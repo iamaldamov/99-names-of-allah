@@ -10,7 +10,65 @@ const previewNames: NameItem[] = completeNames;
 const BOOK_URL = 'https://iamaldamov.github.io/ochishchenie-nafsa/';
 const SITE_URL = 'https://iamaldamov.github.io/99-names-of-allah/';
 
+const languageText: Record<string, Record<string, string>> = {
+ en: {
+ '99 имён Аллаха':'99 Names of Allah','Войти':'Sign in','Выйти':'Sign out','ПУТЬ ПОЗНАНИЯ':'A JOURNEY OF KNOWLEDGE',
+ 'Познакомься с именами':'Discover the names','Того, Кто создал тебя.':'of the One who created you.',
+ 'Начать обучение':'Start learning','ТВОЙ ПУТЬ':'YOUR JOURNEY','Твой прогресс обучения':'Your learning progress',
+ '99 имён. Одно путешествие.':'99 names. One journey.','изучено':'learned','Прогресс сохраняется на этом устройстве':'Your progress is saved on this device',
+ 'ПЕРВЫЕ ШАГИ':'GETTING STARTED','Изучай имена по порядку':'Study the names in order','Открыть каталог имён':'Open name catalogue',
+ 'Свернуть каталог':'Close catalogue','Найти имя, перевод или транскрипцию…':'Search a name, meaning or transliteration…',
+ 'Все 99':'All 99','Повторить':'Review','{tr('Ничего не найдено. Попробуй изменить запрос или фильтр.')}':'Nothing found. Try another search or filter.',
+ 'Проверить знания':'Test your knowledge','Короткий тест по именам':'A short quiz about the names','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'REVIEW',
+ 'Проверь, что запомнил':'Test what you remember','Мини-тест':'Quick quiz','КАК ПЕРЕВОДИТСЯ ИМЯ?':'WHAT DOES THIS NAME MEAN?',
+ 'Верно! Повтори смысл имени своими словами.':'Correct! Repeat the meaning in your own words.',
+ 'Не совсем. Правильный ответ: ':'Not quite. The correct answer is: ','Следующий вопрос':'Next question',
+ 'Методика обучения':'Learning method','Как запоминать и повторять':'How to memorise and review',
+ 'Источники и достоверность':'Sources and accuracy','О создателе':'About the creator',
+ 'Ассаляму алейкум!':'Assalamu alaikum!','Закрыть':'Close','Поддержать проект':'Support the project',
+ 'Перейти к изучению':'Start studying','ДОБРО ПОЖАЛОВАТЬ':'WELCOME','Подумай:':'Reflect:',
+ 'Отметить как изученное':'Mark as learned','Это имя уже отмечено как изученное':'This name is already marked as learned',
+ 'Сохраняем…':'Saving…','Связанный источник:':'Related reference:'
+ },
+ ar: {
+ '99 имён Аллаха':'أسماء الله الحسنى','Войти':'دخول','Выйти':'خروج','ПУТЬ ПОЗНАНИЯ':'رحلة المعرفة',
+ 'Познакомься с именами':'تعرّف على أسماء','Того, Кто создал тебя.':'من خلقك.','Начать обучение':'ابدأ التعلّم',
+ 'ТВОЙ ПУТЬ':'رحلتك','Твой прогресс обучения':'تقدّمك في التعلّم','99 имён. Одно путешествие.':'٩٩ اسمًا. رحلة واحدة.',
+ 'изучено':'تم تعلّمها','Прогресс сохраняется на этом устройстве':'يُحفظ تقدّمك على هذا الجهاز',
+ 'ПЕРВЫЕ ШАГИ':'الخطوات الأولى','Изучай имена по порядку':'تعلّم الأسماء بالترتيب','Открыть каталог имён':'افتح قائمة الأسماء',
+ 'Свернуть каталог':'إغلاق القائمة','Найти имя, перевод или транскрипцию…':'ابحث عن اسم أو معنى…',
+ 'Все 99':'جميع الأسماء','Повторить':'مراجعة','Ничего не найдено. Попробуй изменить запрос или фильтр.':'لم يتم العثور على نتائج. جرّب تغيير البحث أو التصفية.',
+ 'Проверить знания':'اختبر معرفتك','Короткий тест по именам':'اختبار قصير حول الأسماء','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'مراجعة المعرفة',
+ 'Проверь, что запомнил':'اختبر ما تذكّرته','Мини-тест':'اختبار قصير','КАК ПЕРЕВОДИТСЯ ИМЯ؟':'ما معنى هذا الاسم؟',
+ 'Верно! Повтори смысл имени своими словами.':'صحيح! اشرح معنى الاسم بكلماتك.',
+ 'Не совсем. Правильный ответ: ':'ليس تمامًا. الإجابة الصحيحة: ','Следующий вопрос':'السؤال التالي',
+ 'Методика обучения':'منهجية التعلّم','Как запоминать и повторять':'كيف تحفظ وتراجع',
+ 'Источники и достоверность':'المصادر والتوثيق','О создателе':'عن المنشئ','Ассаляму алейкум!':'السلام عليكم',
+ 'Закрыть':'إغلاق','Поддержать проект':'ادعم المشروع','Перейти к изучению':'ابدأ التعلّم',
+ 'ДОБРО ПОЖАЛОВАТЬ':'مرحبًا بك','Подумай:':'تأمّل:','Отметить как изученное':'وضع علامة تم التعلّم',
+ 'Это имя уже отмечено как изученное':'تم وضع علامة التعلّم على هذا الاسم','Сохраняем…':'جارٍ الحفظ…',
+ 'Связанный источник:':'المصدر المرتبط:'
+ }
+};
+function russianTransliteration(value: string) {
+ return value.replace(/ḥ/g,'х').replace(/Ḥ/g,'Х').replace(/ā/g,'а').replace(/Ā/g,'А').replace(/ī/g,'и').replace(/Ī/g,'И')
+ .replace(/ū/g,'у').replace(/Ū/g,'У').replace(/ṣ/g,'с').replace(/Ṣ/g,'С').replace(/ḍ/g,'д').replace(/Ḍ/g,'Д')
+ .replace(/ṭ/g,'т').replace(/Ṭ/g,'Т').replace(/ẓ/g,'з').replace(/Ẓ/g,'З').replace(/[‘’ʿ]/g,'')
+ .replace(/th/g,'с').replace(/dh/g,'з').replace(/kh/g,'х').replace(/gh/g,'г').replace(/sh/g,'ш').replace(/j/g,'дж')
+ .replace(/A/g,'А').replace(/a/g,'а').replace(/B/g,'Б').replace(/b/g,'б').replace(/T/g,'Т').replace(/t/g,'т')
+ .replace(/D/g,'Д').replace(/d/g,'д').replace(/R/g,'Р').replace(/r/g,'р').replace(/Z/g,'З').replace(/z/g,'з')
+ .replace(/S/g,'С').replace(/s/g,'с').replace(/F/g,'Ф').replace(/f/g,'ф').replace(/Q/g,'К').replace(/q/g,'к')
+ .replace(/K/g,'К').replace(/k/g,'к').replace(/L/g,'Л').replace(/l/g,'л').replace(/M/g,'М').replace(/m/g,'м')
+ .replace(/N/g,'Н').replace(/n/g,'н').replace(/H/g,'Х').replace(/h/g,'х').replace(/W/g,'В').replace(/w/g,'в')
+ .replace(/Y/g,'Й').replace(/y/g,'й');
+}
+
+
 export default function App() {
+  const [language, setLanguage] = useState<'ru'|'en'|'ar'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar') || 'ru'; } catch { return 'ru'; } });
+  const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
+  const shownTransliteration = (value: string) => language === 'ru' ? russianTransliteration(value) : value;
+  useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [publishedCount, setPublishedCount] = useState(0);
   const [user, setUser] = useState<any>(null);
@@ -150,35 +208,35 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span>99 <b>имён Аллаха</b></span></a>
+        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span>99 <b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> Выйти</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> Войти</button>}
       </header>
 
       <section className="hero" id="home">
         <div className="eyebrow"><Sparkles size={14}/> ПУТЬ ПОЗНАНИЯ</div>
-        <h1>Познакомься с именами<br/><em>Того, Кто создал тебя.</em></h1>
+        <h1>{tr('Познакомься с именами')}<br/><em>{tr('Того, Кто создал тебя.')}</em></h1>
         <p className="hero-copy">Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.</p>
-        <button className="primary-button" onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>Начать обучение <ArrowRight size={17}/></button>
+        <button className="primary-button" onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
         <div className="hero-art" aria-hidden="true"><div className="art-ring ring-one"/><div className="art-ring ring-two"/><span>اللَّهُ</span></div>
         <div className="hero-caption">ٱلرَّحْمَٰنُ · ٱلرَّحِيمُ · ٱلْمَلِكُ</div>
       </section>
 
       <section className="progress-card reveal">
-        <div className="progress-heading"><div><span className="muted-label">ТВОЙ ПУТЬ</span><h2>{user ? 'Твой прогресс обучения' : '99 имён. Одно путешествие.'}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
+        <div className="progress-heading"><div><span className="muted-label">{tr('ТВОЙ ПУТЬ')}</span><h2>{user ? tr('Твой прогресс обучения') : tr('99 имён. Одно путешествие.')}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
         <div className="progress-track"><span style={{ width: percent + '%' }}/></div>
         <div className="progress-foot"><span><Check size={14}/> {progress.length} изучено</span><span>Прогресс сохраняется на этом устройстве</span></div>
       </section>
 
       <section className="learning-section reveal" id="learning">
-        <div className="section-heading"><div><span className="muted-label">ПЕРВЫЕ ШАГИ</span><h2>Изучай имена по порядку</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
-        {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>Открыть каталог имён <ArrowRight size={15}/></button>}
+        <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
+        {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>{tr('Открыть каталог имён')} <ArrowRight size={15}/></button>}
         {catalogOpen && <div className="name-list">
-          <button className="catalog-close" onClick={() => setCatalogOpen(false)}>Свернуть каталог <X size={14}/></button>
-          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder="Найти имя, перевод или транскрипцию…"/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>Все 99</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>Повторить</button></div></div>
+          <button className="catalog-close" onClick={() => setCatalogOpen(false)}>{tr('Свернуть каталог')} <X size={14}/></button>
+          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder={tr('Найти имя, перевод или транскрипцию…')}/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>{tr('Все 99')}</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>{tr('Повторить')}</button></div></div>
           {visibleNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
-            <span className="name-info"><b>{name.translation}</b><small>{name.transliteration}</small></span>
+            <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name.transliteration)}</small></span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
@@ -193,7 +251,7 @@ export default function App() {
       <details className="compact-details reveal"><summary><span><b>Проверить знания</b><small>Короткий тест по именам</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
         <div className="section-heading"><div><span className="muted-label">ЗАКРЕПЛЕНИЕ ЗНАНИЙ</span><h2>Проверь, что запомнил</h2></div><span className="section-total">Мини-тест</span></div>
         {quizItem && <div className="quiz-card">
-          <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{quizItem.transliteration}</p>
+          <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem.transliteration)}</p>
           <div className="quiz-options">{quizOptions.map(option => <button key={option.id} className={quizAnswer === option.id ? (option.id === quizItem.id ? 'correct' : 'incorrect') : ''} onClick={() => setQuizAnswer(option.id)}>{option.translation}</button>)}</div>
           {quizAnswer !== null && <p className={quizAnswer === quizItem.id ? 'quiz-feedback good' : 'quiz-feedback'}>{quizAnswer === quizItem.id ? 'Верно! Повтори смысл имени своими словами.' : 'Не совсем. Правильный ответ: ' + quizItem.translation}</p>}
           <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
@@ -234,7 +292,7 @@ export default function App() {
 
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span>
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><h2>{selected.translation}</h2><p className="lesson-translit">{selected.transliteration}</p>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><h2>{selected.translation}</h2><p className="lesson-translit">{shownTransliteration(selected.transliteration)}</p>
         <p className="lesson-description">{selected.explanation}</p>
         {selected.verse && <p className="lesson-verse">Связанный источник: {selected.verse}</p>}
         <div className="lesson-reflection"><b>Подумай:</b> Как это имя помогает тебе лучше понять, к Кому ты обращаешься в дуа?</div>
