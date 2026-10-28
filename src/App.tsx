@@ -10,6 +10,36 @@ type ReviewRecord = { box: number; dueAt: string; seen: number; correct: number;
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
 const addDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 
+function loadProgress(): number[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem('asma-ul-husna-progress') || '[]');
+    return Array.isArray(value)
+      ? Array.from(new Set(value.filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= 99)))
+      : [];
+  } catch { return []; }
+}
+
+function loadReviewData(): Record<number, ReviewRecord> {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem('asma-ul-husna-review-v1') || '{}');
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value).flatMap(([key, raw]) => {
+      const id = Number(key);
+      if (!Number.isInteger(id) || id < 1 || id > 99 || !raw || typeof raw !== 'object') return [];
+      const item = raw as Partial<ReviewRecord>;
+      const dueAt = typeof item.dueAt === 'string' && Number.isFinite(Date.parse(item.dueAt))
+        ? item.dueAt : new Date().toISOString();
+      return [[id, {
+        box: Number.isFinite(item.box) ? Math.max(0, Math.min(REVIEW_INTERVALS.length - 1, Math.floor(item.box!))) : 0,
+        dueAt,
+        seen: Number.isFinite(item.seen) ? Math.max(0, Math.floor(item.seen!)) : 0,
+        correct: Number.isFinite(item.correct) ? Math.max(0, Math.floor(item.correct!)) : 0,
+        lastReviewedAt: typeof item.lastReviewedAt === 'string' ? item.lastReviewedAt : null,
+      }]];
+    }));
+  } catch { return {}; }
+}
+
 const BOOK_URL = 'https://iamaldamov.github.io/ochishchenie-nafsa/';
 const SITE_URL = 'https://iamaldamov.github.io/99-names-of-allah/';
 
@@ -92,9 +122,9 @@ export default function App() {
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [publishedCount, setPublishedCount] = useState(0);
   const [user, setUser] = useState<any>(null);
-  const [progress, setProgress] = useState<number[]>(() => { try { return JSON.parse(localStorage.getItem('asma-ul-husna-progress') || '[]') as number[]; } catch { return []; } });
+  const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressReady, setProgressReady] = useState(false);
-  const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(() => { try { return JSON.parse(localStorage.getItem('asma-ul-husna-review-v1') || '{}') as Record<number, ReviewRecord>; } catch { return {}; } });
+  const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(loadReviewData);
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -152,7 +182,7 @@ export default function App() {
   useEffect(() => {
     if (!supabase || !user || !progressReady || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
-    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id' });
+    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true });
   }, [user, progressReady, progress]);
 
   useEffect(() => {
