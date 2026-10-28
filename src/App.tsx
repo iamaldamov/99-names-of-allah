@@ -68,7 +68,7 @@ export default function App() {
     if (!supabase || !user || !progressReady || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
     void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id' });
-  }, [user, progressReady]);
+  }, [user, progressReady, progress]);
 
   useEffect(() => {
     const nodes = document.querySelectorAll<HTMLElement>('.reveal');
@@ -130,7 +130,7 @@ export default function App() {
     setBusy(false);
   };
 
-  const signOut = async () => { if (supabase) await supabase.auth.signOut(); setProgress([]); setMessage('Ты вышел из аккаунта.'); };
+  const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
   const displayedNames = useMemo(() => names.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + name.translation).toLocaleLowerCase();
