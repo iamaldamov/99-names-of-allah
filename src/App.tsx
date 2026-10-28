@@ -378,11 +378,11 @@ export default function App() {
     });
   };
   const displayedNames = useMemo(() => names.filter(name => {
-    const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + name.translation).toLocaleLowerCase();
+    const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + shownTransliteration(name) + ' ' + name.translation).toLocaleLowerCase();
     const matches = searchable.includes(search.toLocaleLowerCase());
-    const tabMatches = activeTab === 'all' || (activeTab === 'review' ? progress.includes(name.id) : activeTab === 'favorites' ? favorites.includes(name.id) : true);
+    const tabMatches = activeTab === 'all' || (activeTab === 'review' ? dueReviewIds.includes(name.id) : activeTab === 'favorites' ? favorites.includes(name.id) : true);
     return matches && tabMatches;
-  }), [names, search, activeTab, progress, favorites]);
+  }), [names, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
   const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
