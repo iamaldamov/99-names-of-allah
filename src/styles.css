@@ -152,3 +152,7 @@ footer{padding:22px 0 82px;display:flex;align-items:center;justify-content:space
 .welcome-continue:hover{background:#f3f7f2;border-color:#cbdacb}
 .welcome-signature{display:block;margin-top:18px;color:#8b978e;font:italic 13px Georgia,serif}
 @media(max-width:480px){.welcome-modal{padding:30px 21px 23px}.welcome-modal h2{font-size:24px}.welcome-ornament{font-size:23px}}
+
+
+.catalog-toggle{display:flex;align-items:center;justify-content:center;gap:9px;margin:14px 0 0;border:1px solid var(--line);border-radius:12px;background:#fff}
+.catalog-close{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;border:0;background:transparent;color:#89958c;font:500 11px 'DM Sans',sans-serif;cursor:pointer}
