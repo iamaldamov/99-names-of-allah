@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, Flame, Heart, LockKeyhole, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, ChevronRight, CircleHelp, Heart, LockKeyhole, Sparkles } from 'lucide-react';
 import { isSupabaseConfigured } from './lib/supabase';
 
 const previewNames = [
