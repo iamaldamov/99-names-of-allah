@@ -24,6 +24,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [, setNotice] = useState('');
   const [saveOpen, setSaveOpen] = useState(false);
   const [showAllInfo, setShowAllInfo] = useState(false);
   const [search, setSearch] = useState('');
