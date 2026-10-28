@@ -10,6 +10,16 @@ type ReviewRecord = { box: number; dueAt: string; seen: number; correct: number;
 const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
 const addDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 
+function localDayKey(date = new Date()): string {
+  const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+function loadStudyDays(): Record<string, number> {
+  try { const value: unknown = JSON.parse(localStorage.getItem('99-names-study-days') || '{}');
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, count]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && Number.isInteger(count) && Number(count) > 0).slice(-90).map(([key, count]) => [key, Number(count)]));
+  } catch { return {}; }
+}
 function loadProgress(): number[] {
   try {
     const value: unknown = JSON.parse(localStorage.getItem('asma-ul-husna-progress') || '[]');
@@ -215,6 +225,7 @@ export default function App() {
   const [favorites, setFavorites] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-favorites') || '[]'); return Array.isArray(v) ? v.filter((x): x is number => Number.isInteger(x) && x>=1 && x<=99) : []; } catch { return []; } });
   const [dailyGoal, setDailyGoal] = useState<number>(() => { try { const n=Number(localStorage.getItem('99-names-daily-goal')); return [1,3,5].includes(n) ? n : 1; } catch { return 1; } });
   const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return v.date === new Date().toDateString() && Array.isArray(v.ids) ? v.ids : []; } catch { return []; } });
+  const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
@@ -226,6 +237,7 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:new Date().toDateString(),ids:learnedToday})); } catch {} }, [learnedToday]);
+  useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
@@ -336,6 +348,7 @@ export default function App() {
     setBusy(true); setError('');
     setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
     setLearnedToday(old => Array.from(new Set([...old, nameId])));
+    setStudyDays(old => ({ ...old, [localDayKey()]: old[localDayKey()] || 1 }));
     setReviewData(old => old[nameId] ? old : { ...old, [nameId]: { box: 0, dueAt: addDays(1), seen: 0, correct: 0, lastReviewedAt: null } });
     setNotice('Имя отмечено как изученное. Первое повторение запланировано на завтра.');
     if (supabase && user) {
@@ -354,6 +367,13 @@ export default function App() {
 
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
+  const nextName = names.find(name => !progress.includes(name.id));
+  const todayKey = localDayKey();
+  const weekActivity = Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = localDayKey(date); return { key, label: new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'ky' ? 'ky-KG' : language === 'ar' ? 'ar' : 'en', { weekday: 'short' }).format(date), count: studyDays[key] || 0, today: key === todayKey }; });
+  const activeDaysThisWeek = weekActivity.filter(day => day.count > 0).length;
+  const currentStreak = (() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; })();
+  const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
+  const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
@@ -396,6 +416,12 @@ export default function App() {
         <div className="daily-goal"><div><b>Ежедневная цель</b><small>{learnedToday.length} из {dailyGoal} имён сегодня</small></div><select aria-label="Ежедневная цель" value={dailyGoal} onChange={e=>setDailyGoal(Number(e.target.value))}><option value={1}>1 имя</option><option value={3}>3 имени</option><option value={5}>5 имён</option></select><div className="goal-track"><span style={{width:Math.min(100,learnedToday.length/dailyGoal*100)+'%'}}/></div></div>
       </section>
 
+      <section className="journey-dashboard reveal" aria-label="Твоя учебная статистика">
+        <div className="journey-head"><div><span className="muted-label">ТВОЯ ПРИВЫЧКА</span><h2>Маленький шаг каждый день</h2><p>Не гонись за количеством. Главное — возвращаться к знаниям.</p></div><div className="streak-counter"><span className="streak-flame">✦</span><b>{currentStreak}</b><small>дней подряд</small></div></div>
+        <div className="week-activity" aria-label="Активность за последние семь дней">{weekActivity.map(day => <div className={`week-day ${day.count ? "is-active" : ""} ${day.today ? "is-today" : ""}`} key={day.key} title={day.count ? `${day.count} учебный день` : "Без занятий"}><span>{day.label}</span><i>{day.count ? <Check size={13}/> : <span/>}</i></div>)}</div>
+        <div className="journey-bottom"><div className="milestone-block"><div className="milestone-label"><span>БЛИЖАЙШАЯ ЦЕЛЬ</span><b>{progress.length} / {nextMilestone}</b></div><div className="milestone-track"><span style={{width: milestoneProgress + "%"}}/></div><small>{nextMilestone === 99 ? "Финишная прямая — осталось совсем немного" : `Ещё ${nextMilestone - progress.length} ${nextMilestone - progress.length === 1 ? "имя" : "имён"} до следующего рубежа`}</small></div><div className="week-summary"><b>{activeDaysThisWeek}/7</b><small>дней с занятиями за неделю</small></div></div>
+        <button className="journey-continue" onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? "СЛЕДУЮЩИЙ ШАГ" : dueReviewIds.length ? "ВРЕМЯ ПОВТОРИТЬ" : "ТЫ ПРОШЁЛ ВЕСЬ СПИСОК"}</small><b>{nextName ? `Продолжить: ${nextName.translation}` : dueReviewIds.length ? "Закрепить изученное" : "Вернуться к каталогу"}</b></span><ArrowRight size={19}/></button>
+      </section>
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
         {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>{tr('Открыть каталог имён')} <ArrowRight size={15}/></button>}
