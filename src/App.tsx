@@ -6,6 +6,9 @@ import { names as completeNames, studyPrinciples, coreReferences } from './data/
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
+type ReviewRecord = { box: number; dueAt: string; seen: number; correct: number; lastReviewedAt: string | null };
+const REVIEW_INTERVALS = [1, 3, 7, 14, 30];
+const addDays = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 
 const BOOK_URL = 'https://iamaldamov.github.io/ochishchenie-nafsa/';
 const SITE_URL = 'https://iamaldamov.github.io/99-names-of-allah/';
@@ -91,6 +94,7 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [progress, setProgress] = useState<number[]>(() => { try { return JSON.parse(localStorage.getItem('asma-ul-husna-progress') || '[]') as number[]; } catch { return []; } });
   const [progressReady, setProgressReady] = useState(false);
+  const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(() => { try { return JSON.parse(localStorage.getItem('asma-ul-husna-review-v1') || '{}') as Record<number, ReviewRecord>; } catch { return {}; } });
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -133,6 +137,7 @@ export default function App() {
   }, []);
 
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-progress', JSON.stringify(progress)); } catch { /* Storage unavailable */ } }, [progress]);
+  useEffect(() => { try { localStorage.setItem('asma-ul-husna-review-v1', JSON.stringify(reviewData)); } catch { /* Storage unavailable */ } }, [reviewData]);
   useEffect(() => {
     if (!supabase || !user) { setProgressReady(true); return; }
     let alive = true;
@@ -194,7 +199,8 @@ export default function App() {
     const nameId = selected.id;
     setBusy(true); setError('');
     setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
-    setNotice('Имя отмечено как изученное и сохранено на этом устройстве.');
+    setReviewData(old => old[nameId] ? old : { ...old, [nameId]: { box: 0, dueAt: addDays(1), seen: 0, correct: 0, lastReviewedAt: null } });
+    setNotice('Имя отмечено как изученное. Первое повторение запланировано на завтра.');
     if (supabase && user) {
       try {
         const { error: saveError } = await supabase.from('user_progress').upsert({
@@ -211,6 +217,15 @@ export default function App() {
 
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
+  const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
+  const reviewNextDate = (id: number) => reviewData[id]?.dueAt ? new Date(reviewData[id].dueAt).toLocaleDateString(language === 'en' ? 'en' : language === 'ar' ? 'ar' : language === 'ky' ? 'ky' : 'ru-RU', { day:'numeric', month:'long' }) : '—';
+  const recordRecall = (id: number, remembered: boolean) => {
+    setReviewData(old => {
+      const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
+      const box = remembered ? Math.min(REVIEW_INTERVALS.length - 1, current.box + 1) : 0;
+      return { ...old, [id]: { box, dueAt: remembered ? addDays(REVIEW_INTERVALS[box]) : new Date(Date.now() + 10 * 60000).toISOString(), seen: current.seen + 1, correct: current.correct + (remembered ? 1 : 0), lastReviewedAt: new Date().toISOString() } };
+    });
+  };
   const displayedNames = useMemo(() => names.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + name.translation).toLocaleLowerCase();
     const matches = searchable.includes(search.toLocaleLowerCase());
@@ -273,6 +288,12 @@ export default function App() {
           <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
         </div>}
       </section></details>
+      <details className="compact-details reveal"><summary><span><b>Повторение и запоминание</b><small>{dueReviewIds.length ? dueReviewIds.length + ' имён ждут повторения' : 'Интервальные повторения помогут закрепить знания'}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
+        <div className="review-system-intro"><span className="muted-label">ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ</span><h2>Запоминай надолго</h2><p>После изучения имя попадает в очередь повторения. Если вспомнил правильно — следующий интервал увеличивается. Если забыл — имя вернётся через 10 минут.</p></div>
+        <div className="review-stats"><div><b>{dueReviewIds.length}</b><span>пора повторить</span></div><div><b>{Object.keys(reviewData).length}</b><span>в расписании</span></div><div><b>{Object.values(reviewData).reduce((sum,item)=>sum+item.correct,0)}</b><span>успешных повторений</span></div></div>
+        {dueReviewIds.length ? <div className="review-queue">{dueReviewIds.slice(0,8).map(id => { const item = names.find(n=>n.id===id); return item ? <button key={id} className="review-queue-row" onClick={()=>setSelected(item)}><span className="review-queue-arabic" lang="ar" dir="rtl">{item.arabic}</span><span><b>{item.translation}</b><small>Повторить сейчас</small></span><ArrowRight size={16}/></button> : null; })}</div> : <div className="review-empty"><Check size={19}/><b>На сегодня всё повторено</b><span>Изученные имена появятся здесь, когда наступит срок повторения.</span></div>}
+        <p className="review-storage-note">Расписание хранится на этом устройстве. Чтобы не потерять его, не очищай данные браузера. Синхронизация расписания между устройствами пока не подключена.</p>
+      </section></details>
       <details className="compact-details reveal"><summary><span><b>Методика обучения</b><small>Как запоминать и повторять</small></span><ChevronRight size={18}/></summary><section className="principles-section" id="method">
         <div className="section-heading"><div><span className="muted-label">КАК УЧИТЬ ЭФФЕКТИВНО</span><h2>Не просто запоминай — понимай</h2></div></div>
         <div className="principle-grid">{studyPrinciples.map((item, i) => <article className="principle-card" key={item.title}><span>0{i+1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div>
@@ -314,7 +335,7 @@ export default function App() {
         <p className="lesson-translit">{shownTransliteration(selected.transliteration)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description">{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
-        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Это имя уже изучено</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Отметить как изученное'} <Check size={17}/></button>}
+        {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> Это имя уже изучено</p><div className="recall-actions"><p>Вспомни значение имени, не подглядывая в объяснение. Получилось?</p><button className="recall-known" onClick={()=>{recordRecall(selected.id,true);setNotice('Отлично! Следующее повторение: через ' + REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)] + ' дн.');setSelected(null);}}>Да, вспомнил</button><button className="recall-forgot" onClick={()=>{recordRecall(selected.id,false);setNotice('Ничего страшного. Имя вернётся в повторение через 10 минут.');setSelected(null);}}>Пока не запомнил</button></div><p className="review-due-label">Следующее повторение: {reviewNextDate(selected.id)}</p></> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил — добавить в повторение'} <Check size={17}/></button>}
         <div className="lesson-navigation">
           <button className="lesson-nav-button" disabled={selected.id <= 1} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id - 1) || null); }}>← Предыдущее</button>
           <span>{selected.id} из 99</span>
