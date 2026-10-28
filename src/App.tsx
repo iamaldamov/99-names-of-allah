@@ -177,7 +177,6 @@ export default function App() {
     const nameId = selected.id;
     setBusy(true); setError('');
     setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
-    setSelected(null);
     setNotice('Имя отмечено как изученное и сохранено на этом устройстве.');
     if (supabase && user) {
       try {
@@ -291,15 +290,19 @@ export default function App() {
       </section></div>}
 
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
-        <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span>
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><h2>{selected.translation}</h2><p className="lesson-translit">{shownTransliteration(selected.transliteration)}</p>
-        <p className="lesson-description">{selected.explanation}</p>
-        {selected.verse && <p className="lesson-verse">Связанный источник: {selected.verse}</p>}
-        <div className="lesson-reflection"><b>Подумай:</b> Как это имя помогает тебе лучше понять, к Кому ты обращаешься в дуа?</div>
-        <div className="source-note"><CircleHelp size={15}/> Изучай значение имени вдумчиво. Сверяй смысл с указанными источниками.</div>
-        <p className="lesson-progress-line">Изучено тобой: <b>{progress.length} из 99</b></p>
+        <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
+        <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>
+        <h2>{selected.translation}</h2>
+        <p className="lesson-translit">{shownTransliteration(selected.transliteration)}</p>
+        <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description">{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
-        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Это имя уже отмечено как изученное</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Отметить как изученное'} <ArrowRight size={17}/></button>}
+        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Это имя уже изучено</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Отметить как изученное'} <Check size={17}/></button>}
+        <div className="lesson-navigation">
+          <button className="lesson-nav-button" disabled={selected.id <= 1} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id - 1) || null); }}>← Предыдущее</button>
+          <span>{selected.id} из 99</span>
+          <button className="lesson-nav-button lesson-next" disabled={selected.id >= 99} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id + 1) || null); }}>Следующее <ArrowRight size={15}/></button>
+        </div>
       </section></div>}
 
       {accountOpen && <div className="modal-backdrop" onClick={() => setAccountOpen(false)}><section className="info-modal account-modal" role="dialog" aria-modal="true" aria-label="Аккаунт" onClick={e => e.stopPropagation()}>
