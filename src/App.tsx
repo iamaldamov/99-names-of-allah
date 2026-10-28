@@ -84,7 +84,7 @@ function russianTransliteration(value: string) {
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky') || 'ru'; } catch { return 'ru'; } });
   const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
-  const shownTransliteration = (value: string) => language === 'ru' || language === 'ky' ? russianTransliteration(value) : value;
+  const shownTransliteration = (value: string) => language === 'ru' ? russianTransliteration(value) : value;
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [publishedCount, setPublishedCount] = useState(0);
