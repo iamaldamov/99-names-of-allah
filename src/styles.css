@@ -41,3 +41,12 @@
 @keyframes calligraphy-glow{0%,100%{opacity:.65}50%{opacity:1}}
 @media(max-width:650px){.hero-caption{position:relative;right:auto;bottom:auto;margin-top:23px;font-size:15px}.share-section{padding:42px 18px;margin-bottom:27px}.creator-section{gap:15px;padding:22px 2px 32px}.creator-mark{width:43px;height:43px;font-size:30px}.creator-content h2{font-size:19px}.book-section{padding:19px;gap:13px}.book-icon{width:40px;height:40px}}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}*{animation:none!important;transition:none!important}}
+
+.signed-in{display:flex;align-items:center;gap:12px}.user-email{font-size:11px;color:#829087;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.locked-row-button{width:100%;border:0;border-top:1px solid #f0f2ee;background:#fff;text-align:left;cursor:pointer;font:inherit}.locked-row-button:hover{background:#f8faf7}
+.learned-check{color:#416c59}.setup-warning{font-size:11px;color:#9a7650;margin:12px 2px}.account-modal{max-height:min(90vh,760px);overflow:auto}
+.account-form{display:flex;flex-direction:column;gap:8px;margin-top:18px}.account-form label{font-size:11px;font-weight:700;color:#68766c;margin-top:5px}.account-form input{width:100%;border:1px solid #dfe6df;border-radius:11px;padding:13px 14px;font:14px 'DM Sans';color:#26342e;background:#fbfcfa;outline:none}.account-form input:focus{border-color:#789681;box-shadow:0 0 0 3px #416c5912}.account-form .primary-button{margin-top:10px}
+.form-error,.form-message{font-size:12px;line-height:1.6;padding:10px 12px;border-radius:9px}.form-error{color:#9a3f36;background:#fff2f0}.form-message{color:#416c59;background:#eff5ef}
+.account-switch{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:15px}.account-switch button{border:0;background:transparent;color:#416c59;font:600 11px 'DM Sans';padding:4px 0;cursor:pointer}.privacy-note{display:flex;align-items:flex-start;gap:7px;margin-top:17px!important;font-size:10px!important;color:#97a198!important}.privacy-note svg{flex:none;margin-top:2px}.already-learned{display:flex;justify-content:center;gap:7px;align-items:center;color:#416c59;font-size:12px}
+.primary-button:disabled{opacity:.6;cursor:wait;transform:none}
+@media(max-width:650px){.user-email{max-width:105px}.signed-in{gap:7px}.account-modal{padding:27px 21px 23px}}
