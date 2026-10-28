@@ -304,3 +304,56 @@ body{font-size:var(--reading-size);line-height:1.75}
 :root[data-theme="dark"] .quiz-options button.correct { background: #24402d !important; color: #c5e6ca !important; }
 :root[data-theme="dark"] .quiz-options button.incorrect { background: #432b28 !important; color: #f0c2bb !important; }
 :root[data-theme="dark"] .recall-known { background: #24402d !important; color: #c5e6ca !important; border-color: #41684a !important; }
+
+:root[data-theme="dark"] .name-list,
+:root[data-theme="dark"] .book-section,
+:root[data-theme="dark"] .info-modal,
+:root[data-theme="dark"] .account-section,
+:root[data-theme="dark"] .action-card,
+:root[data-theme="dark"] .quiz-card,
+:root[data-theme="dark"] .source-note,
+:root[data-theme="dark"] .save-button,
+:root[data-theme="dark"] .filter-tabs button,
+:root[data-theme="dark"] .locked-row-button {
+  background: #1b2a21 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+:root[data-theme="dark"] .action-card.action-main,
+:root[data-theme="dark"] .account-section,
+:root[data-theme="dark"] .source-note {
+  background: #223329 !important;
+}
+:root[data-theme="dark"] .hero-art {
+  background: radial-gradient(circle, #263b2d 0, #1d3025 55%, #101914 75%) !important;
+  color: #b9cbbd !important;
+}
+:root[data-theme="dark"] .progress-track { background: #34483b !important; }
+:root[data-theme="dark"] .name-row:hover,
+:root[data-theme="dark"] .name-row.selected,
+:root[data-theme="dark"] .locked-row-button:hover,
+:root[data-theme="dark"] .filter-tabs button.active {
+  background: #26392d !important;
+  color: #e8eee9 !important;
+  border-color: #405747 !important;
+}
+:root[data-theme="dark"] .name-row { border-bottom-color: #34483b !important; }
+:root[data-theme="dark"] .name-info small,
+:root[data-theme="dark"] .action-card small,
+:root[data-theme="dark"] .book-copy p,
+:root[data-theme="dark"] .info-modal p,
+:root[data-theme="dark"] .account-section p,
+:root[data-theme="dark"] .source-note,
+:root[data-theme="dark"] .empty-results,
+:root[data-theme="dark"] .setup-warning,
+:root[data-theme="dark"] .lesson-translit,
+:root[data-theme="dark"] .creator-content p {
+  color: #b5c3b8 !important;
+}
+:root[data-theme="dark"] .welcome-modal,
+:root[data-theme="dark"] .account-form input {
+  background: #1b2a21 !important;
+  color: var(--ink) !important;
+}
+:root[data-theme="dark"] .account-form label { color: #c2d0c5 !important; }
+:root[data-theme="dark"] .account-form input { border-color: #405747 !important; }
