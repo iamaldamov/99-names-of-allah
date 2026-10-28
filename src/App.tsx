@@ -147,12 +147,22 @@ export default function App() {
   const [saveOpen, setSaveOpen] = useState(false);
   const [showAllInfo, setShowAllInfo] = useState(false);
   const [search, setSearch] = useState('');
+  const [theme, setTheme] = useState<'light'|'dark'>(() => { try { return localStorage.getItem('99-names-theme') === 'dark' ? 'dark' : 'light'; } catch { return 'light'; } });
+  const [favorites, setFavorites] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-favorites') || '[]'); return Array.isArray(v) ? v.filter((x): x is number => Number.isInteger(x) && x>=1 && x<=99) : []; } catch { return []; } });
+  const [dailyGoal, setDailyGoal] = useState<number>(() => { try { const n=Number(localStorage.getItem('99-names-daily-goal')); return [1,3,5].includes(n) ? n : 1; } catch { return 1; } });
+  const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return v.date === new Date().toDateString() && Array.isArray(v.ids) ? v.ids : []; } catch { return []; } });
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return !localStorage.getItem('99-names-welcome-seen'); } catch { return true; } });
+  useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
+  useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
+  useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
+  useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:new Date().toDateString(),ids:learnedToday})); } catch {} }, [learnedToday]);
+  const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
+  const shareName = async (name:NameItem) => { const text = `${name.arabic}\n${name.translation}\n${shownTransliteration(name)}\n\n${name.explanation}\n\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`; try { if (navigator.share) await navigator.share({title:name.translation,text}); else if(navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); setNotice('Карточка имени скопирована.'); } else setNotice('Не удалось скопировать карточку.'); } catch(e) { if(!(e instanceof Error && e.name==='AbortError')) setNotice('Не удалось поделиться именем.'); } };
   const closeWelcome = () => { try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Storage unavailable */ } setWelcomeOpen(false); };
 
   useEffect(() => {
@@ -240,6 +250,7 @@ export default function App() {
     const nameId = selected.id;
     setBusy(true); setError('');
     setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
+    setLearnedToday(old => Array.from(new Set([...old, nameId])));
     setReviewData(old => old[nameId] ? old : { ...old, [nameId]: { box: 0, dueAt: addDays(1), seen: 0, correct: 0, lastReviewedAt: null } });
     setNotice('Имя отмечено как изученное. Первое повторение запланировано на завтра.');
     if (supabase && user) {
@@ -270,9 +281,9 @@ export default function App() {
   const displayedNames = useMemo(() => names.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + name.translation).toLocaleLowerCase();
     const matches = searchable.includes(search.toLocaleLowerCase());
-    const tabMatches = activeTab === 'all' || (activeTab === 'review' ? progress.includes(name.id) : true);
+    const tabMatches = activeTab === 'all' || (activeTab === 'review' ? progress.includes(name.id) : activeTab === 'favorites' ? favorites.includes(name.id) : true);
     return matches && tabMatches;
-  }), [names, search, activeTab, progress]);
+  }), [names, search, activeTab, progress, favorites]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
   const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
@@ -280,7 +291,7 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option></select>
+        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
@@ -298,6 +309,7 @@ export default function App() {
         <div className="progress-heading"><div><span className="muted-label">{tr('ТВОЙ ПУТЬ')}</span><h2>{user ? tr('Твой прогресс обучения') : tr('99 имён. Одно путешествие.')}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
         <div className="progress-track"><span style={{ width: percent + '%' }}/></div>
         <div className="progress-foot"><span><Check size={14}/> {progress.length} {tr('изучено')}</span><span>{tr('Прогресс сохраняется на этом устройстве')}</span></div>
+        <div className="daily-goal"><div><b>Ежедневная цель</b><small>{learnedToday.length} из {dailyGoal} имён сегодня</small></div><select aria-label="Ежедневная цель" value={dailyGoal} onChange={e=>setDailyGoal(Number(e.target.value))}><option value={1}>1 имя</option><option value={3}>3 имени</option><option value={5}>5 имён</option></select><div className="goal-track"><span style={{width:Math.min(100,learnedToday.length/dailyGoal*100)+'%'}}/></div></div>
       </section>
 
       <section className="learning-section reveal" id="learning">
@@ -305,10 +317,10 @@ export default function App() {
         {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>{tr('Открыть каталог имён')} <ArrowRight size={15}/></button>}
         {catalogOpen && <div className="name-list">
           <button className="catalog-close" onClick={() => setCatalogOpen(false)}>{tr('Свернуть каталог')} <X size={14}/></button>
-          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder={tr('Найти имя, перевод или транскрипцию…')}/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>{tr('Все 99')}</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>{tr('Повторить')}</button></div></div>
+          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder={tr('Найти имя, перевод или транскрипцию…')}/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>{tr('Все 99')}</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>{tr('Повторить')}</button><button className={activeTab === 'favorites' ? 'active' : ''} onClick={() => {setActiveTab('favorites');setVisibleNamesCount(12);}}>Избранное ({favorites.length})</button></div></div>
           {visibleNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
-            <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name)}</small></span>
+            <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name)}</small></span><span className="favorite-indicator">{favorites.includes(name.id)?'♥':''}</span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
@@ -371,7 +383,7 @@ export default function App() {
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions"><button onClick={()=>toggleFavorite(selected.id)}>{favorites.includes(selected.id)?'♥ В избранном':'♡ В избранное'}</button><button onClick={()=>shareName(selected)}><Share2 size={15}/> Поделиться именем</button></div>
         <h2>{selected.translation}</h2>
         <p className="lesson-translit">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description">{selected.explanation}</p></div>
