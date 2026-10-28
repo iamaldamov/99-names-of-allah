@@ -111,3 +111,26 @@
 
 
 .donation-section{margin:0 0 42px;padding:38px 28px 34px;text-align:center;border:1px solid #dce8dc;border-radius:22px;background:linear-gradient(145deg,#edf4ed,#f8faf6 70%,#e9f1e9);box-shadow:0 12px 34px #26342e0a}.donation-section .muted-label{justify-content:center}.donation-symbol{display:block;color:#64836d;font-size:35px;line-height:1;margin-bottom:12px}.donation-section h2{margin:13px 0 10px;font-size:clamp(22px,3.5vw,30px);font-weight:600;letter-spacing:-.7px}.donation-section p{max-width:540px;margin:0 auto 20px;color:#6f7d72;font-size:13px;line-height:1.85}.donation-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:230px;padding:15px 25px;border-radius:30px;background:#416c59;color:#fff;text-decoration:none;font:700 14px "DM Sans",sans-serif;box-shadow:0 8px 20px #416c5930;transition:transform .2s,background .2s,box-shadow .2s}.donation-button:hover{transform:translateY(-3px);background:#315743;box-shadow:0 12px 24px #416c5940}.donation-button span{font-size:16px}.donation-section small{display:block;margin-top:13px;color:#89968b;font-size:10px;line-height:1.5}@media(max-width:650px){.donation-section{padding:30px 18px;margin-bottom:30px}.donation-button{width:100%;min-width:0}}
+
+
+/* Compact layout: no jump-to-section tiles */
+.quick-start{display:none!important}
+.compact-details{margin:0 0 14px;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}
+.compact-details>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 19px;cursor:pointer}
+.compact-details>summary::-webkit-details-marker{display:none}
+.compact-details>summary span{display:flex;flex-direction:column;gap:4px}
+.compact-details>summary b{font-size:13px;color:var(--ink);font-weight:600}
+.compact-details>summary small{font-size:11px;color:#89958c}
+.compact-details>summary>svg{color:#819084;transition:transform .2s}
+.compact-details[open]>summary>svg{transform:rotate(90deg)}
+.compact-details>.practice-section,.compact-details>.principles-section,.compact-details>.references-section{padding:0 19px 20px;margin:0}
+.show-more-names{display:block;width:100%;padding:15px;border:0;background:#f7f9f6;color:var(--green);font:600 12px 'DM Sans',sans-serif;cursor:pointer}
+.compact-details .creator-section{padding:18px 0 22px}
+.compact-details .book-section{margin:0 0 4px}
+footer{padding:22px 0 82px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#9ba59c;font-size:10px}
+.footer-actions{display:flex;gap:8px}
+.footer-actions button{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:#758278;font:500 11px 'DM Sans',sans-serif;cursor:pointer;padding:7px}
+.floating-support{position:fixed;z-index:4;right:20px;bottom:18px;display:inline-flex;align-items:center;gap:9px;padding:13px 20px;border-radius:28px;background:#416c59;color:#fff;text-decoration:none;font:700 12px 'DM Sans',sans-serif;box-shadow:0 8px 28px #26342e30;transition:transform .2s,background .2s}
+.floating-support:hover{transform:translateY(-2px);background:#315743}
+.floating-support span{font-size:14px}
+@media(max-width:650px){footer{align-items:flex-start;flex-direction:column;padding-bottom:86px}.footer-actions{margin-left:-7px}.floating-support{right:14px;bottom:12px;padding:12px 17px}.compact-details>summary{padding:15px 16px}}
