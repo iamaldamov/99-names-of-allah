@@ -134,3 +134,21 @@ footer{padding:22px 0 82px;display:flex;align-items:center;justify-content:space
 .floating-support:hover{transform:translateY(-2px);background:#315743}
 .floating-support span{font-size:14px}
 @media(max-width:650px){footer{align-items:flex-start;flex-direction:column;padding-bottom:86px}.footer-actions{margin-left:-7px}.floating-support{right:14px;bottom:12px;padding:12px 17px}.compact-details>summary{padding:15px 16px}}
+
+
+/* First-visit welcome */
+.welcome-backdrop{z-index:10;padding:16px;backdrop-filter:blur(5px)}
+.welcome-modal{width:min(100%,470px);max-height:min(92vh,820px);overflow-y:auto;overscroll-behavior:contain;text-align:center;padding:34px 32px 27px}
+.welcome-ornament{font:27px Amiri;color:#9caf9f;margin:2px 0 15px;letter-spacing:1px}
+.welcome-eyebrow,.welcome-support-label{justify-content:center}
+.welcome-modal h2{font-size:27px;margin:10px 0 13px;letter-spacing:-.6px}
+.welcome-modal p{font-size:13px;line-height:1.8;color:#748078;margin:0 auto 11px;max-width:390px}
+.welcome-modal p b{color:#35493c}
+.welcome-greeting{color:#526257!important}
+.welcome-divider{height:1px;background:#e9eee8;margin:22px 0}
+.welcome-modal h3{font-size:17px;line-height:1.4;margin:9px 0 8px;color:#35493c}
+.welcome-donation{margin-top:10px;min-width:0;width:100%;font-size:13px;padding:14px 20px}
+.welcome-continue{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:11px;padding:14px 18px;border:1px solid #dce5dc;border-radius:30px;background:#fff;color:#416c59;font:700 13px 'DM Sans',sans-serif;cursor:pointer;transition:background .2s,border-color .2s}
+.welcome-continue:hover{background:#f3f7f2;border-color:#cbdacb}
+.welcome-signature{display:block;margin-top:18px;color:#8b978e;font:italic 13px Georgia,serif}
+@media(max-width:480px){.welcome-modal{padding:30px 21px 23px}.welcome-modal h2{font-size:24px}.welcome-ornament{font-size:23px}}
