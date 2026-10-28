@@ -218,3 +218,20 @@ body{font-size:var(--reading-size);line-height:1.75}
 :root[data-theme="dark"] .theme-toggle{background:#1d2a22;color:var(--ink)}
 @media(max-width:600px){:root{--reading-size:17px}.app-shell{padding:0 17px}.topbar{height:auto;min-height:70px;gap:9px;flex-wrap:wrap;padding:12px 0}.brand{font-size:14px}.language-select{max-width:118px}.hero{padding-top:45px}.hero h1{font-size:clamp(2.1rem,9vw,3rem)}.progress-card{padding:20px 17px}.lesson-modal{padding:25px 18px;max-height:92dvh;overflow-y:auto}.lesson-description{font-size:17px;line-height:1.9}.name-row{gap:9px;padding:14px 9px}.name-arabic{font-size:1.8rem}.course-tools{gap:10px}.filter-tabs{flex-wrap:wrap}.lesson-quick-actions button{font-size:13px}.daily-goal{margin-top:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+
+.export-tools{display:flex;justify-content:center;margin:20px 0 32px}
+.print-sheet{display:none}
+@media print{
+ @page{margin:18mm}
+ body{background:#fff!important;color:#111!important;font-family:serif}
+ body *{visibility:hidden!important}
+ .print-sheet,.print-sheet *{visibility:visible!important}
+ .print-sheet{display:block!important;position:absolute;inset:0;width:100%;padding:0;color:#111;background:#fff}
+ .print-sheet h1{text-align:center;font-size:24pt;margin-bottom:8mm}
+ .print-sheet article{break-inside:avoid;border-bottom:1px solid #ddd;padding:5mm 0}
+ .print-sheet article h2{font-size:16pt;margin:0 0 3mm}
+ .print-arabic{font-family:'Amiri',serif;font-size:25pt;text-align:center;margin:3mm}
+ .print-sheet p{font-size:11pt;line-height:1.6}
+ .export-tools{display:none!important}
+}
