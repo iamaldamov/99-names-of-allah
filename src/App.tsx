@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 
