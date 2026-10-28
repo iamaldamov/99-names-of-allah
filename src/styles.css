@@ -91,7 +91,6 @@
 
 /* Content remains visible even if a scroll observer is unavailable. */
 .reveal{opacity:1;transform:none;transition:opacity .45s ease,transform .45s ease}
-.reveal:not(.revealed){opacity:1;transform:none}
 .quick-start{margin:0 0 30px}
 .action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:17px}
 .action-card{min-height:174px;padding:18px 15px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:17px;background:#fff;color:var(--ink);cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
@@ -235,3 +234,73 @@ body{font-size:var(--reading-size);line-height:1.75}
  .print-sheet p{font-size:11pt;line-height:1.6}
  .export-tools{display:none!important}
 }
+
+
+/* Complete dark theme overrides: keep every surface and control readable. */
+:root[data-theme="dark"] .language-select,
+:root[data-theme="dark"] .catalog-toggle,
+:root[data-theme="dark"] .catalog-close,
+:root[data-theme="dark"] .lesson-meaning,
+:root[data-theme="dark"] .lesson-nav-button,
+:root[data-theme="dark"] .review-stats>div,
+:root[data-theme="dark"] .review-queue-row,
+:root[data-theme="dark"] .review-empty,
+:root[data-theme="dark"] .principle-card,
+:root[data-theme="dark"] .reference-list,
+:root[data-theme="dark"] .welcome-modal,
+:root[data-theme="dark"] .welcome-continue,
+:root[data-theme="dark"] .recall-forgot,
+:root[data-theme="dark"] .show-more-names,
+:root[data-theme="dark"] .daily-goal select,
+:root[data-theme="dark"] .lesson-quick-actions button {
+  background-color: #1b2a21 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+:root[data-theme="dark"] .lesson-description,
+:root[data-theme="dark"] .review-system-intro>p,
+:root[data-theme="dark"] .review-stats span,
+:root[data-theme="dark"] .review-queue-row small,
+:root[data-theme="dark"] .review-empty span,
+:root[data-theme="dark"] .review-storage-note,
+:root[data-theme="dark"] .references-intro,
+:root[data-theme="dark"] .editorial-note,
+:root[data-theme="dark"] .welcome-modal p,
+:root[data-theme="dark"] .welcome-modal h3,
+:root[data-theme="dark"] .lesson-navigation>span,
+:root[data-theme="dark"] .catalog-close {
+  color: #b9c8bd !important;
+}
+:root[data-theme="dark"] .editorial-note,
+:root[data-theme="dark"] .lesson-verse,
+:root[data-theme="dark"] .lesson-reflection {
+  background: #223329 !important;
+  border-color: #405747 !important;
+}
+:root[data-theme="dark"] .reference-list a,
+:root[data-theme="dark"] .review-queue-row,
+:root[data-theme="dark"] .lesson-nav-button,
+:root[data-theme="dark"] .recall-forgot {
+  border-color: #34483b !important;
+}
+:root[data-theme="dark"] .reference-list a span,
+:root[data-theme="dark"] .compact-details>summary small,
+:root[data-theme="dark"] .footer-actions button {
+  color: #aab9ae !important;
+}
+:root[data-theme="dark"] .share-section,
+:root[data-theme="dark"] .donation-section {
+  background: linear-gradient(145deg, #1b2c22, #17231c 70%, #223329) !important;
+  border-color: #34483b !important;
+}
+:root[data-theme="dark"] .welcome-modal p b,
+:root[data-theme="dark"] .welcome-modal h3,
+:root[data-theme="dark"] .welcome-modal .welcome-greeting {
+  color: #e1eae2 !important;
+}
+:root[data-theme="dark"] .welcome-divider { background: #34483b !important; }
+:root[data-theme="dark"] .welcome-continue:hover,
+:root[data-theme="dark"] .review-queue-row:hover { background: #26392d !important; }
+:root[data-theme="dark"] .quiz-options button.correct { background: #24402d !important; color: #c5e6ca !important; }
+:root[data-theme="dark"] .quiz-options button.incorrect { background: #432b28 !important; color: #f0c2bb !important; }
+:root[data-theme="dark"] .recall-known { background: #24402d !important; color: #c5e6ca !important; border-color: #41684a !important; }
