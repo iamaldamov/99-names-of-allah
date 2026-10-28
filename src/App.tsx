@@ -124,6 +124,70 @@ const russianTransliterations: Record<number, string> = {
 };
 
 
+
+async function makeNameCard(name: NameItem, transliteration: string): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1350;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas is unavailable');
+  const bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+  bg.addColorStop(0, '#10251d');
+  bg.addColorStop(1, '#263f32');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 1080, 1350);
+  ctx.strokeStyle = 'rgba(225,239,220,.28)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(42, 42, 996, 1266);
+  ctx.strokeStyle = 'rgba(225,239,220,.12)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(62, 62, 956, 1226);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#d7e6d4';
+  ctx.font = '500 27px Arial';
+  ctx.fillText('99 ПРЕКРАСНЫХ ИМЁН АЛЛАХА', 540, 145);
+  ctx.fillStyle = '#f4f6ed';
+  ctx.font = 'bold 100px Amiri, serif';
+  ctx.direction = 'rtl';
+  ctx.fillText(name.arabic, 540, 430, 900);
+  ctx.direction = 'ltr';
+  ctx.fillStyle = '#e7c98a';
+  ctx.font = '600 62px Arial';
+  ctx.fillText(name.translation, 540, 570, 900);
+  ctx.fillStyle = '#d8e5d5';
+  ctx.font = '36px Arial';
+  ctx.fillText(transliteration, 540, 640, 900);
+  ctx.fillStyle = '#f1f3ed';
+  ctx.font = '32px Arial';
+  const words = name.explanation.split(/\s+/);
+  const lines: string[] = [];
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > 820 && line) { lines.push(line); line = word; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  lines.slice(0, 5).forEach((item, i) => ctx.fillText(item, 540, 790 + i * 52, 850));
+  ctx.fillStyle = '#d7e6d4';
+  ctx.font = '28px Arial';
+  ctx.fillText('Изучай бесплатно', 540, 1160);
+  ctx.font = '25px Arial';
+  ctx.fillText('iamaldamov.github.io/99-names-of-allah', 540, 1210);
+  return await new Promise<Blob>((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Image export failed')), 'image/png'));
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky') || 'ru'; } catch { return 'ru'; } });
   const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
@@ -143,7 +207,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [, setNotice] = useState('');
+  const [notice, setNotice] = useState('');
   const [saveOpen, setSaveOpen] = useState(false);
   const [showAllInfo, setShowAllInfo] = useState(false);
   const [search, setSearch] = useState('');
@@ -297,7 +361,7 @@ export default function App() {
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
 
-      <section className="hero" id="home">
+      <section className="hero reveal" id="home">
         <div className="eyebrow"><Sparkles size={14}/> ПУТЬ ПОЗНАНИЯ</div>
         <h1>{tr('Познакомься с именами')}<br/><em>{tr('Того, Кто создал тебя.')}</em></h1>
         <p className="hero-copy">Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.</p>
@@ -362,9 +426,9 @@ export default function App() {
         <section className="creator-section"><div className="creator-mark">ر</div><div className="creator-content"><h2>Ассаляму алейкум!</h2><p>Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, красиво и в удобное время.</p><p>Пусть этот проект станет причиной пользы для нас и для тех, с кем мы им поделимся.</p><span className="creator-signature">С уважением, Рамазан</span></div></section>
         <section className="book-section"><div className="book-icon"><BookOpen size={22}/></div><div className="book-copy"><span className="muted-label">ЕЩЁ ОДИН МОЙ ПРОЕКТ</span><h2>Книга «Очищение нафса»</h2><p>Также я работаю над книгой о воспитании души и очищении сердца.</p><a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">Перейти к книге <ArrowRight size={15}/></a></div></section>
       </details>
-      <div className="export-tools"><button className="secondary-button" onClick={()=>{setShowPrintList(true);window.setTimeout(()=>window.print(),150);}}>Скачать изученные имена в PDF</button></div>
+      <div className="export-tools"><button className="secondary-button" onClick={()=>{setShowPrintList(true);window.setTimeout(()=>window.requestAnimationFrame(()=>window.print()),500);}}>Скачать изученные имена в PDF</button></div>
       {showPrintList && <section className="print-sheet"><h1>Изученные имена Аллаха</h1><p>Сохранено на сайте: {progress.length} из 99</p>{names.filter(n=>progress.includes(n.id)).map(n=><article key={n.id}><h2>{n.id}. {n.translation}</h2><div className="print-arabic" dir="rtl">{n.arabic}</div><p>{shownTransliteration(n)}</p><p>{n.explanation}</p></article>)}</section>}
-      <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
+      {notice && <p className="share-notice" role="status">{notice}</p>}\n      <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
       <a className="floating-support" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer"><span>♥</span> Поддержать проект</a>
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
@@ -386,7 +450,7 @@ export default function App() {
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions"><button onClick={()=>toggleFavorite(selected.id)}>{favorites.includes(selected.id)?'♥ В избранном':'♡ В избранное'}</button><button onClick={()=>shareName(selected)}><Share2 size={15}/> Поделиться именем</button></div>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions"><button onClick={()=>toggleFavorite(selected.id)}>{favorites.includes(selected.id)?'♥ В избранном':'♡ В избранное'}</button><button onClick={()=>shareName(selected)}><Share2 size={15}/> Поделиться картинкой</button><button onClick={()=>downloadNameCard(selected)}>Скачать PNG</button></div>
         <h2>{selected.translation}</h2>
         <p className="lesson-translit">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description">{selected.explanation}</p></div>
