@@ -170,7 +170,7 @@ export default function App() {
       <section className="progress-card reveal">
         <div className="progress-heading"><div><span className="muted-label">ТВОЙ ПУТЬ</span><h2>{user ? 'Твой прогресс обучения' : '99 имён. Одно путешествие.'}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
         <div className="progress-track"><span style={{ width: percent + '%' }}/></div>
-        <div className="progress-foot"><span><Check size={14}/> {progress.length} изучено</span><span>{user ? 'Прогресс сохраняется в аккаунте' : 'Прогресс сохраняется на этом устройстве'}</span></div>
+        <div className="progress-foot"><span><Check size={14}/> {progress.length} изучено</span><span>Прогресс сохраняется на этом устройстве</span></div>
       </section>
 
       <section className="learning-section reveal" id="learning">
