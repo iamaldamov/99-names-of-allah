@@ -14,7 +14,8 @@ export default function App() {
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [publishedCount, setPublishedCount] = useState(0);
   const [user, setUser] = useState<any>(null);
-  const [progress, setProgress] = useState<number[]>([]);
+  const [progress, setProgress] = useState<number[]>(() => { try { return JSON.parse(localStorage.getItem('asma-ul-husna-progress') || '[]') as number[]; } catch { return []; } });
+  const [progressReady, setProgressReady] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -52,13 +53,22 @@ export default function App() {
     return () => { alive = false; listener.subscription.unsubscribe(); };
   }, []);
 
+  useEffect(() => { try { localStorage.setItem('asma-ul-husna-progress', JSON.stringify(progress)); } catch { /* Storage unavailable */ } }, [progress]);
   useEffect(() => {
-    if (!supabase || !user) { setProgress([]); return; }
+    if (!supabase || !user) { setProgressReady(true); return; }
     let alive = true;
-    supabase.from('user_progress').select('name_id,status').eq('user_id', user.id)
-      .then(({ data }) => { if (alive && data) setProgress(data.filter((item: any) => item.status === 'learned').map((item: any) => item.name_id)); });
+    supabase.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data }) => {
+      if (!alive) return;
+      if (data) setProgress(current => Array.from(new Set([...current, ...data.filter((x: any) => x.status === 'learned').map((x: any) => Number(x.name_id))])));
+      setProgressReady(true);
+    });
     return () => { alive = false; };
   }, [user]);
+  useEffect(() => {
+    if (!supabase || !user || !progressReady || !progress.length) return;
+    const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
+    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id' });
+  }, [user, progressReady]);
 
   useEffect(() => {
     const nodes = document.querySelectorAll<HTMLElement>('.reveal');
@@ -101,19 +111,23 @@ export default function App() {
   };
 
   const markLearned = async () => {
-    if (!selected) return;
-    if (!user) { setSelected(null); setAccountMode('signup'); setAccountOpen(true); setMessage('Создай бесплатный аккаунт, чтобы сохранять изученные имена и свой прогресс.'); return; }
-    if (!supabase) return;
+    if (!selected || busy) return;
+    const nameId = selected.id;
     setBusy(true); setError('');
-    const { error: saveError } = await supabase.from('user_progress').upsert({
-      user_id: user.id, name_id: selected.id, status: 'learned', confidence: 3,
-      times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,name_id' });
-    setBusy(false);
-    if (saveError) { setError('Не удалось сохранить прогресс. Проверьте настройки базы данных.'); return; }
-    setProgress(old => old.includes(selected.id) ? old : [...old, selected.id]);
+    setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
     setSelected(null);
-    setNotice('Имя отмечено как изученное. Продолжай в своём темпе.');
+    setNotice('Имя отмечено как изученное и сохранено на этом устройстве.');
+    if (supabase && user) {
+      try {
+        const { error: saveError } = await supabase.from('user_progress').upsert({
+          user_id: user.id, name_id: nameId, status: 'learned', confidence: 3,
+          times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(),
+          next_review_at: new Date(Date.now() + 86400000).toISOString(), updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,name_id' });
+        if (!saveError) setNotice('Готово! Имя отмечено и сохранено в аккаунте.');
+      } catch { /* Local progress remains usable offline. */ }
+    }
+    setBusy(false);
   };
 
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setProgress([]); setMessage('Ты вышел из аккаунта.'); };
@@ -121,7 +135,7 @@ export default function App() {
   const displayedNames = useMemo(() => names.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + name.translation).toLocaleLowerCase();
     const matches = searchable.includes(search.toLocaleLowerCase());
-    const tabMatches = activeTab === 'all' || (activeTab === 'learned' ? progress.includes(name.id) : !progress.includes(name.id));
+    const tabMatches = activeTab === 'all' || (activeTab === 'review' ? progress.includes(name.id) : true);
     return matches && tabMatches;
   }), [names, search, activeTab, progress]);
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
@@ -144,16 +158,25 @@ export default function App() {
         <div className="hero-caption">ٱلرَّحْمَٰنُ · ٱلرَّحِيمُ · ٱلْمَلِكُ</div>
       </section>
 
+      <section className="quick-start reveal" aria-label="Быстрый выбор раздела">
+        <div className="section-heading"><div><span className="muted-label">ТВОЙ МАРШРУТ</span><h2>С чего начнём?</h2></div><span className="section-total">4 раздела</span></div>
+        <div className="action-grid">
+          <button className="action-card action-main" onClick={() => {setActiveTab('all');document.getElementById('learning')?.scrollIntoView({behavior:'smooth'});}}><span className="action-icon"><BookOpen size={21}/></span><b>Изучать имена</b><small>99 имён с объяснениями</small><span className="action-link">Открыть курс <ArrowRight size={14}/></span></button>
+          <button className="action-card" onClick={() => document.getElementById('practice')?.scrollIntoView({behavior:'smooth'})}><span className="action-icon"><Sparkles size={21}/></span><b>Проверить знания</b><small>Короткий тест с ответами</small><span className="action-link">Начать тест <ArrowRight size={14}/></span></button>
+          <button className="action-card" onClick={() => {setActiveTab('review');document.getElementById('learning')?.scrollIntoView({behavior:'smooth'});}}><span className="action-icon"><Check size={21}/></span><b>Повторить изученное</b><small>{progress.length} имён уже отмечено</small><span className="action-link">К повторению <ArrowRight size={14}/></span></button>
+          <button className="action-card" onClick={() => document.getElementById('method')?.scrollIntoView({behavior:'smooth'})}><span className="action-icon"><CircleHelp size={21}/></span><b>Методика обучения</b><small>Как запоминать и повторять</small><span className="action-link">Узнать метод <ArrowRight size={14}/></span></button>
+        </div>
+      </section>
       <section className="progress-card reveal">
         <div className="progress-heading"><div><span className="muted-label">ТВОЙ ПУТЬ</span><h2>{user ? 'Твой прогресс обучения' : '99 имён. Одно путешествие.'}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
         <div className="progress-track"><span style={{ width: percent + '%' }}/></div>
-        <div className="progress-foot"><span><Check size={14}/> {progress.length} изучено</span><span>{user ? 'Прогресс сохраняется в аккаунте' : 'Войди, чтобы сохранять прогресс'}</span></div>
+        <div className="progress-foot"><span><Check size={14}/> {progress.length} изучено</span><span>{user ? 'Прогресс сохраняется в аккаунте' : 'Прогресс сохраняется на этом устройстве'}</span></div>
       </section>
 
-      <section className="learning-section reveal">
-        <div className="section-heading"><div><span className="muted-label">ПЕРВЫЕ ШАГИ</span><h2>Изучай имена по порядку</h2></div><span className="section-total">{names.length} в курсе <ChevronRight size={15}/></span></div>
+      <section className="learning-section reveal" id="learning">
+        <div className="section-heading"><div><span className="muted-label">ПЕРВЫЕ ШАГИ</span><h2>Изучай имена по порядку</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
         <div className="name-list">
-          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => setSearch(e.target.value)} placeholder="Найти имя, перевод или транскрипцию…"/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => setActiveTab('all')}>Все 99</button><button className={activeTab === 'learned' ? 'active' : ''} onClick={() => setActiveTab('learned')}>Изучено</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => setActiveTab('review')}>Повторить</button></div></div>
+          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => setSearch(e.target.value)} placeholder="Найти имя, перевод или транскрипцию…"/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => setActiveTab('all')}>Все 99</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => setActiveTab('review')}>Повторить</button></div></div>
           {displayedNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
             <span className="name-info"><b>{name.translation}</b><small>{name.transliteration}</small></span>
@@ -167,7 +190,7 @@ export default function App() {
         {!supabase && <p className="setup-warning">Сервис аккаунтов пока не подключён к опубликованной версии сайта.</p>}
       </section>
 
-      <section className="practice-section reveal">
+      <section className="practice-section reveal" id="practice">
         <div className="section-heading"><div><span className="muted-label">ЗАКРЕПЛЕНИЕ ЗНАНИЙ</span><h2>Проверь, что запомнил</h2></div><span className="section-total">Мини-тест</span></div>
         {quizItem && <div className="quiz-card">
           <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{quizItem.transliteration}</p>
@@ -176,7 +199,7 @@ export default function App() {
           <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
         </div>}
       </section>
-      <section className="principles-section reveal">
+      <section className="principles-section reveal" id="method">
         <div className="section-heading"><div><span className="muted-label">КАК УЧИТЬ ЭФФЕКТИВНО</span><h2>Не просто запоминай — понимай</h2></div></div>
         <div className="principle-grid">{studyPrinciples.map((item, i) => <article className="principle-card" key={item.title}><span>0{i+1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div>
       </section>
@@ -204,8 +227,10 @@ export default function App() {
         <p className="lesson-description">{selected.explanation}</p>
         {selected.verse && <p className="lesson-verse">Связанный источник: {selected.verse}</p>}
         <div className="lesson-reflection"><b>Подумай:</b> Как это имя помогает тебе лучше понять, к Кому ты обращаешься в дуа?</div>
-        <div className="source-note"><CircleHelp size={15}/> Изучай значение имени вдумчиво. Ссылки на проверенные источники будут указаны в полном уроке.</div>
-        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Это имя уже отмечено как изученное</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{user ? 'Отметить как изученное' : 'Создать аккаунт и сохранить прогресс'} <ArrowRight size={17}/></button>}
+        <div className="source-note"><CircleHelp size={15}/> Изучай значение имени вдумчиво. Сверяй смысл с указанными источниками.</div>
+        <p className="lesson-progress-line">Изучено тобой: <b>{progress.length} из 99</b></p>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Это имя уже отмечено как изученное</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Отметить как изученное'} <ArrowRight size={17}/></button>}
       </section></div>}
 
       {accountOpen && <div className="modal-backdrop" onClick={() => setAccountOpen(false)}><section className="info-modal account-modal" role="dialog" aria-modal="true" aria-label="Аккаунт" onClick={e => e.stopPropagation()}>
