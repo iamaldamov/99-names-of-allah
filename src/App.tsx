@@ -32,6 +32,8 @@ export default function App() {
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
+  const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return !localStorage.getItem('99-names-welcome-seen'); } catch { return true; } });
+  const closeWelcome = () => { try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Storage unavailable */ } setWelcomeOpen(false); };
 
   useEffect(() => {
     if (!supabase) return;
@@ -210,6 +212,22 @@ export default function App() {
       </details>
       <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
       <a className="floating-support" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer"><span>♥</span> Поддержать проект</a>
+
+      {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
+        <button className="modal-x" aria-label="Закрыть" onClick={closeWelcome}><X size={19}/></button>
+        <div className="welcome-ornament" aria-hidden="true">أسماء الله الحسنى</div>
+        <span className="muted-label welcome-eyebrow">ДОБРО ПОЖАЛОВАТЬ</span>
+        <h2 id="welcome-title">Ассаляму алейкум!</h2>
+        <p className="welcome-greeting">Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, осмысленно и в удобное время.</p>
+        <p>Пусть эти знания принесут пользу тебе и тем, с кем ты ими поделишься.</p>
+        <div className="welcome-divider"></div>
+        <span className="muted-label welcome-support-label">ПОДДЕРЖАТЬ ПРОЕКТ</span>
+        <h3>Помоги этому знанию распространяться</h3>
+        <p>Если сайт оказался полезен тебе, можешь добровольно поддержать его развитие. Любая сумма — только по твоему желанию.</p>
+        <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
+        <button className="welcome-continue" onClick={closeWelcome}>Перейти к изучению <ArrowRight size={16}/></button>
+        <span className="welcome-signature">С уважением, Рамазан</span>
+      </section></div>}
 
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span>
