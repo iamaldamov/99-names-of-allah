@@ -355,7 +355,6 @@ export default function App() {
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
-  const reviewNextDate = (id: number) => reviewData[id]?.dueAt ? new Date(reviewData[id].dueAt).toLocaleDateString(language === 'en' ? 'en' : language === 'ar' ? 'ar' : language === 'ky' ? 'ky' : 'ru-RU', { day:'numeric', month:'long' }) : '—';
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
       const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
