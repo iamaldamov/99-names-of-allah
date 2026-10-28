@@ -227,13 +227,6 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:new Date().toDateString(),ids:learnedToday})); } catch {} }, [learnedToday]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
-  const downloadNameCard = async (name: NameItem) => {
-    try {
-      const blob = await makeNameCard(name, shownTransliteration(name));
-      downloadBlob(blob, `allah-name-${name.id}.png`);
-      setNotice('Карточка PNG подготовлена. Проверь загрузки браузера.');
-    } catch { setNotice('Не удалось создать изображение. Попробуй ещё раз.'); }
-  };
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
     try {
@@ -248,7 +241,7 @@ export default function App() {
         setNotice('Карточка PNG скачана. Прикрепи её к публикации в Threads.');
       }
     } catch (e) {
-      if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Скачай PNG отдельной кнопкой.');
+      if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Попробуй ещё раз.');
     }
   };
   const closeWelcome = () => { try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Storage unavailable */ } setWelcomeOpen(false); };
@@ -390,8 +383,8 @@ export default function App() {
 
       <section className="hero reveal" id="home">
         <div className="eyebrow"><Sparkles size={14}/> ПУТЬ ПОЗНАНИЯ</div>
-        <h1>{tr('Познакомься с именами')}</h1>
-        <p className="hero-copy">Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.</p>
+        <h1 className="text-enter">{tr('Познакомься с именами')}</h1>
+        <p className="hero-copy text-enter">Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.</p>
         <button className="primary-button" onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
         <div className="hero-art" aria-hidden="true"><div className="art-ring ring-one"/><div className="art-ring ring-two"/><span>اللَّهُ</span></div>
         <div className="hero-caption">ٱلرَّحْمَٰنُ · ٱلرَّحِيمُ · ٱلْمَلِكُ</div>
@@ -478,11 +471,11 @@ export default function App() {
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
-        <h2>{selected.translation}</h2>
-        <p className="lesson-translit">{shownTransliteration(selected)}</p>
-        <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description">{selected.explanation}</p></div>
+        <h2 className="text-enter">{selected.translation}</h2>
+        <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
+        <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description text-enter">{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
-        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Изучено · повторение запланировано</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил'} <Check size={17}/></button>}
+        {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> Изучено</p>{dueReviewIds.includes(selected.id) && <div className="recall-compact"><button aria-label="Вспомнил" title="Вспомнил" onClick={()=>{recordRecall(selected.id,true);setNotice('Повторение отмечено. Следующее — через ' + REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)] + ' дн.');setSelected(null);}}><Check size={16}/></button><button aria-label="Повторить позже" title="Повторить позже" onClick={()=>{recordRecall(selected.id,false);setNotice('Имя вернётся на повторение через 10 минут.');setSelected(null);}}><ArrowRight size={16}/></button></div>}</> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил'} <Check size={17}/></button>}
         <div className="lesson-navigation">
           <button className="lesson-nav-button" disabled={selected.id <= 1} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id - 1) || null); }}>← Предыдущее</button>
           <span>{selected.id} из 99</span>
