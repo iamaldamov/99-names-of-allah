@@ -100,24 +100,34 @@ const languageText: Record<string, Record<string, string>> = {
  'Связанный источник:':'المصدر المرتبط:'
  }
 };
-function russianTransliteration(value: string) {
- return value.replace(/\bAl-/g,'Aль-').replace(/ḥ/g,'х').replace(/Ḥ/g,'Х').replace(/ā/g,'а').replace(/Ā/g,'А').replace(/ī/g,'и').replace(/Ī/g,'И')
- .replace(/ū/g,'у').replace(/Ū/g,'У').replace(/ṣ/g,'с').replace(/Ṣ/g,'С').replace(/ḍ/g,'д').replace(/Ḍ/g,'Д')
- .replace(/ṭ/g,'т').replace(/Ṭ/g,'Т').replace(/ẓ/g,'з').replace(/Ẓ/g,'З').replace(/[‘’ʿ]/g,'')
- .replace(/th/g,'с').replace(/dh/g,'з').replace(/kh/g,'х').replace(/gh/g,'г').replace(/sh/g,'ш').replace(/j/g,'дж')
- .replace(/A/g,'А').replace(/a/g,'а').replace(/B/g,'Б').replace(/b/g,'б').replace(/T/g,'Т').replace(/t/g,'т')
- .replace(/D/g,'Д').replace(/d/g,'д').replace(/R/g,'Р').replace(/r/g,'р').replace(/Z/g,'З').replace(/z/g,'з')
- .replace(/S/g,'С').replace(/s/g,'с').replace(/F/g,'Ф').replace(/f/g,'ф').replace(/Q/g,'К').replace(/q/g,'к')
- .replace(/K/g,'К').replace(/k/g,'к').replace(/L/g,'Л').replace(/l/g,'л').replace(/M/g,'М').replace(/m/g,'м')
- .replace(/N/g,'Н').replace(/n/g,'н').replace(/H/g,'Х').replace(/h/g,'х').replace(/W/g,'В').replace(/w/g,'в')
- .replace(/Y/g,'Й').replace(/y/g,'й');
-}
+const russianTransliterations: Record<number, string> = {
+  1:'Ар-Рахмаан', 2:'Ар-Рахиим', 3:'Аль-Малик', 4:'Аль-Куддус', 5:'Ас-Саляам',
+  6:'Аль-Муъмин', 7:'Аль-Мухаймин', 8:'Аль-Азииз', 9:'Аль-Джаббаар', 10:'Аль-Мутакаббир',
+  11:'Аль-Хаалик', 12:'Аль-Баари', 13:'Аль-Мусаввир', 14:'Аль-Гаффаар', 15:'Аль-Каххаар',
+  16:'Аль-Ваххааб', 17:'Ар-Раззаак', 18:'Аль-Фаттаах', 19:'Аль-Алиим', 20:'Аль-Каабид',
+  21:'Аль-Баасит', 22:'Аль-Хаафид', 23:'Ар-Рафи', 24:'Аль-Муизз', 25:'Аль-Музилль',
+  26:'Ас-Сами', 27:'Аль-Басиир', 28:'Аль-Хакам', 29:'Аль-Адль', 30:'Аль-Латыиф',
+  31:'Аль-Хабиир', 32:'Аль-Халиим', 33:'Аль-Азым', 34:'Аль-Гафуур', 35:'Аш-Шакуур',
+  36:'Аль-Алий', 37:'Аль-Кабиир', 38:'Аль-Хафииз', 39:'Аль-Мукиит', 40:'Аль-Хасиib',
+  41:'Аль-Джалииль', 42:'Аль-Кариим', 43:'Ар-Ракыиб', 44:'Аль-Муджииб', 45:'Аль-Вааси',
+  46:'Аль-Хакиим', 47:'Аль-Вадууд', 48:'Аль-Маджиid', 49:'Аль-Баис', 50:'Аш-Шахиид',
+  51:'Аль-Хакк', 52:'Аль-Вакииль', 53:'Аль-Кавий', 54:'Аль-Матиин', 55:'Аль-Валий',
+  56:'Аль-Хамиид', 57:'Аль-Мухсы', 58:'Аль-Мубди', 59:'Аль-Муиид', 60:'Аль-Мухйи',
+  61:'Аль-Мумиит', 62:'Аль-Хайй', 63:'Аль-Каййуум', 64:'Аль-Вааджид', 65:'Аль-Мааджид',
+  66:'Аль-Ваахид', 67:'Ас-Самад', 68:'Аль-Каадир', 69:'Аль-Муктадир', 70:'Аль-Мукаддим',
+  71:'Аль-Муаххир', 72:'Аль-Авваль', 73:'Аль-Аахир', 74:'Аз-Заахир', 75:'Аль-Баатин',
+  76:'Аль-Ваали', 77:'Аль-Мутааали', 78:'Аль-Барр', 79:'Ат-Таввааб', 80:'Аль-Мунтаким',
+  81:'Аль-Афувв', 82:'Ар-Рауф', 83:'Мааликуль-Мульк', 84:'Зуль-Джаляяли валь-Икраам',
+  85:'Аль-Муксит', 86:'Аль-Джаами', 87:'Аль-Ганий', 88:'Аль-Мугнии', 89:'Аль-Маани',
+  90:'Ад-Даарр', 91:'Ан-Наафи', 92:'Ан-Нуур', 93:'Аль-Хаади', 94:'Аль-Бадии',
+  95:'Аль-Баакы', 96:'Аль-Ваарис', 97:'Ар-Рашиид', 98:'Ас-Сабуур', 99:'Аллаах'
+};
 
 
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky') || 'ru'; } catch { return 'ru'; } });
   const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
-  const shownTransliteration = (value: string) => language === 'ru' ? russianTransliteration(value) : value;
+  const shownTransliteration = (name: NameItem) => language === 'ru' ? russianTransliterations[name.id] ?? name.transliteration : name.transliteration;
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [publishedCount, setPublishedCount] = useState(0);
@@ -298,7 +308,7 @@ export default function App() {
           <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder={tr('Найти имя, перевод или транскрипцию…')}/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>{tr('Все 99')}</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>{tr('Повторить')}</button></div></div>
           {visibleNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
-            <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name.transliteration)}</small></span>
+            <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name)}</small></span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
@@ -313,7 +323,7 @@ export default function App() {
       <details className="compact-details reveal"><summary><span><b>Проверить знания</b><small>Короткий тест по именам</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
         <div className="section-heading"><div><span className="muted-label">ЗАКРЕПЛЕНИЕ ЗНАНИЙ</span><h2>Проверь, что запомнил</h2></div><span className="section-total">Мини-тест</span></div>
         {quizItem && <div className="quiz-card">
-          <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem.transliteration)}</p>
+          <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem)}</p>
           <div className="quiz-options">{quizOptions.map(option => <button key={option.id} className={quizAnswer === option.id ? (option.id === quizItem.id ? 'correct' : 'incorrect') : ''} onClick={() => setQuizAnswer(option.id)}>{option.translation}</button>)}</div>
           {quizAnswer !== null && <p className={quizAnswer === quizItem.id ? 'quiz-feedback good' : 'quiz-feedback'}>{quizAnswer === quizItem.id ? 'Верно! Повтори смысл имени своими словами.' : 'Не совсем. Правильный ответ: ' + quizItem.translation}</p>}
           <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
@@ -363,7 +373,7 @@ export default function App() {
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>
         <h2>{selected.translation}</h2>
-        <p className="lesson-translit">{shownTransliteration(selected.transliteration)}</p>
+        <p className="lesson-translit">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description">{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> Это имя уже изучено</p><div className="recall-actions"><p>Вспомни значение имени, не подглядывая в объяснение. Получилось?</p><button className="recall-known" onClick={()=>{recordRecall(selected.id,true);setNotice('Отлично! Следующее повторение: через ' + REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)] + ' дн.');setSelected(null);}}>Да, вспомнил</button><button className="recall-forgot" onClick={()=>{recordRecall(selected.id,false);setNotice('Ничего страшного. Имя вернётся в повторение через 10 минут.');setSelected(null);}}>Пока не запомнил</button></div><p className="review-due-label">Следующее повторение: {reviewNextDate(selected.id)}</p></> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил — добавить в повторение'} <Check size={17}/></button>}
