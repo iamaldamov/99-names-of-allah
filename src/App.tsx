@@ -156,6 +156,7 @@ export default function App() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [showPrintList, setShowPrintList] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return !localStorage.getItem('99-names-welcome-seen'); } catch { return true; } });
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
@@ -361,6 +362,8 @@ export default function App() {
         <section className="creator-section"><div className="creator-mark">ر</div><div className="creator-content"><h2>Ассаляму алейкум!</h2><p>Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, красиво и в удобное время.</p><p>Пусть этот проект станет причиной пользы для нас и для тех, с кем мы им поделимся.</p><span className="creator-signature">С уважением, Рамазан</span></div></section>
         <section className="book-section"><div className="book-icon"><BookOpen size={22}/></div><div className="book-copy"><span className="muted-label">ЕЩЁ ОДИН МОЙ ПРОЕКТ</span><h2>Книга «Очищение нафса»</h2><p>Также я работаю над книгой о воспитании души и очищении сердца.</p><a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">Перейти к книге <ArrowRight size={15}/></a></div></section>
       </details>
+      <div className="export-tools"><button className="secondary-button" onClick={()=>{setShowPrintList(true);window.setTimeout(()=>window.print(),150);}}>Скачать изученные имена в PDF</button></div>
+      {showPrintList && <section className="print-sheet"><h1>Изученные имена Аллаха</h1><p>Сохранено на сайте: {progress.length} из 99</p>{names.filter(n=>progress.includes(n.id)).map(n=><article key={n.id}><h2>{n.id}. {n.translation}</h2><div className="print-arabic" dir="rtl">{n.arabic}</div><p>{shownTransliteration(n)}</p><p>{n.explanation}</p></article>)}</section>}
       <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
       <a className="floating-support" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer"><span>♥</span> Поддержать проект</a>
 
