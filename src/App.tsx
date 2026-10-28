@@ -227,7 +227,30 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:new Date().toDateString(),ids:learnedToday})); } catch {} }, [learnedToday]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
-  const shareName = async (name:NameItem) => { const text = `${name.arabic}\n${name.translation}\n${shownTransliteration(name)}\n\n${name.explanation}\n\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`; try { if (navigator.share) await navigator.share({title:name.translation,text}); else if(navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); setNotice('Карточка имени скопирована.'); } else setNotice('Не удалось скопировать карточку.'); } catch(e) { if(!(e instanceof Error && e.name==='AbortError')) setNotice('Не удалось поделиться именем.'); } };
+  const downloadNameCard = async (name: NameItem) => {
+    try {
+      const blob = await makeNameCard(name, shownTransliteration(name));
+      downloadBlob(blob, `allah-name-${name.id}.png`);
+      setNotice('Карточка PNG подготовлена. Проверь загрузки браузера.');
+    } catch { setNotice('Не удалось создать изображение. Попробуй ещё раз.'); }
+  };
+  const shareName = async (name: NameItem) => {
+    const text = `${name.translation} — ${shownTransliteration(name)}\\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
+    try {
+      const blob = await makeNameCard(name, shownTransliteration(name));
+      const file = new File([blob], `allah-name-${name.id}.png`, { type: 'image/png' });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ title: name.translation, text, files: [file] });
+      } else {
+        downloadBlob(blob, file.name);
+        if (navigator.share) await navigator.share({ title: name.translation, text, url: SITE_URL });
+        else if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+        setNotice('Карточка PNG скачана. Прикрепи её к публикации в Threads.');
+      }
+    } catch (e) {
+      if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Скачай PNG отдельной кнопкой.');
+    }
+  };
   const closeWelcome = () => { try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Storage unavailable */ } setWelcomeOpen(false); };
 
   useEffect(() => {
@@ -428,7 +451,8 @@ export default function App() {
       </details>
       <div className="export-tools"><button className="secondary-button" onClick={()=>{setShowPrintList(true);window.setTimeout(()=>window.requestAnimationFrame(()=>window.print()),500);}}>Скачать изученные имена в PDF</button></div>
       {showPrintList && <section className="print-sheet"><h1>Изученные имена Аллаха</h1><p>Сохранено на сайте: {progress.length} из 99</p>{names.filter(n=>progress.includes(n.id)).map(n=><article key={n.id}><h2>{n.id}. {n.translation}</h2><div className="print-arabic" dir="rtl">{n.arabic}</div><p>{shownTransliteration(n)}</p><p>{n.explanation}</p></article>)}</section>}
-      {notice && <p className="share-notice" role="status">{notice}</p>}\n      <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
+      {notice && <p className="share-notice" role="status">{notice}</p>}
+      <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
       <a className="floating-support" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer"><span>♥</span> Поддержать проект</a>
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
