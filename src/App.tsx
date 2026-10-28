@@ -2,21 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 
-type NameItem = {
-  id: number;
-  arabic: string;
-  transliteration: string;
-  translation: string;
-  explanation: string;
-  source_references?: unknown[];
-};
-
-const previewNames: NameItem[] = [
-  { id: 1, arabic: 'الرَّحْمَٰنُ', transliteration: 'Ar-Raḥmān', translation: 'Всемилостивый', explanation: 'Имя указывает на всеобъемлющую милость Аллаха. Милость Аллаха охватывает всё творение.' },
-  { id: 2, arabic: 'الرَّحِيمُ', transliteration: 'Ar-Raḥīm', translation: 'Милующий', explanation: 'Имя указывает на милость Аллаха к Его рабам. Смысл имени раскрывается в контексте Корана и Сунны.' },
-  { id: 3, arabic: 'الْمَلِكُ', transliteration: 'Al-Malik', translation: 'Владыка', explanation: 'Аллах — истинный Владыка, Ему принадлежит совершенная власть над всем сущим.' },
-];
+type NameItem = (typeof completeNames)[number];
+const previewNames: NameItem[] = completeNames;
 
 const BOOK_URL = 'https://iamaldamov.github.io/ochishchenie-nafsa/';
 const SITE_URL = 'https://iamaldamov.github.io/99-names-of-allah/';
@@ -37,6 +26,10 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [saveOpen, setSaveOpen] = useState(false);
   const [showAllInfo, setShowAllInfo] = useState(false);
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review'>('all');
+  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
+  const [quizIndex, setQuizIndex] = useState(0);
 
   useEffect(() => {
     if (!supabase) return;
@@ -124,7 +117,14 @@ export default function App() {
 
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setProgress([]); setMessage('Ты вышел из аккаунта.'); };
   const percent = Math.round((progress.length / 99) * 100);
-  const displayedNames = useMemo(() => names, [names]);
+  const displayedNames = useMemo(() => names.filter(name => {
+    const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + name.translation).toLocaleLowerCase();
+    const matches = searchable.includes(search.toLocaleLowerCase());
+    const tabMatches = activeTab === 'all' || (activeTab === 'learned' ? progress.includes(name.id) : !progress.includes(name.id));
+    return matches && tabMatches;
+  }), [names, search, activeTab, progress]);
+  const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
+  const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
 
   return (
     <main className="app-shell">
@@ -150,20 +150,41 @@ export default function App() {
       </section>
 
       <section className="learning-section reveal">
-        <div className="section-heading"><div><span className="muted-label">ПЕРВЫЕ ШАГИ</span><h2>Изучай имена по порядку</h2></div><span className="section-total">{publishedCount || 3} опубликовано <ChevronRight size={15}/></span></div>
+        <div className="section-heading"><div><span className="muted-label">ПЕРВЫЕ ШАГИ</span><h2>Изучай имена по порядку</h2></div><span className="section-total">{names.length} в курсе <ChevronRight size={15}/></span></div>
         <div className="name-list">
+          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => setSearch(e.target.value)} placeholder="Найти имя, перевод или транскрипцию…"/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => setActiveTab('all')}>Все 99</button><button className={activeTab === 'learned' ? 'active' : ''} onClick={() => setActiveTab('learned')}>Изучено</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => setActiveTab('review')}>Повторить</button></div></div>
           {displayedNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
             <span className="name-info"><b>{name.translation}</b><small>{name.transliteration}</small></span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
           </button>)}
-          {publishedCount < 99 && <button className="locked-row locked-row-button" onClick={() => setShowAllInfo(true)}>
+          {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
+          {false && publishedCount < 99 && <button className="locked-row locked-row-button" onClick={() => setShowAllInfo(true)}>
             <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>Следующие имена</b><small>Новые уроки будут добавляться после проверки источников</small></span><span className="locked-count">ещё {99 - (publishedCount || 3)}</span>
           </button>}
         </div>
         {!supabase && <p className="setup-warning">Сервис аккаунтов пока не подключён к опубликованной версии сайта.</p>}
       </section>
 
+      <section className="practice-section reveal">
+        <div className="section-heading"><div><span className="muted-label">ЗАКРЕПЛЕНИЕ ЗНАНИЙ</span><h2>Проверь, что запомнил</h2></div><span className="section-total">Мини-тест</span></div>
+        {quizItem && <div className="quiz-card">
+          <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{quizItem.transliteration}</p>
+          <div className="quiz-options">{quizOptions.map(option => <button key={option.id} className={quizAnswer === option.id ? (option.id === quizItem.id ? 'correct' : 'incorrect') : ''} onClick={() => setQuizAnswer(option.id)}>{option.translation}</button>)}</div>
+          {quizAnswer !== null && <p className={quizAnswer === quizItem.id ? 'quiz-feedback good' : 'quiz-feedback'}>{quizAnswer === quizItem.id ? 'Верно! Повтори смысл имени своими словами.' : 'Не совсем. Правильный ответ: ' + quizItem.translation}</p>}
+          <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
+        </div>}
+      </section>
+      <section className="principles-section reveal">
+        <div className="section-heading"><div><span className="muted-label">КАК УЧИТЬ ЭФФЕКТИВНО</span><h2>Не просто запоминай — понимай</h2></div></div>
+        <div className="principle-grid">{studyPrinciples.map((item, i) => <article className="principle-card" key={item.title}><span>0{i+1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div>
+      </section>
+      <section className="references-section reveal">
+        <span className="muted-label">ОСНОВА ИСТОЧНИКОВ</span><h2>Изучай по Корану и Сунне</h2>
+        <p className="references-intro">Коран утверждает, что Аллаху принадлежат прекрасные имена и велит обращаться к Нему посредством них. В достоверном хадисе говорится о 99 именах, однако сам хадис не приводит один бесспорный пронумерованный перечень. В разных списках есть расхождения.</p>
+        <div className="reference-list">{coreReferences.map(ref => <a key={ref.label} href={ref.url} target="_blank" rel="noreferrer"><b>{ref.label}</b><span>{ref.detail}</span><ArrowRight size={15}/></a>)}</div>
+        <p className="editorial-note">Важная оговорка: этот сайт — учебный инструмент, а не фетва. Состав и нумерация популярных списков различаются. Имена, для которых требуется отдельная проверка доказательства, помечены в уроке. Перед окончательной публикацией каждой формулировки необходима проверка квалифицированным редактором исламских наук.</p>
+      </section>
       <section className="share-section reveal">
         <div className="share-ornament" aria-hidden="true">ٱلْهَادِي</div><span className="muted-label">ПОДЕЛИСЬ ПОЛЕЗНЫМ</span>
         <h2>Сохрани этот сайт<br/><em>и поделись с близкими.</em></h2>
@@ -180,6 +201,8 @@ export default function App() {
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span>
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><h2>{selected.translation}</h2><p className="lesson-translit">{selected.transliteration}</p>
         <p className="lesson-description">{selected.explanation}</p>
+        {selected.verse && <p className="lesson-verse">Связанный источник: {selected.verse}</p>}
+        <div className="lesson-reflection"><b>Подумай:</b> Как это имя помогает тебе лучше понять, к Кому ты обращаешься в дуа?</div>
         <div className="source-note"><CircleHelp size={15}/> Изучай значение имени вдумчиво. Ссылки на проверенные источники будут указаны в полном уроке.</div>
         {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> Это имя уже отмечено как изученное</p> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{user ? 'Отметить как изученное' : 'Создать аккаунт и сохранить прогресс'} <ArrowRight size={17}/></button>}
       </section></div>}
