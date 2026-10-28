@@ -357,3 +357,92 @@ body{font-size:var(--reading-size);line-height:1.75}
 }
 :root[data-theme="dark"] .account-form label { color: #c2d0c5 !important; }
 :root[data-theme="dark"] .account-form input { border-color: #405747 !important; }
+
+
+/* Cleaner lesson controls: compact icon-only actions. */
+.lesson-quick-actions.compact-icon-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 18px;
+}
+.lesson-quick-actions.compact-icon-actions button {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--muted);
+  transition: transform .22s ease, color .22s ease, background .22s ease, border-color .22s ease;
+}
+.lesson-quick-actions.compact-icon-actions button:hover {
+  transform: translateY(-2px);
+  color: var(--green);
+  border-color: var(--green);
+}
+.lesson-quick-actions.compact-icon-actions button.is-favorite {
+  color: #bd6874;
+  background: #fff3f4;
+  border-color: #f0d6da;
+}
+.recall-compact {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 4px;
+}
+.recall-compact button {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--green);
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+.recall-compact button:hover { transform: translateY(-2px); background: var(--line); }
+.export-tools { justify-content: center; margin: 18px 0 28px; }
+.export-tools .secondary-button { max-width: 100%; }
+
+/* Gentle staggered transitions for lesson text and modal content. */
+@keyframes textEnter {
+  from { opacity: 0; transform: translateY(12px); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes lessonEnter {
+  from { opacity: 0; transform: translateY(14px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.text-enter { animation: textEnter .65s cubic-bezier(.2,.7,.2,1) both; }
+.lesson-modal { animation: lessonEnter .38s cubic-bezier(.2,.7,.2,1) both; }
+.lesson-modal > .lesson-topline { animation: textEnter .5s .04s both; }
+.lesson-modal > .lesson-arabic { animation: textEnter .65s .09s both; }
+.lesson-modal > .lesson-quick-actions { animation: textEnter .55s .14s both; }
+.lesson-modal > h2 { animation: textEnter .55s .19s both; }
+.lesson-modal > .lesson-translit { animation: textEnter .55s .24s both; }
+.lesson-modal > .lesson-meaning { animation: textEnter .65s .29s both; }
+.lesson-modal > .primary-button,
+.lesson-modal > .already-learned { animation: textEnter .55s .34s both; }
+:root[data-theme="dark"] .lesson-quick-actions.compact-icon-actions button,
+:root[data-theme="dark"] .recall-compact button {
+  background: #1b2a21;
+  border-color: #405747;
+  color: #c4d2c7;
+}
+:root[data-theme="dark"] .lesson-quick-actions.compact-icon-actions button.is-favorite {
+  background: #39262b;
+  color: #efaab4;
+  border-color: #65414a;
+}
+@media(prefers-reduced-motion:reduce) {
+  .text-enter,.lesson-modal,.lesson-modal > * { animation: none !important; }
+}
