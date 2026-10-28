@@ -25,3 +25,5 @@ Only the Supabase publishable/anon key belongs in the client. Never expose the s
 
 ## Content integrity
 Name entries are intentionally marked as draft until Arabic spelling, transliteration, translation, explanation, and references have been reviewed against reliable Islamic sources. Do not publish unverified religious content.
+
+Pages deployment is triggered automatically on pushes to the main branch.
