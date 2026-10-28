@@ -84,7 +84,7 @@ function russianTransliteration(value: string) {
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky') || 'ru'; } catch { return 'ru'; } });
   const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
-  const shownTransliteration = (value: string) => language === 'ru' ? russianTransliteration(value) : value;
+  const shownTransliteration = (value: string) => language === 'ru' || language === 'ky' ? russianTransliteration(value) : value;
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [publishedCount, setPublishedCount] = useState(0);
@@ -224,7 +224,7 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span>99 <b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргызча</option></select>
+        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
