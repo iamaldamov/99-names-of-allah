@@ -125,7 +125,8 @@ export default function App() {
           next_review_at: new Date(Date.now() + 86400000).toISOString(), updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,name_id' });
         if (!saveError) setNotice('Готово! Имя отмечено и сохранено в аккаунте.');
-      } catch { /* Local progress remains usable offline. */ }
+        else setNotice('Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.');
+      } catch { setNotice('Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.'); }
     }
     setBusy(false);
   };
