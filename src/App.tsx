@@ -51,7 +51,7 @@ const languageText: Record<string, Record<string, string>> = {
  }
 };
 function russianTransliteration(value: string) {
- return value.replace(/ḥ/g,'х').replace(/Ḥ/g,'Х').replace(/ā/g,'а').replace(/Ā/g,'А').replace(/ī/g,'и').replace(/Ī/g,'И')
+ return value.replace(/\bAl-/g,'Aль-').replace(/ḥ/g,'х').replace(/Ḥ/g,'Х').replace(/ā/g,'а').replace(/Ā/g,'А').replace(/ī/g,'и').replace(/Ī/g,'И')
  .replace(/ū/g,'у').replace(/Ū/g,'У').replace(/ṣ/g,'с').replace(/Ṣ/g,'С').replace(/ḍ/g,'д').replace(/Ḍ/g,'Д')
  .replace(/ṭ/g,'т').replace(/Ṭ/g,'Т').replace(/ẓ/g,'з').replace(/Ẓ/g,'З').replace(/[‘’ʿ]/g,'')
  .replace(/th/g,'с').replace(/dh/g,'з').replace(/kh/g,'х').replace(/gh/g,'г').replace(/sh/g,'ш').replace(/j/g,'дж')
@@ -209,8 +209,8 @@ export default function App() {
     <main className="app-shell">
       <header className="topbar">
         <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span>99 <b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option></select>
-        {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> Выйти</button></div> :
-          <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> Войти</button>}
+        {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
+          <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
 
       <section className="hero" id="home">
@@ -225,7 +225,7 @@ export default function App() {
       <section className="progress-card reveal">
         <div className="progress-heading"><div><span className="muted-label">{tr('ТВОЙ ПУТЬ')}</span><h2>{user ? tr('Твой прогресс обучения') : tr('99 имён. Одно путешествие.')}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
         <div className="progress-track"><span style={{ width: percent + '%' }}/></div>
-        <div className="progress-foot"><span><Check size={14}/> {progress.length} изучено</span><span>Прогресс сохраняется на этом устройстве</span></div>
+        <div className="progress-foot"><span><Check size={14}/> {progress.length} {tr('изучено')}</span><span>{tr('Прогресс сохраняется на этом устройстве')}</span></div>
       </section>
 
       <section className="learning-section reveal" id="learning">
