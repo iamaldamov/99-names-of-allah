@@ -17,7 +17,7 @@ function localDayKey(date = new Date()): string {
 function loadStudyDays(): Record<string, number> {
   try { const value: unknown = JSON.parse(localStorage.getItem('99-names-study-days') || '{}');
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-    return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, count]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && Number.isInteger(count) && Number(count) > 0).slice(-90).map(([key, count]) => [key, Number(count)]));
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, count]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof count === 'number' && Number.isInteger(count) && count > 0).slice(-90).map(([key, count]) => [key, Number(count)]));
   } catch { return {}; }
 }
 function loadProgress(): number[] {
