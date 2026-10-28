@@ -11,6 +11,23 @@ const BOOK_URL = 'https://iamaldamov.github.io/ochishchenie-nafsa/';
 const SITE_URL = 'https://iamaldamov.github.io/99-names-of-allah/';
 
 const languageText: Record<string, Record<string, string>> = {
+ ky: {
+ '99 имён Аллаха':'Аллахтын 99 ысымы','Войти':'Кирүү','Выйти':'Чыгуу','ПУТЬ ПОЗНАНИЯ':'ТААНЫП-БИЛҮҮ ЖОЛУ',
+ 'Познакомься с именами':'Сени жараткан Заттын','Того, Кто создал тебя.':'ысымдары менен тааныш.','Начать обучение':'Үйрөнүүнү баштоо',
+ 'ТВОЙ ПУТЬ':'СЕНИН ЖОЛУҢ','Твой прогресс обучения':'Үйрөнүүдөгү жетишкендигиң','99 имён. Одно путешествие.':'99 ысым. Бир сапар.','изучено':'үйрөнүлдү',
+ 'Прогресс сохраняется на этом устройстве':'Жетишкендигиң ушул түзмөктө сакталат','ПЕРВЫЕ ШАГИ':'АЛГАЧКЫ КАДАМДАР',
+ 'Изучай имена по порядку':'Ысымдарды ирети менен үйрөн','Открыть каталог имён':'Ысымдардын тизмесин ачуу','Свернуть каталог':'Тизмени жабуу',
+ 'Найти имя, перевод или транскрипцию…':'Ысымды, котормосун же транскрипциясын издөө…','Все 99':'Бардыгы 99','Повторить':'Кайталоо',
+ 'Ничего не найдено. Попробуй изменить запрос или фильтр.':'Эч нерсе табылган жок. Издөөнү же чыпканы өзгөртүп көр.',
+ 'Проверить знания':'Билимиңди текшер','Короткий тест по именам':'Ысымдар боюнча кыска тест','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'БИЛИМДИ БЕКЕМДӨӨ',
+ 'Проверь, что запомнил':'Эмнени эстеп калганыңды текшер','Мини-тест':'Кыска тест','КАК ПЕРЕВОДИТСЯ ИМЯ?':'БУЛ ЫСЫМ КАНДАЙ КОТОРУЛАТ?',
+ 'Верно! Повтори смысл имени своими словами.':'Туура! Ысымдын маанисин өз сөзүң менен кайтала.','Не совсем. Правильный ответ: ':'Туура эмес. Туура жооп: ',
+ 'Следующий вопрос':'Кийинки суроо','Методика обучения':'Үйрөнүү ыкмасы','Как запоминать и повторять':'Кантип жаттап, кайталоо керек',
+ 'Источники и достоверность':'Булактар жана ишенимдүүлүк','О создателе':'Долбоордун автору','Ассаляму алейкум!':'Ассаламу алейкум!',
+ 'Закрыть':'Жабуу','Поддержать проект':'Долбоорду колдоо','Перейти к изучению':'Үйрөнүүгө өтүү','ДОБРО ПОЖАЛОВАТЬ':'КОШ КЕЛИҢИЗ',
+ 'Отметить как изученное':'Үйрөнүлдү деп белгилөө','Это имя уже отмечено как изученное':'Бул ысым үйрөнүлдү деп белгиленген',
+ 'Сохраняем…':'Сакталууда…','Связанный источник:':'Байланыштуу булак:'
+ },
  en: {
  '99 имён Аллаха':'99 Names of Allah','Войти':'Sign in','Выйти':'Sign out','ПУТЬ ПОЗНАНИЯ':'A JOURNEY OF KNOWLEDGE',
  'Познакомься с именами':'Discover the names','Того, Кто создал тебя.':'of the One who created you.',
@@ -65,7 +82,7 @@ function russianTransliteration(value: string) {
 
 
 export default function App() {
-  const [language, setLanguage] = useState<'ru'|'en'|'ar'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar') || 'ru'; } catch { return 'ru'; } });
+  const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky') || 'ru'; } catch { return 'ru'; } });
   const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
   const shownTransliteration = (value: string) => language === 'ru' ? russianTransliteration(value) : value;
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
@@ -207,7 +224,7 @@ export default function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span>99 <b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option></select>
+        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span>99 <b>{tr('99 имён Аллаха')}</b></span></a><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргызча</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
