@@ -31,6 +31,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
+  const [visibleNamesCount, setVisibleNamesCount] = useState(12);
 
   useEffect(() => {
     if (!supabase) return;
@@ -139,6 +140,7 @@ export default function App() {
     const tabMatches = activeTab === 'all' || (activeTab === 'review' ? progress.includes(name.id) : true);
     return matches && tabMatches;
   }), [names, search, activeTab, progress]);
+  const visibleNames = displayedNames.slice(0, visibleNamesCount);
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
   const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
 
@@ -159,15 +161,6 @@ export default function App() {
         <div className="hero-caption">ٱلرَّحْمَٰنُ · ٱلرَّحِيمُ · ٱلْمَلِكُ</div>
       </section>
 
-      <section className="quick-start reveal" aria-label="Быстрый выбор раздела">
-        <div className="section-heading"><div><span className="muted-label">ТВОЙ МАРШРУТ</span><h2>С чего начнём?</h2></div><span className="section-total">4 раздела</span></div>
-        <div className="action-grid">
-          <button className="action-card action-main" onClick={() => {setActiveTab('all');document.getElementById('learning')?.scrollIntoView({behavior:'smooth'});}}><span className="action-icon"><BookOpen size={21}/></span><b>Изучать имена</b><small>99 имён с объяснениями</small><span className="action-link">Открыть курс <ArrowRight size={14}/></span></button>
-          <button className="action-card" onClick={() => document.getElementById('practice')?.scrollIntoView({behavior:'smooth'})}><span className="action-icon"><Sparkles size={21}/></span><b>Проверить знания</b><small>Короткий тест с ответами</small><span className="action-link">Начать тест <ArrowRight size={14}/></span></button>
-          <button className="action-card" onClick={() => {setActiveTab('review');document.getElementById('learning')?.scrollIntoView({behavior:'smooth'});}}><span className="action-icon"><Check size={21}/></span><b>Повторить изученное</b><small>{progress.length} имён уже отмечено</small><span className="action-link">К повторению <ArrowRight size={14}/></span></button>
-          <button className="action-card" onClick={() => document.getElementById('method')?.scrollIntoView({behavior:'smooth'})}><span className="action-icon"><CircleHelp size={21}/></span><b>Методика обучения</b><small>Как запоминать и повторять</small><span className="action-link">Узнать метод <ArrowRight size={14}/></span></button>
-        </div>
-      </section>
       <section className="progress-card reveal">
         <div className="progress-heading"><div><span className="muted-label">ТВОЙ ПУТЬ</span><h2>{user ? 'Твой прогресс обучения' : '99 имён. Одно путешествие.'}</h2></div><span className="progress-count">{progress.length} <small>/ 99</small></span></div>
         <div className="progress-track"><span style={{ width: percent + '%' }}/></div>
@@ -177,13 +170,14 @@ export default function App() {
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">ПЕРВЫЕ ШАГИ</span><h2>Изучай имена по порядку</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
         <div className="name-list">
-          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => setSearch(e.target.value)} placeholder="Найти имя, перевод или транскрипцию…"/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => setActiveTab('all')}>Все 99</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => setActiveTab('review')}>Повторить</button></div></div>
-          {displayedNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
+          <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder="Найти имя, перевод или транскрипцию…"/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>Все 99</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>Повторить</button></div></div>
+          {visibleNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
             <span className="name-info"><b>{name.translation}</b><small>{name.transliteration}</small></span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
+          {displayedNames.length > visibleNames.length && <button className="show-more-names" onClick={() => setVisibleNamesCount(count => count + 12)}>Показать ещё имена ({displayedNames.length - visibleNames.length})</button>}
           {false && publishedCount < 99 && <button className="locked-row locked-row-button" onClick={() => setShowAllInfo(true)}>
             <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>Следующие имена</b><small>Новые уроки будут добавляться после проверки источников</small></span><span className="locked-count">ещё {99 - (publishedCount || 3)}</span>
           </button>}
@@ -191,7 +185,7 @@ export default function App() {
         {!supabase && <p className="setup-warning">Сервис аккаунтов пока не подключён к опубликованной версии сайта.</p>}
       </section>
 
-      <section className="practice-section reveal" id="practice">
+      <details className="compact-details reveal"><summary><span><b>Проверить знания</b><small>Короткий тест по именам</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
         <div className="section-heading"><div><span className="muted-label">ЗАКРЕПЛЕНИЕ ЗНАНИЙ</span><h2>Проверь, что запомнил</h2></div><span className="section-total">Мини-тест</span></div>
         {quizItem && <div className="quiz-card">
           <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{quizItem.transliteration}</p>
@@ -199,30 +193,23 @@ export default function App() {
           {quizAnswer !== null && <p className={quizAnswer === quizItem.id ? 'quiz-feedback good' : 'quiz-feedback'}>{quizAnswer === quizItem.id ? 'Верно! Повтори смысл имени своими словами.' : 'Не совсем. Правильный ответ: ' + quizItem.translation}</p>}
           <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
         </div>}
-      </section>
-      <section className="principles-section reveal" id="method">
+      </section></details>
+      <details className="compact-details reveal"><summary><span><b>Методика обучения</b><small>Как запоминать и повторять</small></span><ChevronRight size={18}/></summary><section className="principles-section" id="method">
         <div className="section-heading"><div><span className="muted-label">КАК УЧИТЬ ЭФФЕКТИВНО</span><h2>Не просто запоминай — понимай</h2></div></div>
         <div className="principle-grid">{studyPrinciples.map((item, i) => <article className="principle-card" key={item.title}><span>0{i+1}</span><h3>{item.title}</h3><p>{item.body}</p></article>)}</div>
-      </section>
-      <section className="references-section reveal">
+      </section></details>
+      <details className="compact-details reveal"><summary><span><b>Источники и достоверность</b><small>На чём основаны материалы</small></span><ChevronRight size={18}/></summary><section className="references-section">
         <span className="muted-label">ОСНОВА ИСТОЧНИКОВ</span><h2>Изучай по Корану и Сунне</h2>
         <p className="references-intro">Коран утверждает, что Аллаху принадлежат прекрасные имена и велит обращаться к Нему посредством них. В достоверном хадисе говорится о 99 именах, однако сам хадис не приводит один бесспорный пронумерованный перечень. В разных списках есть расхождения.</p>
         <div className="reference-list">{coreReferences.map(ref => <a key={ref.label} href={ref.url} target="_blank" rel="noreferrer"><b>{ref.label}</b><span>{ref.detail}</span><ArrowRight size={15}/></a>)}</div>
         <p className="editorial-note">Важная оговорка: этот сайт — учебный инструмент, а не фетва. Состав и нумерация популярных списков различаются. Имена, для которых требуется отдельная проверка доказательства, помечены в уроке. Перед окончательной публикацией каждой формулировки необходима проверка квалифицированным редактором исламских наук.</p>
-      </section>
-      <section className="share-section reveal">
-        <div className="share-ornament" aria-hidden="true">ٱلْهَادِي</div><span className="muted-label">ПОДЕЛИСЬ ПОЛЕЗНЫМ</span>
-        <h2>Сохрани этот сайт<br/><em>и поделись с близкими.</em></h2>
-        <p>Возможно, благодаря твоей рекомендации ещё один человек узнает прекрасные имена Аллаха. Надеемся на награду от Аллаха за распространение полезного знания.</p>
-        <div className="share-actions"><button className="primary-button" onClick={shareSite}><Share2 size={16}/> Поделиться сайтом</button><button className="save-button" onClick={() => setSaveOpen(true)}><Bookmark size={16}/> Сохранить</button></div>
-        {notice && <p className="share-notice" role="status">{notice}</p>}
-      </section>
-
-      <section className="creator-section reveal"><div className="creator-mark">ر</div><div className="creator-content"><span className="muted-label">О СОЗДАТЕЛЕ</span><h2>Ассаляму алейкум!</h2><p>Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, красиво и в удобное время.</p><p>Пусть этот проект станет причиной пользы для нас и для тех, с кем мы им поделимся.</p><span className="creator-signature">С уважением, Рамазан</span></div></section>
-
-      <section className="book-section reveal"><div className="book-icon"><BookOpen size={22}/></div><div className="book-copy"><span className="muted-label">ЕЩЁ ОДИН МОЙ ПРОЕКТ</span><h2>Книга «Очищение нафса»</h2><p>Также я работаю над книгой о воспитании души и очищении сердца. Познакомься с ней на отдельном сайте.</p><a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">Перейти к книге <ArrowRight size={15}/></a></div></section>
-
-      <section className="donation-section reveal"><span className="donation-symbol" aria-hidden="true">♡</span><span className="muted-label">ПОДДЕРЖАТЬ ПРОЕКТ</span><h2>Помоги этому знанию распространяться</h2><p>Сайт создан для бесплатного изучения прекрасных имён Аллаха. Если он оказался полезен тебе, ты можешь добровольно поддержать его развитие. Любая сумма — по твоему желанию. Пусть Аллах воздаст тебе благом.</p><a className="donation-button" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span aria-hidden="true">♥</span></a><small>Пожертвование добровольное. Обучение остаётся бесплатным.</small></section>
+      </section></details>
+      <details className="compact-details reveal"><summary><span><b>О создателе</b><small>Немного о Рамазане и других проектах</small></span><ChevronRight size={18}/></summary>
+        <section className="creator-section"><div className="creator-mark">ر</div><div className="creator-content"><h2>Ассаляму алейкум!</h2><p>Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, красиво и в удобное время.</p><p>Пусть этот проект станет причиной пользы для нас и для тех, с кем мы им поделимся.</p><span className="creator-signature">С уважением, Рамазан</span></div></section>
+        <section className="book-section"><div className="book-icon"><BookOpen size={22}/></div><div className="book-copy"><span className="muted-label">ЕЩЁ ОДИН МОЙ ПРОЕКТ</span><h2>Книга «Очищение нафса»</h2><p>Также я работаю над книгой о воспитании души и очищении сердца.</p><a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">Перейти к книге <ArrowRight size={15}/></a></div></section>
+      </details>
+      <footer><span>asma ul husna · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
+      <a className="floating-support" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer"><span>♥</span> Поддержать проект</a>
 
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span>
@@ -253,7 +240,6 @@ export default function App() {
 
       {saveOpen && <div className="modal-backdrop" onClick={() => setSaveOpen(false)}><section className="info-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}><button className="modal-x" onClick={() => setSaveOpen(false)}><X size={19}/></button><div className="info-modal-icon"><Bookmark size={21}/></div><h2>Сохрани сайт, чтобы вернуться</h2><p><b>На iPhone:</b> нажми «Поделиться» в Safari, затем выбери «На экран Домой» или «Добавить закладку».</p><p><b>В других браузерах:</b> добавь страницу в закладки.</p><button className="primary-button full" onClick={() => setSaveOpen(false)}>Понятно</button></section></div>}
 
-      <footer><span>asma ul husna</span><span>Учись с намерением и постоянством</span></footer>
     </main>
   );
 }
