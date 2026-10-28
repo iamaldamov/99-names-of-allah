@@ -251,6 +251,13 @@ export default function App() {
       if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Скачай PNG отдельной кнопкой.');
     }
   };
+  const downloadStudyList = () => {
+    const studied = names.filter(n => progress.includes(n.id));
+    if (!studied.length) { setNotice('Пока нечего скачивать: сначала отметь хотя бы одно имя как изученное.'); return; }
+    const content = studied.map(n => `${n.id}. ${n.translation}\\n${n.arabic}\\n${shownTransliteration(n)}\\n${n.explanation}`).join('\\n\\n');
+    downloadBlob(new Blob([`Изученные имена Аллаха\\n\\n${content}`], { type: 'text/plain;charset=utf-8' }), 'izuchennye-imena-allaha.txt');
+    setNotice('Список скачан в формате TXT.');
+  };
   const closeWelcome = () => { try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Storage unavailable */ } setWelcomeOpen(false); };
 
   useEffect(() => {
@@ -294,7 +301,11 @@ export default function App() {
   }, [user, progressReady, progress]);
 
   useEffect(() => {
-    const nodes = document.querySelectorAll<HTMLElement>('.reveal');
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+    if (!('IntersectionObserver' in window)) {
+      nodes.forEach(node => node.classList.add('revealed'));
+      return;
+    }
     const observer = new IntersectionObserver(entries => entries.forEach(entry => {
       if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); }
     }), { threshold: 0.12 });
@@ -449,7 +460,7 @@ export default function App() {
         <section className="creator-section"><div className="creator-mark">ر</div><div className="creator-content"><h2>Ассаляму алейкум!</h2><p>Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, красиво и в удобное время.</p><p>Пусть этот проект станет причиной пользы для нас и для тех, с кем мы им поделимся.</p><span className="creator-signature">С уважением, Рамазан</span></div></section>
         <section className="book-section"><div className="book-icon"><BookOpen size={22}/></div><div className="book-copy"><span className="muted-label">ЕЩЁ ОДИН МОЙ ПРОЕКТ</span><h2>Книга «Очищение нафса»</h2><p>Также я работаю над книгой о воспитании души и очищении сердца.</p><a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">Перейти к книге <ArrowRight size={15}/></a></div></section>
       </details>
-      <div className="export-tools"><button className="secondary-button" onClick={()=>{setShowPrintList(true);window.setTimeout(()=>window.requestAnimationFrame(()=>window.print()),500);}}>Скачать изученные имена в PDF</button></div>
+      <div className="export-tools"><button className="secondary-button" onClick={()=>{if(!progress.length){setNotice('Пока нет изученных имён для PDF. Отметь имя как изученное и повтори.');return;}setShowPrintList(true);window.setTimeout(()=>window.requestAnimationFrame(()=>window.print()),600);}}>Печать / сохранить PDF</button><button className="secondary-button" onClick={downloadStudyList}>Скачать список TXT</button></div>
       {showPrintList && <section className="print-sheet"><h1>Изученные имена Аллаха</h1><p>Сохранено на сайте: {progress.length} из 99</p>{names.filter(n=>progress.includes(n.id)).map(n=><article key={n.id}><h2>{n.id}. {n.translation}</h2><div className="print-arabic" dir="rtl">{n.arabic}</div><p>{shownTransliteration(n)}</p><p>{n.explanation}</p></article>)}</section>}
       {notice && <p className="share-notice" role="status">{notice}</p>}
       <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
