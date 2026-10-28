@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, ChevronRight, CircleHelp, Heart, LockKeyhole, Share2, Bookmark, BookOpen, Sparkles, X } from 'lucide-react';
-import { isSupabaseConfigured } from './lib/supabase';
+import { ArrowRight, Check, ChevronRight, CircleHelp, LockKeyhole, Share2, Bookmark, BookOpen, Sparkles, X } from 'lucide-react';
 
 const previewNames = [
   { n: '01', arabic: 'الرَّحْمَٰنُ', transliteration: 'Ar-Raḥmān', meaning: 'Всемилостивый', description: 'Тот, Чья милость всеобъемлюща и охватывает творения.' },
