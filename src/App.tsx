@@ -226,6 +226,8 @@ export default function App() {
   const [dailyGoal, setDailyGoal] = useState<number>(() => { try { const n=Number(localStorage.getItem('99-names-daily-goal')); return [1,3,5].includes(n) ? n : 1; } catch { return 1; } });
   const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return v.date === new Date().toDateString() && Array.isArray(v.ids) ? v.ids : []; } catch { return []; } });
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
+  const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
+  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
@@ -238,6 +240,12 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:new Date().toDateString(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
+  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: localDayKey(), answers: challengeAnswers })); } catch {} }, [challengeAnswers]);
+  useEffect(() => {
+    if (challengeAnswers.length !== 5) return;
+    const score = dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0);
+    setChallengeBest(old => { const next = Math.max(old, score); try { localStorage.setItem('99-names-challenge-best', String(next)); } catch {} return next; });
+  }, [challengeAnswers]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
@@ -374,6 +382,15 @@ export default function App() {
   const currentStreak = (() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; })();
   const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
   const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
+  const dailyChallenge = useMemo(() => {
+    const seed = Number(todayKey.replace(/-/g, ''));
+    const rank = (id: number, salt: number) => (id * 9301 + seed * 49297 + salt * 233280) % 1000003;
+    const ordered = [...names].sort((a, b) => rank(a.id, 17) - rank(b.id, 17));
+    return ordered.slice(0, 5).map((item, index) => ({
+      item,
+      options: [item, ...names.filter(name => name.id !== item.id).sort((a, b) => rank(a.id, index * 31 + 7) - rank(b.id, index * 31 + 7)).slice(0, 3)].sort((a, b) => rank(a.id, index * 97 + 3) - rank(b.id, index * 97 + 3))
+    }));
+  }, [names, todayKey]);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
@@ -421,6 +438,21 @@ export default function App() {
         <div className="week-activity" aria-label="Активность за последние семь дней">{weekActivity.map(day => <div className={`week-day ${day.count ? "is-active" : ""} ${day.today ? "is-today" : ""}`} key={day.key} title={day.count ? `${day.count} учебный день` : "Без занятий"}><span>{day.label}</span><i>{day.count ? <Check size={13}/> : <span/>}</i></div>)}</div>
         <div className="journey-bottom"><div className="milestone-block"><div className="milestone-label"><span>БЛИЖАЙШАЯ ЦЕЛЬ</span><b>{progress.length} / {nextMilestone}</b></div><div className="milestone-track"><span style={{width: milestoneProgress + "%"}}/></div><small>{nextMilestone === 99 ? "Финишная прямая — осталось совсем немного" : `Ещё ${nextMilestone - progress.length} ${nextMilestone - progress.length === 1 ? "имя" : "имён"} до следующего рубежа`}</small></div><div className="week-summary"><b>{activeDaysThisWeek}/7</b><small>дней с занятиями за неделю</small></div></div>
         <button className="journey-continue" onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? "СЛЕДУЮЩИЙ ШАГ" : dueReviewIds.length ? "ВРЕМЯ ПОВТОРИТЬ" : "ТЫ ПРОШЁЛ ВЕСЬ СПИСОК"}</small><b>{nextName ? `Продолжить: ${nextName.translation}` : dueReviewIds.length ? "Закрепить изученное" : "Вернуться к каталогу"}</b></span><ArrowRight size={19}/></button>
+      </section>
+
+      <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
+        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div>
+        {challengeAnswers.length < 5 ? <div className="challenge-play">
+          <div className="challenge-progress"><span>ВОПРОС {challengeAnswers.length + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
+          <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><p>Выбери правильное значение имени</p></div>
+          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => <button key={option.id} onClick={() => setChallengeAnswers(old => old.length < 5 ? [...old, option.id] : old)}>{option.translation}</button>)}</div>
+        </div> : <div className="challenge-result">
+          <span className="challenge-result-mark">{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "✦" : "✓"}</span>
+          <h3>Испытание завершено</h3><b>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0)} из 5 правильных ответов</b>
+          <p>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Вернись к именам, в которых сомневался."}</p>
+          <button onClick={() => setChallengeAnswers([])}>Пройти ещё раз <ArrowRight size={15}/></button>
+        </div>}
+        <div className="challenge-foot"><span>Твой лучший результат сохраняется на этом устройстве</span><span>{challengeAnswers.length}/5</span></div>
       </section>
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
