@@ -38,7 +38,8 @@ export default function App() {
       .then(({ data, error: fetchError }) => {
         if (!alive) return;
         if (!fetchError && data && data.length) {
-          setNames(data as NameItem[]);
+          const remote = data as NameItem[];
+          setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
           setPublishedCount(data.length);
         }
       });
