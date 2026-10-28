@@ -50,3 +50,41 @@
 .account-switch{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:15px}.account-switch button{border:0;background:transparent;color:#416c59;font:600 11px 'DM Sans';padding:4px 0;cursor:pointer}.privacy-note{display:flex;align-items:flex-start;gap:7px;margin-top:17px!important;font-size:10px!important;color:#97a198!important}.privacy-note svg{flex:none;margin-top:2px}.already-learned{display:flex;justify-content:center;gap:7px;align-items:center;color:#416c59;font-size:12px}
 .primary-button:disabled{opacity:.6;cursor:wait;transform:none}
 @media(max-width:650px){.user-email{max-width:105px}.signed-in{gap:7px}.account-modal{padding:27px 21px 23px}}
+
+/* Full-course learning tools */
+.course-tools{padding:16px 18px;border-bottom:1px solid #f0f2ee;background:#fbfcfa}
+.name-search{width:100%;border:1px solid #e3e9e2;border-radius:12px;padding:12px 14px;background:#fff;color:var(--ink);font:13px 'DM Sans';outline:none}
+.name-search:focus{border-color:#91a995;box-shadow:0 0 0 3px #416c5910}
+.filter-tabs{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.filter-tabs button{border:1px solid #e4eae3;background:#fff;color:#77847a;border-radius:30px;padding:8px 13px;font:600 11px 'DM Sans';cursor:pointer}
+.filter-tabs button.active{background:#eaf1e9;border-color:#d6e3d5;color:#416c59}
+.empty-results{padding:20px;text-align:center;color:#87948a;font-size:12px}
+.practice-section,.principles-section,.references-section{margin:0 0 58px}
+.quiz-card{margin-top:18px;padding:25px;border:1px solid var(--line);border-radius:18px;background:#fff;text-align:center}
+.quiz-card>.muted-label{justify-content:center}
+.quiz-arabic{font:54px Amiri;color:var(--green);margin:12px 0 0}
+.quiz-translit{font-size:12px;color:#8b978e;margin:3px 0 18px}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.quiz-options button{min-height:48px;padding:10px;border:1px solid #e5ebe4;border-radius:12px;background:#fbfcfa;color:#4e5d52;font:500 12px 'DM Sans';cursor:pointer}
+.quiz-options button.correct{background:#edf6ee;border-color:#a9c8ac;color:#32633e}
+.quiz-options button.incorrect{background:#fff1ef;border-color:#e6b6ae;color:#9b453c}
+.quiz-feedback{font-size:12px;color:#9b5149;line-height:1.6;margin:14px 0 0}
+.quiz-feedback.good{color:#416c59}
+.quiz-next{display:inline-flex;align-items:center;gap:8px;margin-top:17px;border:0;background:transparent;color:var(--green);font:700 12px 'DM Sans';cursor:pointer}
+.principle-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.principle-card{padding:20px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.principle-card>span{font-size:10px;color:#9aa89c;letter-spacing:1px}
+.principle-card h3{font-size:14px;margin:11px 0 7px}
+.principle-card p{font-size:12px;line-height:1.8;color:#7a867d;margin:0}
+.references-section h2{font-size:21px;margin:10px 0}
+.references-intro,.editorial-note{font-size:12px;line-height:1.85;color:#77847a;max-width:750px}
+.reference-list{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;margin:18px 0}
+.reference-list a{display:grid;grid-template-columns:1fr 24px;gap:5px 12px;padding:15px 17px;text-decoration:none;color:var(--ink);border-bottom:1px solid #f0f2ee}
+.reference-list a:last-child{border:0}
+.reference-list a b{font-size:12px;color:var(--green)}
+.reference-list a span{font-size:11px;line-height:1.7;color:#87938a;grid-column:1}
+.reference-list a svg{grid-column:2;grid-row:1/3;align-self:center;color:#a3b0a4}
+.editorial-note{padding:14px 16px;border-left:2px solid #b8cbb9;background:#f0f4ef;border-radius:0 10px 10px 0}
+.lesson-verse{font-size:11px;color:#829087;background:#f8faf7;padding:9px 12px;border-radius:9px}
+.lesson-reflection{font-size:12px;line-height:1.7;color:#6f7e73;text-align:left;padding:13px 14px;border:1px solid #e8eee7;border-radius:11px;margin:14px 0}
+@media(max-width:650px){.course-tools{padding:13px 12px}.quiz-card{padding:20px 15px}.quiz-options{grid-template-columns:1fr}.principle-grid{grid-template-columns:1fr}.principle-card{padding:17px}.references-section h2{font-size:19px}}
