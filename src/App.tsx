@@ -18,7 +18,7 @@ const languageText: Record<string, Record<string, string>> = {
  '99 имён. Одно путешествие.':'99 names. One journey.','изучено':'learned','Прогресс сохраняется на этом устройстве':'Your progress is saved on this device',
  'ПЕРВЫЕ ШАГИ':'GETTING STARTED','Изучай имена по порядку':'Study the names in order','Открыть каталог имён':'Open name catalogue',
  'Свернуть каталог':'Close catalogue','Найти имя, перевод или транскрипцию…':'Search a name, meaning or transliteration…',
- 'Все 99':'All 99','Повторить':'Review','{tr('Ничего не найдено. Попробуй изменить запрос или фильтр.')}':'Nothing found. Try another search or filter.',
+ 'Все 99':'All 99','Повторить':'Review','Ничего не найдено. Попробуй изменить запрос или фильтр.':'Nothing found. Try another search or filter.',
  'Проверить знания':'Test your knowledge','Короткий тест по именам':'A short quiz about the names','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'REVIEW',
  'Проверь, что запомнил':'Test what you remember','Мини-тест':'Quick quiz','КАК ПЕРЕВОДИТСЯ ИМЯ?':'WHAT DOES THIS NAME MEAN?',
  'Верно! Повтори смысл имени своими словами.':'Correct! Repeat the meaning in your own words.',
