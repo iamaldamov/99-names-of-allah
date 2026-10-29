@@ -17,7 +17,7 @@ function localDayKey(date = new Date()): string {
 function loadStudyDays(): Record<string, number> {
   try { const value: unknown = JSON.parse(localStorage.getItem('99-names-study-days') || '{}');
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-    return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, count]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof count === 'number' && Number.isInteger(count) && count > 0).slice(-90).map(([key, count]) => [key, Number(count)]));
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, count]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof count === 'number' && Number.isInteger(count) && count > 0).sort(([a], [b]) => a.localeCompare(b)).slice(-90).map(([key, count]) => [key, Number(count)]));
   } catch { return {}; }
 }
 function loadProgress(): number[] {
@@ -254,6 +254,7 @@ export default function App() {
   const observedDayRef = useRef(localDayKey());
   const dayKey = localDayKey(new Date(clockNow));
   const soundContextRef = useRef<AudioContext | null>(null);
+  const praiseTimeoutRef = useRef<number | null>(null);
   const playFeedbackSound = (kind: 'tap' | 'correct' | 'wrong') => {
     if (typeof window === 'undefined') return;
     try {
@@ -437,11 +438,16 @@ export default function App() {
     };
     const options = messages[language]?.[kind] || messages.ru[kind];
     setPraise(options[Math.floor(Math.random() * options.length)]);
-    window.setTimeout(() => setPraise(''), 2600);,
-  'Прослушать произношение':'Угуп көрүү','Остановить':'Токтотуу','Арабская озвучка голосом устройства':'Түзмөктөгү арабча үн менен','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'Бул түзмөк арабча үн менен окууну колдобойт. Башка браузерден ачып көр.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'Айтылышын угузуу мүмкүн болгон жок. Түзмөктөгү үн жөндөөлөрүн текшер.',
-  'Прослушать произношение':'Listen to pronunciation','Остановить':'Stop','Арабская озвучка голосом устройства':'Arabic voice provided by your device','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'Arabic speech is not supported on this device. Try opening the site in another browser.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'Could not play the pronunciation. Check your device voice settings.',
-  'Прослушать произношение':'استمع إلى النطق','Остановить':'إيقاف','Арабская озвучка голосом устройства':'النطق بصوت عربي من الجهاز','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'هذا الجهاز لا يدعم النطق العربي. جرّب فتح الموقع بمتصفح آخر.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'تعذّر تشغيل النطق. تحقّق من إعدادات الصوت في جهازك.'
+    if (praiseTimeoutRef.current !== null) window.clearTimeout(praiseTimeoutRef.current);
+    praiseTimeoutRef.current = window.setTimeout(() => {
+      setPraise('');
+      praiseTimeoutRef.current = null;
+    }, 2600);
   };
+
+  useEffect(() => () => {
+    if (praiseTimeoutRef.current !== null) window.clearTimeout(praiseTimeoutRef.current);
+  }, []);
 
   const markLearned = async () => {
     if (!selected || busy) return;
@@ -516,7 +522,18 @@ export default function App() {
   }), [names, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
-  const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
+  const quizOptions = useMemo(() => {
+    if (!quizItem) return [];
+    const distractors = names.filter(name => name.id !== quizItem.id);
+    const start = (quizIndex * 11) % Math.max(1, distractors.length);
+    const selectedDistractors = Array.from(
+      { length: Math.min(3, distractors.length) },
+      (_, index) => distractors[(start + index) % distractors.length]
+    );
+    return [quizItem, ...selectedDistractors].sort(
+      (a, b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)
+    );
+  }, [quizItem, names, quizIndex]);
 
   const handleButtonSound = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
