@@ -838,3 +838,86 @@ html{scroll-padding-top:18px}
     animation: none !important;
   }
 }
+
+
+/* Directional card motion: right swipe opens the next name. */
+.lesson-modal.swipe-direction-next {
+  animation-name: lesson-enter-from-left;
+}
+.lesson-modal.swipe-direction-prev {
+  animation-name: lesson-enter-from-right;
+}
+@keyframes lesson-enter-from-left {
+  from { opacity: .72; transform: translate3d(-22px,0,0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes lesson-enter-from-right {
+  from { opacity: .72; transform: translate3d(22px,0,0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+/* Separate glass-style controls throughout the interface. */
+button:not(.name-row) {
+  background-color: rgba(255,255,255,.34) !important;
+  border: 1px solid rgba(116,145,122,.30) !important;
+  border-radius: 14px;
+  -webkit-backdrop-filter: blur(13px);
+  backdrop-filter: blur(13px);
+  box-shadow: 0 3px 12px rgba(32,62,42,.055);
+  color: var(--green,#416c59);
+}
+button:not(.name-row):not(:disabled):hover {
+  background-color: rgba(145,180,150,.20) !important;
+  border-color: rgba(100,139,107,.46) !important;
+}
+button:not(.name-row):not(:disabled):active {
+  background-color: rgba(133,169,139,.27) !important;
+}
+button.primary-button:not(:disabled),
+button.welcome-continue:not(:disabled) {
+  background-color: rgba(92,132,101,.19) !important;
+  color: var(--green,#416c59);
+  border-color: rgba(100,139,107,.38) !important;
+}
+button.quiz-options button.correct,
+.quiz-options button.correct {
+  background-color: rgba(111,166,119,.22) !important;
+  border-color: rgba(91,148,100,.55) !important;
+  color: #32633e;
+}
+button.quiz-options button.incorrect,
+.quiz-options button.incorrect {
+  background-color: rgba(194,103,91,.16) !important;
+  border-color: rgba(194,103,91,.48) !important;
+  color: #9b453c;
+}
+:root[data-theme="dark"] button:not(.name-row) {
+  background-color: rgba(205,226,207,.075) !important;
+  border-color: rgba(190,215,193,.20) !important;
+  color: #d5e6d7;
+  box-shadow: 0 3px 12px rgba(0,0,0,.12);
+}
+:root[data-theme="dark"] button:not(.name-row):not(:disabled):hover {
+  background-color: rgba(145,183,151,.17) !important;
+  border-color: rgba(174,207,179,.34) !important;
+}
+:root[data-theme="dark"] button.primary-button:not(:disabled),
+:root[data-theme="dark"] button.welcome-continue:not(:disabled) {
+  background-color: rgba(145,183,151,.17) !important;
+  color: #e0eee1;
+}
+:root[data-theme="dark"] button.quiz-options button.correct,
+:root[data-theme="dark"] .quiz-options button.correct {
+  background-color: rgba(111,166,119,.22) !important;
+  color: #b7e0bd;
+}
+:root[data-theme="dark"] button.quiz-options button.incorrect,
+:root[data-theme="dark"] .quiz-options button.incorrect {
+  background-color: rgba(194,103,91,.2) !important;
+  color: #f0b9b1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lesson-modal.swipe-direction-next,
+  .lesson-modal.swipe-direction-prev {
+    animation: none !important;
+  }
+}
