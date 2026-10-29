@@ -247,19 +247,34 @@ export default function App() {
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
   const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(null);
   const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
-  const challengeSoundData: Record<'tap' | 'correct' | 'wrong', string> = {
-    tap: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgYSEfnVxdoSTl4t0YWB0k6mliGJLVXypvKl8UURci7K6nG1JSGmZubSOX0VPeKa7q4BURFmHsLqgcUtGZpa3tpJjRU10o7uug1ZEVoOuu6N0TUVjkra3lmZGS3GgurCHWURUf6u7pnhPRV+OtLmZaUhJbZy6sotcRFF8qbypfFFEXIuyupxtSUhpmbm0jl9FT3imu6uAVERZh7C6oHFLRmaWt7aSY0VNdKO7roNWRFaDrrujdE1FY5K2t5ZmRktxoLqwh1lEVH+ru6Z4T0VfjrS5mWlISW2curKLXERRfKm8qXxRRFyLsrqcbUlIaZm5s45hSFJ5orWmgFpNX4anr5l0V1VtkKemjGxZX3iWpJuCaF5pgpiekXpnZXKIl5eIdmpseoqTj4J1b3R/io2IfnZ1eoKHh4J9e3t+gYKBgA==',
-    correct: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgoF5eYeNe2x9l41oZpCjelV0qp1cUZW6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrqARWmyqVxJjruHRmOurmNGh7uOSVypsmlFgLqWTVajtnFEeLmcUVGcuXhEcbajVk2Wun9FabKpXEmOu4dGY66uY0aHu45JXKmyaUV/upZNVqO2cUR4uZxRUZy5eERxtqNWTZa6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrp/RWmyqVxJjruHRmOurmNGh7qOTF6lrmxLgLKSVV6cq3RReqqVXl+Up3pYdqKWZmGMoX9fdJqVbmWHm4Nnc5OSdGqClIVudIyOeXB/jYR1d4aJfXd+h4N7e4KDf31/gA==',
-    wrong: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgIKFiYyOkI+Mh4B4b2ZeWFVWWmJufIycqrS6u7iwpJaFdGRWTEVERk5ZaHiJmaeyuby5sqeZiXhoWU5GREVMVmR0hZaksLi7urSqnI18a1xQSERFSlRhcYGSoa63u7u2raCQgG9fUklEREhRXm1+jp6rtbq7t6+jlINyY1VLRURHT1tpeoubqbO6u7mxppeHdmZYTUZERk1YZnaHl6axubu6s6mbi3ppW09HREVLVWNyg5Sjr7e7urWrno5+bV5RSERESVJfb3+QoK22u7u3rqGSgXFhVEpFREhQXGt8jZyqtLq7uLCkloV0ZFZMRURGTlppeIiXpK2ztLGroZWHeW1iWlVTVVtjbXiDjpeeoqOinpePh351bmhlZGVobXN6gIaMkJKTkpCMiISAfHh2dXR1d3l7fX+BgoODgoKBgA=='
-  };
-  const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong') => {
+  const soundContextRef = useRef<AudioContext | null>(null);
+  const playFeedbackSound = (kind: 'tap' | 'correct' | 'wrong') => {
     if (typeof window === 'undefined') return;
     try {
-      const audio = new Audio('data:audio/wav;base64,' + challengeSoundData[kind]);
-      audio.preload = 'auto';
-      audio.volume = 0.65;
-      void audio.play().catch(() => {});
-    } catch { /* Sound is optional; the quiz remains usable without it. */ }
+      const AudioContextClass = window.AudioContext;
+      if (!AudioContextClass) return;
+      const context = soundContextRef.current || (soundContextRef.current = new AudioContextClass());
+      if (context.state === 'suspended') void context.resume();
+      const now = context.currentTime;
+      const tone = (frequency: number, startAt: number, duration: number, volume: number) => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, now + startAt);
+        if (kind === 'tap') oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.76, now + startAt + duration);
+        gain.gain.setValueAtTime(0.0001, now + startAt);
+        gain.gain.exponentialRampToValueAtTime(volume, now + startAt + 0.009);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + startAt + duration);
+        oscillator.connect(gain); gain.connect(context.destination);
+        oscillator.start(now + startAt); oscillator.stop(now + startAt + duration + 0.015);
+      };
+      if (kind === 'tap') tone(620, 0, 0.055, 0.028);
+      else if (kind === 'correct') {
+        tone(660, 0, 0.13, 0.036); tone(830, 0.075, 0.16, 0.032); tone(990, 0.15, 0.2, 0.026);
+      } else {
+        tone(390, 0, 0.09, 0.018); tone(330, 0.065, 0.11, 0.014);
+      }
+    } catch { /* Audio is optional; the learning experience remains usable. */ }
   };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
@@ -471,7 +486,7 @@ export default function App() {
   const handleButtonSound = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
     const button = target.closest('button');
-    if (button && !button.hasAttribute('data-sound-special')) playChallengeSound('tap');
+    if (button && !button.hasAttribute('data-sound-special')) playFeedbackSound('tap');
   };
 
   return (
@@ -486,7 +501,7 @@ export default function App() {
         <div className="eyebrow"><Sparkles size={14}/> ПУТЬ ПОЗНАНИЯ</div>
         <h1 className="text-enter">{tr('Познакомься с именами')}</h1>
         <p className="hero-copy text-enter">Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.</p>
-        <button className="primary-button" onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
+        <button className="primary-button" data-feedback onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
         <div className="hero-art" aria-hidden="true"><div className="art-ring ring-one"/><div className="art-ring ring-two"/><span>اللَّهُ</span></div>
         <div className="hero-caption">ٱلرَّحْمَٰنُ · ٱلرَّحِيمُ · ٱلْمَلِكُ</div>
       </section>
@@ -502,7 +517,7 @@ export default function App() {
         <div className="journey-head"><div><span className="muted-label">ТВОЯ ПРИВЫЧКА</span><h2>Маленький шаг каждый день</h2><p>Не гонись за количеством. Главное — возвращаться к знаниям.</p></div><div className="streak-counter"><span className="streak-flame">✦</span><b>{currentStreak}</b><small>дней подряд</small></div></div>
         <div className="week-activity" aria-label="Активность за последние семь дней">{weekActivity.map(day => <div className={`week-day ${day.count ? "is-active" : ""} ${day.today ? "is-today" : ""}`} key={day.key} title={day.count ? `${day.count} учебный день` : "Без занятий"}><span>{day.label}</span><i>{day.count ? <Check size={13}/> : <span/>}</i></div>)}</div>
         <div className="journey-bottom"><div className="milestone-block"><div className="milestone-label"><span>БЛИЖАЙШАЯ ЦЕЛЬ</span><b>{progress.length} / {nextMilestone}</b></div><div className="milestone-track"><span style={{width: milestoneProgress + "%"}}/></div><small>{nextMilestone === 99 ? "Финишная прямая — осталось совсем немного" : `Ещё ${nextMilestone - progress.length} ${nextMilestone - progress.length === 1 ? "имя" : "имён"} до следующего рубежа`}</small></div><div className="week-summary"><b>{activeDaysThisWeek}/7</b><small>дней с занятиями за неделю</small></div></div>
-        <button className="journey-continue" onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? "СЛЕДУЮЩИЙ ШАГ" : dueReviewIds.length ? "ВРЕМЯ ПОВТОРИТЬ" : "ТЫ ПРОШЁЛ ВЕСЬ СПИСОК"}</small><b>{nextName ? `Продолжить: ${nextName.translation}` : dueReviewIds.length ? "Закрепить изученное" : "Вернуться к каталогу"}</b></span><ArrowRight size={19}/></button>
+        <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? "СЛЕДУЮЩИЙ ШАГ" : dueReviewIds.length ? "ВРЕМЯ ПОВТОРИТЬ" : "ТЫ ПРОШЁЛ ВЕСЬ СПИСОК"}</small><b>{nextName ? `Продолжить: ${nextName.translation}` : dueReviewIds.length ? "Закрепить изученное" : "Вернуться к каталогу"}</b></span><ArrowRight size={19}/></button>
       </section>
 
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
@@ -515,7 +530,7 @@ export default function App() {
             const answered = challengeCurrentAnswer !== null;
             const isCorrect = option.id === correctId;
             const isSelected = option.id === challengeCurrentAnswer;
-            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId; playChallengeSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId; playFeedbackSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
           })}</div>
           {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
             <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
@@ -536,7 +551,7 @@ export default function App() {
         {catalogOpen && <div className="name-list">
           <button className="catalog-close" onClick={() => setCatalogOpen(false)}>{tr('Свернуть каталог')} <X size={14}/></button>
           <div className="course-tools"><input className="name-search" aria-label="Поиск имени" value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder={tr('Найти имя, перевод или транскрипцию…')}/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>{tr('Все 99')}</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>{tr('Повторить')}</button><button className={activeTab === 'favorites' ? 'active' : ''} onClick={() => {setActiveTab('favorites');setVisibleNamesCount(12);}}>Избранное ({favorites.length})</button></div></div>
-          {visibleNames.map(name => <button className="name-row" key={name.id} onClick={() => setSelected(name)}>
+          {visibleNames.map(name => <button className="name-row" data-feedback key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
             <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name)}</small></span><span className="favorite-indicator">{favorites.includes(name.id)?'♥':''}</span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
@@ -559,7 +574,7 @@ export default function App() {
             const answered = quizAnswer !== null;
             const isCorrect = option.id === quizItem.id;
             const isSelected = option.id === quizAnswer;
-            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id; playChallengeSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id; playFeedbackSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
           })}</div>
           {quizAnswer !== null && <div className={quizAnswer === quizItem.id ? 'challenge-feedback correct' : 'challenge-feedback wrong'}>
             <b>{quizAnswer === quizItem.id ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
@@ -577,7 +592,7 @@ export default function App() {
       <details className="compact-details reveal"><summary><span><b>Повторение и запоминание</b><small>{dueReviewIds.length ? dueReviewIds.length + ' имён ждут повторения' : 'Интервальные повторения помогут закрепить знания'}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
         <div className="review-system-intro"><span className="muted-label">ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ</span><h2>Запоминай надолго</h2><p>После изучения имя попадает в очередь повторения. Если вспомнил правильно — следующий интервал увеличивается. Если забыл — имя вернётся через 10 минут.</p></div>
         <div className="review-stats"><div><b>{dueReviewIds.length}</b><span>пора повторить</span></div><div><b>{Object.keys(reviewData).length}</b><span>в расписании</span></div><div><b>{Object.values(reviewData).reduce((sum,item)=>sum+item.correct,0)}</b><span>успешных повторений</span></div></div>
-        {dueReviewIds.length ? <div className="review-queue">{dueReviewIds.slice(0,8).map(id => { const item = names.find(n=>n.id===id); return item ? <button key={id} className="review-queue-row" onClick={()=>setSelected(item)}><span className="review-queue-arabic" lang="ar" dir="rtl">{item.arabic}</span><span><b>{item.translation}</b><small>Повторить сейчас</small></span><ArrowRight size={16}/></button> : null; })}</div> : <div className="review-empty"><Check size={19}/><b>На сегодня всё повторено</b><span>Изученные имена появятся здесь, когда наступит срок повторения.</span></div>}
+        {dueReviewIds.length ? <div className="review-queue">{dueReviewIds.slice(0,8).map(id => { const item = names.find(n=>n.id===id); return item ? <button key={id} className="review-queue-row" data-feedback onClick={()=>setSelected(item)}><span className="review-queue-arabic" lang="ar" dir="rtl">{item.arabic}</span><span><b>{item.translation}</b><small>Повторить сейчас</small></span><ArrowRight size={16}/></button> : null; })}</div> : <div className="review-empty"><Check size={19}/><b>На сегодня всё повторено</b><span>Изученные имена появятся здесь, когда наступит срок повторения.</span></div>}
         <p className="review-storage-note">Расписание хранится на этом устройстве. Чтобы не потерять его, не очищай данные браузера. Синхронизация расписания между устройствами пока не подключена.</p>
       </section></details>
       <details className="compact-details reveal"><summary><span><b>Методика обучения</b><small>Как запоминать и повторять</small></span><ChevronRight size={18}/></summary><section className="principles-section" id="method">
@@ -629,16 +644,16 @@ export default function App() {
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
         <h2 className="text-enter">{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description text-enter">{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
-        {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> Изучено</p>{dueReviewIds.includes(selected.id) && <div className="recall-compact"><button aria-label="Вспомнил" title="Вспомнил" onClick={()=>{recordRecall(selected.id,true);setNotice('Повторение отмечено. Следующее — через ' + REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)] + ' дн.');setSelected(null);}}><Check size={16}/></button><button aria-label="Повторить позже" title="Повторить позже" onClick={()=>{recordRecall(selected.id,false);setNotice('Имя вернётся на повторение через 10 минут.');setSelected(null);}}><ArrowRight size={16}/></button></div>}</> : <button className="primary-button full" disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил'} <Check size={17}/></button>}
+        {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> Изучено</p>{dueReviewIds.includes(selected.id) && <div className="recall-compact"><button aria-label="Вспомнил" title="Вспомнил" data-feedback onClick={()=>{recordRecall(selected.id,true);setNotice('Повторение отмечено. Следующее — через ' + REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)] + ' дн.');setSelected(null);}}><Check size={16}/></button><button aria-label="Повторить позже" title="Повторить позже" data-feedback onClick={()=>{recordRecall(selected.id,false);setNotice('Имя вернётся на повторение через 10 минут.');setSelected(null);}}><ArrowRight size={16}/></button></div>}</> : <button className="primary-button full" data-feedback disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил'} <Check size={17}/></button>}
         <div className="lesson-navigation">
-          <button className="lesson-nav-button" disabled={selected.id <= 1} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id - 1) || null); }}>← Предыдущее</button>
+          <button className="lesson-nav-button" data-feedback disabled={selected.id <= 1} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id - 1) || null); }}>← Предыдущее</button>
           <span>{selected.id} из 99</span>
-          <button className="lesson-nav-button lesson-next" disabled={selected.id >= 99} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id + 1) || null); }}>Следующее <ArrowRight size={15}/></button>
+          <button className="lesson-nav-button lesson-next" data-feedback disabled={selected.id >= 99} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id + 1) || null); }}>Следующее <ArrowRight size={15}/></button>
         </div>
       </section></div>}
 
