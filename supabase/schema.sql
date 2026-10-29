@@ -17,7 +17,7 @@ create table if not exists public.names (
 
 create table if not exists public.user_progress (
   user_id uuid not null references auth.users(id) on delete cascade,
-  name_id smallint not null references public.names(id) on delete cascade,
+  name_id smallint not null check (name_id between 1 and 99),
   status text not null default 'new' check (status in ('new','learning','learned','review')),
   confidence smallint not null default 0 check (confidence between 0 and 5),
   times_seen integer not null default 0 check (times_seen >= 0),
