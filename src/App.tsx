@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent, MouseEvent } from 'react';
+import type { FormEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
@@ -253,43 +253,14 @@ export default function App() {
   const [clockNow, setClockNow] = useState(() => Date.now());
   const observedDayRef = useRef(localDayKey());
   const dayKey = localDayKey(new Date(clockNow));
-  const soundContextRef = useRef<AudioContext | null>(null);
   const praiseTimeoutRef = useRef<number | null>(null);
-  const playFeedbackSound = (kind: 'tap' | 'correct' | 'wrong') => {
-    if (typeof window === 'undefined') return;
-    try {
-      const AudioContextClass = window.AudioContext;
-      if (!AudioContextClass) return;
-      const context = soundContextRef.current || (soundContextRef.current = new AudioContextClass());
-      if (context.state === 'suspended') void context.resume();
-      const now = context.currentTime;
-      const tone = (frequency: number, startAt: number, duration: number, volume: number) => {
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(frequency, now + startAt);
-        if (kind === 'tap') oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.76, now + startAt + duration);
-        gain.gain.setValueAtTime(0.0001, now + startAt);
-        gain.gain.exponentialRampToValueAtTime(volume, now + startAt + 0.009);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + startAt + duration);
-        oscillator.connect(gain); gain.connect(context.destination);
-        oscillator.start(now + startAt); oscillator.stop(now + startAt + duration + 0.015);
-      };
-      if (kind === 'tap') tone(620, 0, 0.055, 0.028);
-      else if (kind === 'correct') {
-        tone(660, 0, 0.13, 0.036); tone(830, 0.075, 0.16, 0.032); tone(990, 0.15, 0.2, 0.026);
-      } else {
-        tone(390, 0, 0.09, 0.018); tone(330, 0.065, 0.11, 0.014);
-      }
-    } catch { /* Audio is optional; the learning experience remains usable. */ }
-  };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
-  const [welcomeOpen, setWelcomeOpen] = useState(true);
+  const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen') !== '1'; } catch { return true; } });
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
@@ -331,7 +302,7 @@ export default function App() {
     setChallengeCurrentAnswer(null);
   }, [dayKey]);
 
-  const closeWelcome = () => setWelcomeOpen(false);
+  const closeWelcome = () => { setWelcomeOpen(false); try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Welcome can be closed even when storage is unavailable. */ } };
 
   useEffect(() => {
     if (!supabase) return;
@@ -535,22 +506,8 @@ export default function App() {
     );
   }, [quizItem, names, quizIndex]);
 
-  const handleButtonSound = (event: MouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement;
-    const button = target.closest('button[data-feedback], button[data-sound-special]') as HTMLButtonElement | null;
-    if (!button || button.disabled) return;
-    // Short haptic feedback where the browser/device supports the Vibration API.
-    // iPhone Safari currently does not expose it, so this safely becomes a no-op there.
-    try {
-      if ('vibrate' in navigator) navigator.vibrate(10);
-    } catch { /* Haptics are optional and must never block a button action. */ }
-    if (button.hasAttribute('data-feedback') && !button.hasAttribute('data-sound-special')) {
-      playFeedbackSound('tap');
-    }
-  };
-
   return (
-    <main className="app-shell" onClickCapture={handleButtonSound}>
+    <main className="app-shell">
       <header className="topbar">
         <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
@@ -590,7 +547,7 @@ export default function App() {
             const answered = challengeCurrentAnswer !== null;
             const isCorrect = option.id === correctId;
             const isSelected = option.id === challengeCurrentAnswer;
-            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId; playFeedbackSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId;  if (correct) praiseFor('correct'); }}>{option.translation}</button>;
           })}</div>
           {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
             <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
@@ -634,7 +591,7 @@ export default function App() {
             const answered = quizAnswer !== null;
             const isCorrect = option.id === quizItem.id;
             const isSelected = option.id === quizAnswer;
-            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id; playFeedbackSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id;  if (correct) praiseFor('correct'); }}>{option.translation}</button>;
           })}</div>
           {quizAnswer !== null && <div className={quizAnswer === quizItem.id ? 'challenge-feedback correct' : 'challenge-feedback wrong'}>
             <b>{quizAnswer === quizItem.id ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
