@@ -1010,7 +1010,7 @@ input, select, textarea, .account-form input {
   --control-radius:16px;
   --shadow-soft:0 12px 34px rgba(31,48,40,.065);
   --shadow-card:0 18px 48px rgba(31,48,40,.085);
-  font-family:Inter,"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:Manrope,"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   letter-spacing:-.01em;
 }
 body{
