@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, MouseEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
@@ -246,12 +246,13 @@ export default function App() {
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
   const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(null);
-  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });const challengeSoundData: Record<'tap' | 'correct' | 'wrong', string> = {
+  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
+  const challengeSoundData: Record<'tap' | 'correct' | 'wrong', string> = {
     tap: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgYSEfnVxdoSTl4t0YWB0k6mliGJLVXypvKl8UURci7K6nG1JSGmZubSOX0VPeKa7q4BURFmHsLqgcUtGZpa3tpJjRU10o7uug1ZEVoOuu6N0TUVjkra3lmZGS3GgurCHWURUf6u7pnhPRV+OtLmZaUhJbZy6sotcRFF8qbypfFFEXIuyupxtSUhpmbm0jl9FT3imu6uAVERZh7C6oHFLRmaWt7aSY0VNdKO7roNWRFaDrrujdE1FY5K2t5ZmRktxoLqwh1lEVH+ru6Z4T0VfjrS5mWlISW2curKLXERRfKm8qXxRRFyLsrqcbUlIaZm5s45hSFJ5orWmgFpNX4anr5l0V1VtkKemjGxZX3iWpJuCaF5pgpiekXpnZXKIl5eIdmpseoqTj4J1b3R/io2IfnZ1eoKHh4J9e3t+gYKBgA==',
     correct: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgoF5eYeNe2x9l41oZpCjelV0qp1cUZW6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrqARWmyqVxJjruHRmOurmNGh7uOSVypsmlFgLqWTVajtnFEeLmcUVGcuXhEcbajVk2Wun9FabKpXEmOu4dGY66uY0aHu45JXKmyaUV/upZNVqO2cUR4uZxRUZy5eERxtqNWTZa6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrp/RWmyqVxJjruHRmOurmNGh7qOTF6lrmxLgLKSVV6cq3RReqqVXl+Up3pYdqKWZmGMoX9fdJqVbmWHm4Nnc5OSdGqClIVudIyOeXB/jYR1d4aJfXd+h4N7e4KDf31/gA==',
     wrong: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgIKFiYyOkI+Mh4B4b2ZeWFVWWmJufIycqrS6u7iwpJaFdGRWTEVERk5ZaHiJmaeyuby5sqeZiXhoWU5GREVMVmR0hZaksLi7urSqnI18a1xQSERFSlRhcYGSoa63u7u2raCQgG9fUklEREhRXm1+jp6rtbq7t6+jlINyY1VLRURHT1tpeoubqbO6u7mxppeHdmZYTUZERk1YZnaHl6axubu6s6mbi3ppW09HREVLVWNyg5Sjr7e7urWrno5+bV5RSERESVJfb3+QoK22u7u3rqGSgXFhVEpFREhQXGt8jZyqtLq7uLCkloV0ZFZMRURGTlppeIiXpK2ztLGroZWHeW1iWlVTVVtjbXiDjpeeoqOinpePh351bmhlZGVobXN6gIaMkJKTkpCMiISAfHh2dXR1d3l7fX+BgoODgoKBgA=='
   };
-  const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong', force = false) => {
+  const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong') => {
     if (typeof window === 'undefined') return;
     try {
       const audio = new Audio('data:audio/wav;base64,' + challengeSoundData[kind]);
@@ -466,7 +467,7 @@ export default function App() {
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
   const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
 
-  const handleButtonSound = (event: React.MouseEvent<HTMLElement>) => {
+  const handleButtonSound = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
     const button = target.closest('button');
     if (button && !button.hasAttribute('data-sound-special')) playChallengeSound('tap');
@@ -475,7 +476,7 @@ export default function App() {
   return (
     <main className="app-shell" onClickCapture={handleButtonSound}>
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
+        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
