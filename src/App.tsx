@@ -434,40 +434,6 @@ export default function App() {
     } catch { setSwipeHintVisible(true); }
   }, [selected?.id]);
 
-  const playSwipeSound = () => {
-    try {
-      const AudioContextConstructor = window.AudioContext;
-      if (!AudioContextConstructor) return;
-      const audio = new AudioContextConstructor();
-      const duration = 0.13;
-      const frameCount = Math.floor(audio.sampleRate * duration);
-      const buffer = audio.createBuffer(1, frameCount, audio.sampleRate);
-      const channel = buffer.getChannelData(0);
-      for (let i = 0; i < frameCount; i += 1) {
-        const fade = 1 - i / frameCount;
-        channel[i] = (Math.random() * 2 - 1) * fade * fade;
-      }
-      const source = audio.createBufferSource();
-      const filter = audio.createBiquadFilter();
-      const volume = audio.createGain();
-      source.buffer = buffer;
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1700, audio.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(520, audio.currentTime + duration);
-      volume.gain.setValueAtTime(0.0001, audio.currentTime);
-      volume.gain.exponentialRampToValueAtTime(0.045, audio.currentTime + 0.018);
-      volume.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + duration);
-      source.connect(filter);
-      filter.connect(volume);
-      volume.connect(audio.destination);
-      source.onended = () => { void audio.close(); };
-      source.start();
-      source.stop(audio.currentTime + duration);
-    } catch {
-      // Audio is optional; swiping must always work without it.
-    }
-  };
-
   const handleLessonPointerDown = (event: PointerEvent<HTMLElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     swipeStartRef.current = { x: event.clientX, y: event.clientY };
@@ -480,14 +446,13 @@ export default function App() {
     const dy = event.clientY - start.y;
     if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
 
-    // A rightward finger movement advances to the next name; left returns to the previous one.
-    const isSwipeRight = dx > 0;
-    const nextId = selected.id + (isSwipeRight ? 1 : -1);
+    // A leftward finger movement advances to the next name; right returns to the previous one.
+    const isSwipeLeft = dx < 0;
+    const nextId = selected.id + (isSwipeLeft ? 1 : -1);
     if (nextId < 1 || nextId > 99) return;
 
-    setSwipeDirection(isSwipeRight ? 1 : -1);
+    setSwipeDirection(isSwipeLeft ? 1 : -1);
     setError('');
-    playSwipeSound();
     setSelected(completeNames[nextId - 1] || null);
   };
 
@@ -727,7 +692,7 @@ export default function App() {
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section key={selected.id} className={`lesson-modal ${swipeDirection > 0 ? 'swipe-direction-next' : 'swipe-direction-prev'}${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onPointerDown={handleLessonPointerDown} onPointerUp={handleLessonPointerUp} onPointerCancel={() => { swipeStartRef.current = null; }}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
-        {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>Смахни вправо — следующее имя</span><span className="swipe-hint-arrow">→</span></div>}
+        {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>Смахни влево — следующее имя</span><span className="swipe-hint-arrow">→</span></div>}
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
         <h2 className="text-enter">{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
