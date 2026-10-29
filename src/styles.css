@@ -921,3 +921,16 @@ button.quiz-options button.incorrect,
     animation: none !important;
   }
 }
+
+
+/* Keep horizontal pointer gestures reliable on touch devices. */
+.lesson-modal {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lesson-modal .lesson-description,
+.lesson-modal .lesson-translit {
+  user-select: text;
+  -webkit-user-select: text;
+}
