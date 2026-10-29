@@ -581,3 +581,5 @@ body{font-size:var(--reading-size);line-height:1.75}
   .support-options { grid-template-columns:1fr; }
   .support-options article { padding:16px; }
 }
+
+.challenge-transliteration{margin:10px 0 2px;color:var(--green);font-size:19px;font-weight:700;letter-spacing:.02em;text-align:center}.challenge-question p{margin-top:10px}.challenge-top-actions{display:flex;align-items:center;gap:10px}.challenge-sound-toggle{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);padding:9px 12px;font:600 12px inherit;cursor:pointer}
