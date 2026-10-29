@@ -910,3 +910,7 @@ input, select, textarea, .account-form input {
   from { opacity: .72; transform: translate3d(-22px,0,0) scale(.992); }
   to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
+
+
+/* Use the full available screen width */
+.app-shell{width:100%;max-width:none;margin:0 auto;padding-left:clamp(18px,4vw,64px);padding-right:clamp(18px,4vw,64px)}
