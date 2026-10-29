@@ -469,6 +469,13 @@ export default function App() {
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
   const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
   const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
+  const recordRecall = (id: number, remembered: boolean) => {
+    setReviewData(old => {
+      const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
+      const box = remembered ? Math.min(REVIEW_INTERVALS.length - 1, current.box + 1) : 0;
+      return { ...old, [id]: { box, dueAt: remembered ? addDays(REVIEW_INTERVALS[box]) : new Date(Date.now() + 10 * 60000).toISOString(), seen: current.seen + 1, correct: current.correct + (remembered ? 1 : 0), lastReviewedAt: new Date().toISOString() } };
+    });
+  };
   const finishReview = (remembered: boolean) => {
     if (reviewSessionId === null) return;
     const currentId = reviewSessionId;
@@ -481,13 +488,6 @@ export default function App() {
     const nextId = dueReviewIds.find(id => id !== currentId);
     if (nextId !== undefined) { setReviewSessionId(nextId); setReviewAnswerShown(false); }
     else { setReviewSessionId(null); setReviewAnswerShown(false); setNotice('Отлично! Все доступные на сегодня повторения завершены.'); }
-  };
-  const recordRecall = (id: number, remembered: boolean) => {
-    setReviewData(old => {
-      const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
-      const box = remembered ? Math.min(REVIEW_INTERVALS.length - 1, current.box + 1) : 0;
-      return { ...old, [id]: { box, dueAt: remembered ? addDays(REVIEW_INTERVALS[box]) : new Date(Date.now() + 10 * 60000).toISOString(), seen: current.seen + 1, correct: current.correct + (remembered ? 1 : 0), lastReviewedAt: new Date().toISOString() } };
-    });
   };
   const displayedNames = useMemo(() => names.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + shownTransliteration(name) + ' ' + name.translation).toLocaleLowerCase();
