@@ -908,3 +908,35 @@ input, select, textarea, .account-form input {
 
 /* Use the full available screen width */
 .app-shell{width:100%;max-width:none;margin:0 auto;padding-left:clamp(18px,4vw,64px);padding-right:clamp(18px,4vw,64px)}
+
+
+/* A calm floating header that follows the reader's scroll direction. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  margin-inline: calc(-1 * clamp(18px, 4vw, 64px));
+  padding-inline: clamp(18px, 4vw, 64px);
+  background: color-mix(in srgb, var(--paper, #fff) 88%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow: 0 8px 24px rgba(31, 54, 39, .045);
+  transition: transform .42s cubic-bezier(.22,.7,.2,1), opacity .32s ease,
+    background-color .25s ease, box-shadow .25s ease;
+  will-change: transform;
+}
+.topbar.topbar-hidden {
+  transform: translate3d(0, -110%, 0);
+  opacity: 0;
+  pointer-events: none;
+}
+:root[data-theme="dark"] .topbar {
+  background: rgba(24, 35, 29, .88);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .14);
+}
+@media (max-width: 650px) {
+  .topbar { margin-inline: -17px; padding-inline: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar { transition: none; }
+}
