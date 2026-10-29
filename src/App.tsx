@@ -231,6 +231,7 @@ export default function App() {
   const [reviewAnswerShown, setReviewAnswerShown] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [swipeHintVisible, setSwipeHintVisible] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -445,7 +446,9 @@ export default function App() {
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
     if (Math.abs(dx) < 58 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
-    const nextId = selected.id + (dx > 0 ? 1 : -1);
+    const isSwipeRight = dx > 0;
+    setSwipeDirection(isSwipeRight ? 1 : -1);
+    const nextId = selected.id + (isSwipeRight ? 1 : -1);
     if (nextId < 1 || nextId > 99) return;
     setError('');
     setSelected(completeNames.find(name => name.id === nextId) || null);
@@ -684,7 +687,7 @@ export default function App() {
         </div>
       </section></div>}
 
-      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section key={selected.id} className={`lesson-modal${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onTouchStart={handleLessonTouchStart} onTouchEnd={handleLessonTouchEnd}>
+      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section key={selected.id} className={`lesson-modal ${swipeDirection > 0 ? 'swipe-direction-next' : 'swipe-direction-prev'}${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onTouchStart={handleLessonTouchStart} onTouchEnd={handleLessonTouchEnd}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>Смахни вправо — следующее имя</span><span className="swipe-hint-arrow">→</span></div>}
