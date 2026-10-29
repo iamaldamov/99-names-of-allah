@@ -227,37 +227,23 @@ export default function App() {
   const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return v.date === new Date().toDateString() && Array.isArray(v.ids) ? v.ids : []; } catch { return []; } });
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
+  const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(null);
   const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
    const [challengeSound, setChallengeSound] = useState<boolean>(() => { try { return localStorage.getItem('99-names-challenge-sound') !== 'off'; } catch { return true; } });
-  const audioContextRef = useRef<AudioContext | null>(null);
   useEffect(() => { try { localStorage.setItem('99-names-challenge-sound', challengeSound ? 'on' : 'off'); } catch {} }, [challengeSound]);
+  const challengeSoundData: Record<'tap' | 'correct' | 'wrong', string> = {
+    tap: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgYSEfnVxdoSTl4t0YWB0k6mliGJLVXypvKl8UURci7K6nG1JSGmZubSOX0VPeKa7q4BURFmHsLqgcUtGZpa3tpJjRU10o7uug1ZEVoOuu6N0TUVjkra3lmZGS3GgurCHWURUf6u7pnhPRV+OtLmZaUhJbZy6sotcRFF8qbypfFFEXIuyupxtSUhpmbm0jl9FT3imu6uAVERZh7C6oHFLRmaWt7aSY0VNdKO7roNWRFaDrrujdE1FY5K2t5ZmRktxoLqwh1lEVH+ru6Z4T0VfjrS5mWlISW2curKLXERRfKm8qXxRRFyLsrqcbUlIaZm5s45hSFJ5orWmgFpNX4anr5l0V1VtkKemjGxZX3iWpJuCaF5pgpiekXpnZXKIl5eIdmpseoqTj4J1b3R/io2IfnZ1eoKHh4J9e3t+gYKBgA==',
+    correct: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgoF5eYeNe2x9l41oZpCjelV0qp1cUZW6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrqARWmyqVxJjruHRmOurmNGh7uOSVypsmlFgLqWTVajtnFEeLmcUVGcuXhEcbajVk2Wun9FabKpXEmOu4dGY66uY0aHu45JXKmyaUV/upZNVqO2cUR4uZxRUZy5eERxtqNWTZa6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrp/RWmyqVxJjruHRmOurmNGh7qOTF6lrmxLgLKSVV6cq3RReqqVXl+Up3pYdqKWZmGMoX9fdJqVbmWHm4Nnc5OSdGqClIVudIyOeXB/jYR1d4aJfXd+h4N7e4KDf31/gA==',
+    wrong: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgIKFiYyOkI+Mh4B4b2ZeWFVWWmJufIycqrS6u7iwpJaFdGRWTEVERk5ZaHiJmaeyuby5sqeZiXhoWU5GREVMVmR0hZaksLi7urSqnI18a1xQSERFSlRhcYGSoa63u7u2raCQgG9fUklEREhRXm1+jp6rtbq7t6+jlINyY1VLRURHT1tpeoubqbO6u7mxppeHdmZYTUZERk1YZnaHl6axubu6s6mbi3ppW09HREVLVWNyg5Sjr7e7urWrno5+bV5RSERESVJfb3+QoK22u7u3rqGSgXFhVEpFREhQXGt8jZyqtLq7uLCkloV0ZFZMRURGTlppeIiXpK2ztLGroZWHeW1iWlVTVVtjbXiDjpeeoqOinpePh351bmhlZGVobXN6gIaMkJKTkpCMiISAfHh2dXR1d3l7fX+BgoODgoKBgA=='
+  };
   const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong', force = false) => {
     if ((!challengeSound && !force) || typeof window === 'undefined') return;
-    const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
     try {
-      const audio = audioContextRef.current || new AudioContextClass();
-      audioContextRef.current = audio;
-      const playTone = () => {
-        const oscillator = audio.createOscillator();
-        const gain = audio.createGain();
-        const now = audio.currentTime;
-        const tones = kind === 'correct' ? [660, 880] : kind === 'wrong' ? [220, 165] : [520];
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(tones[0], now);
-        if (tones.length > 1) oscillator.frequency.setValueAtTime(tones[1], now + 0.11);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(kind === 'tap' ? 0.055 : 0.075, now + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + (kind === 'tap' ? 0.11 : 0.28));
-        oscillator.connect(gain);
-        gain.connect(audio.destination);
-        oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-        oscillator.start();
-        oscillator.stop(now + (kind === 'tap' ? 0.12 : 0.29));
-      };
-      if (audio.state === 'suspended') void audio.resume().then(playTone).catch(() => {});
-      else playTone();
-    } catch { /* Audio is optional; quiz must remain usable without it. */ }
+      const audio = new Audio('data:audio/wav;base64,' + challengeSoundData[kind]);
+      audio.preload = 'auto';
+      audio.volume = 0.65;
+      void audio.play().catch(() => {});
+    } catch { /* Sound is optional; the quiz remains usable without it. */ }
   };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
@@ -487,12 +473,23 @@ export default function App() {
         {challengeAnswers.length < 5 ? <div className="challenge-play">
           <div className="challenge-progress"><span>ВОПРОС {challengeAnswers.length + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
           <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>Прочитай транскрипцию и выбери правильное значение имени</p></div>
-          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => <button key={option.id} onClick={() => { if (challengeAnswers.length >= 5) return; playChallengeSound('tap'); playChallengeSound(option.id === dailyChallenge[challengeAnswers.length]?.item.id ? 'correct' : 'wrong'); setChallengeAnswers(old => old.length < 5 ? [...old, option.id] : old); }}>{option.translation}</button>)}</div>
+          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => {
+            const correctId = dailyChallenge[challengeAnswers.length]?.item.id;
+            const answered = challengeCurrentAnswer !== null;
+            const isCorrect = option.id === correctId;
+            const isSelected = option.id === challengeCurrentAnswer;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); playChallengeSound(option.id === correctId ? 'correct' : 'wrong'); }}>{option.translation}</button>;
+          })}</div>
+          {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
+            <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "Верно! Отличная работа." : "Не совсем. Правильный ответ:"}</b>
+            {dailyChallenge[challengeAnswers.length]?.options.find(option => option.id === dailyChallenge[challengeAnswers.length]?.item.id)?.translation}
+            <button onClick={() => { setChallengeAnswers(old => [...old, challengeCurrentAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? "Завершить испытание" : "Следующий вопрос"} <ArrowRight size={15}/></button>
+          </div>}
         </div> : <div className="challenge-result">
           <span className="challenge-result-mark">{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "✦" : "✓"}</span>
           <h3>Испытание завершено</h3><b>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0)} из 5 правильных ответов</b>
           <p>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Вернись к именам, в которых сомневался."}</p>
-          <button onClick={() => setChallengeAnswers([])}>Пройти ещё раз <ArrowRight size={15}/></button>
+          <button onClick={() => { setChallengeAnswers([]); setChallengeCurrentAnswer(null); }}>Пройти ещё раз <ArrowRight size={15}/></button>
         </div>}
         <div className="challenge-foot"><span>Твой лучший результат сохраняется на этом устройстве</span><span>{challengeAnswers.length}/5</span></div>
       </section>
