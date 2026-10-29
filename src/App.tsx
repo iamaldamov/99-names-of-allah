@@ -483,7 +483,7 @@ export default function App() {
           {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
             <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "Верно! Отличная работа." : "Не совсем. Правильный ответ:"}</b>
             {dailyChallenge[challengeAnswers.length]?.options.find(option => option.id === dailyChallenge[challengeAnswers.length]?.item.id)?.translation}
-            <button onClick={() => { setChallengeAnswers(old => [...old, challengeCurrentAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? "Завершить испытание" : "Следующий вопрос"} <ArrowRight size={15}/></button>
+            <button onClick={() => { if (challengeCurrentAnswer === null) return; const selectedAnswer = challengeCurrentAnswer; setChallengeAnswers(old => [...old, selectedAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? "Завершить испытание" : "Следующий вопрос"} <ArrowRight size={15}/></button>
           </div>}
         </div> : <div className="challenge-result">
           <span className="challenge-result-mark">{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "✦" : "✓"}</span>
