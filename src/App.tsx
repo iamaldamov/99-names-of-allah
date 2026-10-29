@@ -86,7 +86,8 @@ const languageText: Record<string, Record<string, string>> = {
   'Источники и достоверность':'Дереккөздер мен сенімділік','О создателе':'Жоба авторы','Ассаляму алейкум!':'Әссәләму алейкум!',
   'Закрыть':'Жабу','Поддержать проект':'Жобаны қолдау','Перейти к изучению':'Үйренуге өту','ДОБРО ПОЖАЛОВАТЬ':'ҚОШ КЕЛДІҢ!',
   'Отметить как изученное':'Үйренілді деп белгілеу','Это имя уже отмечено как изученное':'Бұл есім үйренілді деп белгіленген',
-  'Сохраняем…':'Сақталуда…','Связанный источник:':'Қатысты дереккөз:'
+  'Сохраняем…':'Сақталуда…','Связанный источник:':'Қатысты дереккөз:',
+  'Прослушать произношение':'Айтылуын тыңдау','Остановить':'Тоқтату','Арабская озвучка голосом устройства':'Құрылғыдағы арабша дауыс','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'Бұл құрылғы арабша дыбыстауды қолдамайды. Сайтты басқа браузерден ашып көр.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'Айтылымды ойнату мүмкін болмады. Құрылғының дауыс параметрлерін тексер.'
   },
  en: {
  '99 имён Аллаха':'99 Names of Allah','Войти':'Sign in','Выйти':'Sign out','ПУТЬ ПОЗНАНИЯ':'A JOURNEY OF KNOWLEDGE',
@@ -290,7 +291,7 @@ export default function App() {
   };
   const speakName = (name: NameItem) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      setNotice('На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.');
+      setNotice(tr('На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.'));
       return;
     }
     if (speakingNameId === name.id) { stopNameAudio(); return; }
@@ -303,7 +304,7 @@ export default function App() {
     if (arabicVoice) utterance.voice = arabicVoice;
     utterance.onstart = () => setSpeakingNameId(name.id);
     utterance.onend = () => { speechUtteranceRef.current = null; setSpeakingNameId(null); };
-    utterance.onerror = () => { speechUtteranceRef.current = null; setSpeakingNameId(null); setNotice('Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.'); };
+    utterance.onerror = () => { speechUtteranceRef.current = null; setSpeakingNameId(null); setNotice(tr('Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.')); };
     speechUtteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   };
@@ -468,7 +469,10 @@ export default function App() {
     };
     const options = messages[language]?.[kind] || messages.ru[kind];
     setPraise(options[Math.floor(Math.random() * options.length)]);
-    window.setTimeout(() => setPraise(''), 2600);
+    window.setTimeout(() => setPraise(''), 2600);,
+  'Прослушать произношение':'Угуп көрүү','Остановить':'Токтотуу','Арабская озвучка голосом устройства':'Түзмөктөгү арабча үн менен','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'Бул түзмөк арабча үн менен окууну колдобойт. Башка браузерден ачып көр.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'Айтылышын угузуу мүмкүн болгон жок. Түзмөктөгү үн жөндөөлөрүн текшер.',
+  'Прослушать произношение':'Listen to pronunciation','Остановить':'Stop','Арабская озвучка голосом устройства':'Arabic voice provided by your device','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'Arabic speech is not supported on this device. Try opening the site in another browser.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'Could not play the pronunciation. Check your device voice settings.',
+  'Прослушать произношение':'استمع إلى النطق','Остановить':'إيقاف','Арабская озвучка голосом устройства':'النطق بصوت عربي من الجهاز','На этом устройстве нет поддержки арабского озвучивания. Попробуй открыть сайт в другом браузере.':'هذا الجهاز لا يدعم النطق العربي. جرّب فتح الموقع بمتصفح آخر.','Не удалось воспроизвести произношение. Проверь голосовые настройки устройства.':'تعذّر تشغيل النطق. تحقّق من إعدادات الصوت في جهازك.'
   };
 
   const markLearned = async () => {
@@ -718,11 +722,11 @@ export default function App() {
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>
         <div className="name-audio-controls">
-          <button className={speakingNameId === selected.id ? 'name-audio-button is-playing' : 'name-audio-button'} data-feedback onClick={() => speakName(selected)} aria-label={speakingNameId === selected.id ? 'Остановить произношение' : 'Прослушать арабское произношение'}>
+          <button className={speakingNameId === selected.id ? 'name-audio-button is-playing' : 'name-audio-button'} data-feedback onClick={() => speakName(selected)} aria-label={speakingNameId === selected.id ? tr('Остановить') : tr('Прослушать произношение')}>
             {speakingNameId === selected.id ? <VolumeX size={18}/> : <Volume2 size={18}/>}
-            {speakingNameId === selected.id ? 'Остановить' : 'Прослушать произношение'}
+            {speakingNameId === selected.id ? tr('Остановить') : tr('Прослушать произношение')}
           </button>
-          <span>Арабская озвучка голосом устройства</span>
+          <span>{tr('Арабская озвучка голосом устройства')}</span>
         </div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
         <h2 className="text-enter">{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
@@ -742,9 +746,9 @@ export default function App() {
         <div className="review-session-step">Имя {item.id} · {dueReviewIds.length} {dueReviewIds.length === 1 ? "имя в очереди" : "имён в очереди"}</div>
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
         <div className="name-audio-controls review-audio-controls">
-          <button className={speakingNameId === item.id ? 'name-audio-button is-playing' : 'name-audio-button'} data-feedback onClick={() => speakName(item)} aria-label={speakingNameId === item.id ? 'Остановить произношение' : 'Прослушать арабское произношение'}>
+          <button className={speakingNameId === item.id ? 'name-audio-button is-playing' : 'name-audio-button'} data-feedback onClick={() => speakName(item)} aria-label={speakingNameId === item.id ? tr('Остановить') : tr('Прослушать произношение')}>
             {speakingNameId === item.id ? <VolumeX size={18}/> : <Volume2 size={18}/>}
-            {speakingNameId === item.id ? 'Остановить' : 'Прослушать произношение'}
+            {speakingNameId === item.id ? tr('Остановить') : tr('Прослушать произношение')}
           </button>
         </div>
         <p className="lesson-translit">{shownTransliteration(item)}</p>
