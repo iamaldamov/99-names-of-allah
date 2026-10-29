@@ -1220,3 +1220,83 @@ button:disabled{cursor:not-allowed}
 :root[data-theme="dark"] .share-section,:root[data-theme="dark"] .donation-section,:root[data-theme="dark"] .account-section{
   background:linear-gradient(145deg,#203528,#1a281e 70%,#24392a);border-color:#344c39;
 }
+
+
+/* Cascade fix: explicitly win over legacy glass-button !important rules. */
+html body #root .app-shell button.primary-button:not(:disabled),
+html body #root .app-shell button.welcome-continue:not(:disabled),
+html body #root .app-shell button.journey-continue:not(:disabled),
+html body #root .app-shell button.challenge-result:not(:disabled) {
+  color:#fff !important;
+  background:linear-gradient(135deg,#4a805e 0%,#326448 54%,#244d38 100%) !important;
+  background-color:#326448 !important;
+  border:1px solid rgba(255,255,255,.2) !important;
+  border-radius:999px !important;
+  min-height:54px;
+  padding:14px 24px;
+  box-shadow:0 10px 24px rgba(39,86,54,.23),inset 0 1px 0 rgba(255,255,255,.22) !important;
+  font-weight:700;
+  letter-spacing:.01em;
+}
+html body #root .app-shell button.primary-button:not(:disabled):hover,
+html body #root .app-shell button.welcome-continue:not(:disabled):hover,
+html body #root .app-shell button.journey-continue:not(:disabled):hover {
+  color:#fff !important;
+  background:linear-gradient(135deg,#568b68,#2c5b40) !important;
+  border-color:rgba(255,255,255,.3) !important;
+  transform:translateY(-2px);
+  box-shadow:0 14px 28px rgba(39,86,54,.28),inset 0 1px 0 rgba(255,255,255,.24) !important;
+}
+html body #root .app-shell button.primary-button:not(:disabled):active,
+html body #root .app-shell button.welcome-continue:not(:disabled):active,
+html body #root .app-shell button.journey-continue:not(:disabled):active {
+  transform:translateY(1px) scale(.985);
+  box-shadow:0 4px 12px rgba(39,86,54,.2) !important;
+}
+html body #root .app-shell button.login-button,
+html body #root .app-shell button.secondary-button,
+html body #root .app-shell button.save-button,
+html body #root .app-shell button.support-share-button,
+html body #root .app-shell button.lesson-nav-button:not(.lesson-next) {
+  color:#365c43 !important;
+  background:linear-gradient(145deg,#fff,#f0f6ef) !important;
+  border:1px solid #d5e4d5 !important;
+  border-radius:999px !important;
+  box-shadow:0 5px 14px rgba(38,65,45,.07),inset 0 1px 0 #fff !important;
+}
+html body #root .app-shell button.quiz-options button,
+html body #root .app-shell button.challenge-options button {
+  color:#3b5141 !important;
+  background:linear-gradient(145deg,#fff,#f5f9f4) !important;
+  border:1px solid #dfe9df !important;
+  border-radius:17px !important;
+  box-shadow:0 4px 12px rgba(38,65,45,.045) !important;
+}
+html body #root .app-shell button.quiz-options button.correct,
+html body #root .app-shell button.challenge-options button.is-correct {
+  color:#2f6840 !important;background:#eaf5e9 !important;border-color:#9fc4a1 !important;
+}
+html body #root .app-shell button.quiz-options button.incorrect,
+html body #root .app-shell button.challenge-options button.is-wrong {
+  color:#994b40 !important;background:#fff0ed !important;border-color:#e6b4ab !important;
+}
+:root[data-theme="dark"] html body #root .app-shell button.primary-button:not(:disabled),
+:root[data-theme="dark"] html body #root .app-shell button.welcome-continue:not(:disabled),
+:root[data-theme="dark"] html body #root .app-shell button.journey-continue:not(:disabled) {
+  color:#fff !important;background:linear-gradient(135deg,#5d9270,#315f45) !important;border-color:rgba(255,255,255,.15) !important;
+}
+:root[data-theme="dark"] html body #root .app-shell button.login-button,
+:root[data-theme="dark"] html body #root .app-shell button.secondary-button,
+:root[data-theme="dark"] html body #root .app-shell button.save-button,
+:root[data-theme="dark"] html body #root .app-shell button.support-share-button {
+  color:#d8e9d9 !important;background:linear-gradient(145deg,#26392c,#1d2d22) !important;border-color:#3b5541 !important;
+}
+:root[data-theme="dark"] html body #root .app-shell button.quiz-options button,
+:root[data-theme="dark"] html body #root .app-shell button.challenge-options button {
+  color:#d5e2d6 !important;background:#24362a !important;border-color:#3b5140 !important;
+}
+@media(max-width:650px){
+  html body #root .app-shell button.primary-button:not(:disabled),
+  html body #root .app-shell button.welcome-continue:not(:disabled),
+  html body #root .app-shell button.journey-continue:not(:disabled){width:100%;min-height:54px;padding:14px 18px}
+}
