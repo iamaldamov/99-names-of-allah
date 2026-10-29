@@ -1,4 +1,4 @@
-const CACHE_NAME = 'asma-ul-husna-v1';
+const CACHE_NAME = 'asma-ul-husna-v2';
 const APP_URL = new URL('./', self.location.href).href;
 const MANIFEST_URL = new URL('./manifest.webmanifest', self.location.href).href;
 const APP_SHELL = [APP_URL, MANIFEST_URL];
