@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart } from 'lucide-react';
 import { supabase } from './lib/supabase';
@@ -229,26 +229,36 @@ export default function App() {
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
   const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
    const [challengeSound, setChallengeSound] = useState<boolean>(() => { try { return localStorage.getItem('99-names-challenge-sound') !== 'off'; } catch { return true; } });
-   useEffect(() => { try { localStorage.setItem('99-names-challenge-sound', challengeSound ? 'on' : 'off'); } catch {} }, [challengeSound]);
-   const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong') => {
-     if (!challengeSound || typeof window === 'undefined' || !('AudioContext' in window)) return;
-     try {
-       const audio = new AudioContext();
-       const oscillator = audio.createOscillator();
-       const gain = audio.createGain();
-       const now = audio.currentTime;
-       const tones = kind === 'correct' ? [660, 880] : kind === 'wrong' ? [220, 165] : [520];
-       oscillator.type = 'sine';
-       oscillator.frequency.setValueAtTime(tones[0], now);
-       if (tones.length > 1) oscillator.frequency.setValueAtTime(tones[1], now + 0.11);
-       gain.gain.setValueAtTime(0.0001, now);
-       gain.gain.exponentialRampToValueAtTime(kind === 'tap' ? 0.045 : 0.065, now + 0.012);
-       gain.gain.exponentialRampToValueAtTime(0.0001, now + (kind === 'tap' ? 0.075 : 0.24));
-       oscillator.connect(gain); gain.connect(audio.destination);
-       oscillator.start(now); oscillator.stop(now + (kind === 'tap' ? 0.08 : 0.25));
-       oscillator.onended = () => { void audio.close(); };
-     } catch { /* Audio is optional; quiz must remain usable without it. */ }
-   };
+  const audioContextRef = useRef<AudioContext | null>(null);
+  useEffect(() => { try { localStorage.setItem('99-names-challenge-sound', challengeSound ? 'on' : 'off'); } catch {} }, [challengeSound]);
+  const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong', force = false) => {
+    if ((!challengeSound && !force) || typeof window === 'undefined') return;
+    const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    try {
+      const audio = audioContextRef.current || new AudioContextClass();
+      audioContextRef.current = audio;
+      const playTone = () => {
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        const now = audio.currentTime;
+        const tones = kind === 'correct' ? [660, 880] : kind === 'wrong' ? [220, 165] : [520];
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(tones[0], now);
+        if (tones.length > 1) oscillator.frequency.setValueAtTime(tones[1], now + 0.11);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(kind === 'tap' ? 0.055 : 0.075, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + (kind === 'tap' ? 0.11 : 0.28));
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+        oscillator.start();
+        oscillator.stop(now + (kind === 'tap' ? 0.12 : 0.29));
+      };
+      if (audio.state === 'suspended') void audio.resume().then(playTone).catch(() => {});
+      else playTone();
+    } catch { /* Audio is optional; quiz must remain usable without it. */ }
+  };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
@@ -473,7 +483,7 @@ export default function App() {
       </section>
 
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
-        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><button type="button" className="challenge-sound-toggle" aria-pressed={challengeSound} onClick={() => setChallengeSound(value => !value)}>{challengeSound ? 'Звук: вкл.' : 'Звук: выкл.'}</button><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
+        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><button type="button" className="challenge-sound-toggle" aria-pressed={challengeSound} onClick={() => { const next = !challengeSound; setChallengeSound(next); if (next) playChallengeSound('tap', true); }}>{challengeSound ? 'Звук: вкл.' : 'Звук: выкл.'}</button><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
         {challengeAnswers.length < 5 ? <div className="challenge-play">
           <div className="challenge-progress"><span>ВОПРОС {challengeAnswers.length + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
           <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>Прочитай транскрипцию и выбери правильное значение имени</p></div>
@@ -552,15 +562,17 @@ export default function App() {
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
         <button className="modal-x" aria-label="Закрыть" onClick={closeWelcome}><X size={19}/></button>
+        <div className="welcome-bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
         <span className="muted-label welcome-eyebrow">ДОБРО ПОЖАЛОВАТЬ</span>
         <h2 id="welcome-title">Ассаляму алейкум!</h2>
-        <p className="welcome-greeting">Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, осмысленно и в удобное время.</p>
-        <p>Пусть эти знания принесут пользу тебе и тем, с кем ты ими поделишься.</p>
-        <p className="welcome-motivation">Не стремись выучить всё за один день. Начни с одного имени, вдумайся в его смысл и возвращайся к повторению. Маленький, но постоянный шаг ценнее большого порыва на один день.</p>
+        <p className="welcome-greeting">Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы помочь тебе изучать 99 прекрасных имён Аллаха.</p>
+        <p className="welcome-intention"><b>Перед началом сделай намерение:</b> изучать имена Аллаха ради Его довольства, лучше узнавать своего Господа и применять эти знания в жизни.</p>
+        <p className="welcome-motivation">Изучай по одному имени, вдумывайся в его смысл и регулярно повторяй. Постоянство важнее спешки.</p>
+        <p>Делись знаниями — пусть они принесут пользу и другим.</p>
         <div className="welcome-divider"></div>
         <span className="muted-label welcome-support-label">ПОДДЕРЖАТЬ ПРОЕКТ</span>
         <h3>Помоги этому знанию распространяться</h3>
-        <p>Если сайт оказался полезен тебе, можешь добровольно поддержать его развитие. Любая сумма — только по твоему желанию.</p>
+        <p>Если сайт приносит пользу, можешь добровольно поддержать его развитие.</p>
         <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
         <button className="welcome-continue" onClick={closeWelcome}>Перейти к изучению <ArrowRight size={16}/></button>
         <span className="welcome-signature">С уважением, Рамазан</span>
