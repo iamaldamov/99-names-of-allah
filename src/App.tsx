@@ -246,11 +246,13 @@ export default function App() {
   const [theme, setTheme] = useState<'light'|'dark'>(() => { try { return localStorage.getItem('99-names-theme') === 'dark' ? 'dark' : 'light'; } catch { return 'light'; } });
   const [favorites, setFavorites] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-favorites') || '[]'); return Array.isArray(v) ? v.filter((x): x is number => Number.isInteger(x) && x>=1 && x<=99) : []; } catch { return []; } });
   const [dailyGoal, setDailyGoal] = useState<number>(() => { try { const n=Number(localStorage.getItem('99-names-daily-goal')); return [1,3,5].includes(n) ? n : 1; } catch { return 1; } });
-  const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return v.date === new Date().toDateString() && Array.isArray(v.ids) ? v.ids : []; } catch { return []; } });
+  const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return (v.date === new Date().toDateString() || v.date === localDayKey()) && Array.isArray(v.ids) ? v.ids.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99) : []; } catch { return []; } });
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
-  const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(null);
+  const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); const id = Number(saved.currentAnswer); return saved.date === localDayKey() && Number.isInteger(id) && id >= 1 && id <= 99 ? id : null; } catch { return null; } });
   const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
+  const [clockNow, setClockNow] = useState(() => Date.now());
+  const observedDayRef = useRef(localDayKey());
   const soundContextRef = useRef<AudioContext | null>(null);
   const playFeedbackSound = (kind: 'tap' | 'correct' | 'wrong') => {
     if (typeof window === 'undefined') return;
@@ -320,17 +322,17 @@ export default function App() {
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
-  useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:new Date().toDateString(),ids:learnedToday})); } catch {} }, [learnedToday]);
+  useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
-  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: localDayKey(), answers: challengeAnswers })); } catch {} }, [challengeAnswers]);
+  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: todayKey, answers: challengeAnswers, currentAnswer: challengeCurrentAnswer })); } catch {} }, [challengeAnswers, challengeCurrentAnswer, todayKey]);
   useEffect(() => {
     if (challengeAnswers.length !== 5) return;
     const score = challengeScore;
     setChallengeBest(old => { const next = Math.max(old, score); try { localStorage.setItem('99-names-challenge-best', String(next)); } catch {} return next; });
-  }, [challengeAnswers]);
+  }, [challengeAnswers, challengeScore]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
-    const text = `${name.translation} — ${shownTransliteration(name)}\\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
+    const text = `${name.translation} — ${shownTransliteration(name)}\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
     try {
       const blob = await makeNameCard(name, shownTransliteration(name));
       const file = new File([blob], `allah-name-${name.id}.png`, { type: 'image/png' });
@@ -346,6 +348,18 @@ export default function App() {
       if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Попробуй ещё раз.');
     }
   };
+  useEffect(() => {
+    const interval = window.setInterval(() => setClockNow(Date.now()), 30000);
+    return () => window.clearInterval(interval);
+  }, []);
+  useEffect(() => {
+    if (observedDayRef.current === todayKey) return;
+    observedDayRef.current = todayKey;
+    setLearnedToday([]);
+    setChallengeAnswers([]);
+    setChallengeCurrentAnswer(null);
+  }, [todayKey]);
+
   const closeWelcome = () => setWelcomeOpen(false);
 
   useEffect(() => {
@@ -483,7 +497,7 @@ export default function App() {
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => !progress.includes(name.id));
-  const todayKey = localDayKey();
+  const todayKey = localDayKey(new Date(clockNow));
   const weekActivity = useMemo(() => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = localDayKey(date); return { key, label: new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'ky' ? 'ky-KG' : language === 'ar' ? 'ar' : 'en', { weekday: 'short' }).format(date), count: studyDays[key] || 0, today: key === todayKey }; }), [language, studyDays, todayKey]);
   const activeDaysThisWeek = weekActivity.filter(day => day.count > 0).length;
   const currentStreak = useMemo(() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; }, [studyDays, todayKey]);
@@ -498,7 +512,7 @@ export default function App() {
       options: [item, ...names.filter(name => name.id !== item.id).sort((a, b) => rank(a.id, index * 31 + 7) - rank(b.id, index * 31 + 7)).slice(0, 3)].sort((a, b) => rank(a.id, index * 97 + 3) - rank(b.id, index * 97 + 3))
     }));
   }, [names, todayKey]);
-  const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
+  const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= clockNow).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress, clockNow]);
   const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
   const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
   const recordRecall = (id: number, remembered: boolean) => {
