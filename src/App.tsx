@@ -304,6 +304,9 @@ export default function App() {
     speechUtteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   };
+  useEffect(() => {
+    stopNameAudio();
+  }, [selected?.id, reviewSessionId]);
   useEffect(() => () => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
