@@ -934,3 +934,63 @@ button.quiz-options button.incorrect,
   user-select: text;
   -webkit-user-select: text;
 }
+
+
+/* Soft, rounded visual language across cards, controls and content panels. */
+:root {
+  --surface-radius: 24px;
+  --control-radius: 999px;
+  --soft-radius: 18px;
+}
+.modal-backdrop > :is(.lesson-modal,.welcome-modal,.account-modal,.info-modal,.review-session-modal),
+.lesson-modal,
+.welcome-modal,
+.account-modal,
+.info-modal,
+.review-session-modal,
+.challenge-modal,
+.quiz-modal {
+  border-radius: 28px !important;
+  overflow: hidden;
+}
+:is(.principle-grid > *, .action-card, .journey-stat, .review-session-answer,
+    .lesson-meaning, .support-options article, .source-card, .reference-card,
+    .challenge-question, .challenge-result, .progress-panel, .journey-panel,
+    .account-section, .info-section, .creator-card, .book-card) {
+  border-radius: 22px !important;
+}
+:is(.name-row, .review-queue-row, .filter-tabs, .quiz-options button,
+    .challenge-options button, .review-session-actions button, .support-share-button) {
+  border-radius: 17px !important;
+}
+button:not(.name-row) {
+  border-radius: var(--control-radius) !important;
+}
+button:has(svg):not(.primary-button):not(.welcome-continue):not(.quiz-options button):not(.challenge-options button) {
+  border-radius: 50% !important;
+}
+input, select, textarea, .account-form input {
+  border-radius: 16px !important;
+}
+.lesson-modal .lesson-meaning,
+.lesson-modal .lesson-quick-actions button,
+.lesson-modal .close-button {
+  border-radius: 18px !important;
+}
+:root[data-theme="dark"] :is(.principle-grid > *, .action-card, .journey-stat,
+  .review-session-answer, .lesson-meaning, .support-options article,
+  .source-card, .reference-card, .challenge-question, .challenge-result) {
+  border-color: rgba(190,215,193,.16);
+}
+
+/* A left swipe advances; the next card arrives from the right. */
+.lesson-modal.swipe-direction-next { animation-name: lesson-enter-from-right; }
+.lesson-modal.swipe-direction-prev { animation-name: lesson-enter-from-left; }
+@keyframes lesson-enter-from-right {
+  from { opacity: .72; transform: translate3d(22px,0,0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes lesson-enter-from-left {
+  from { opacity: .72; transform: translate3d(-22px,0,0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
