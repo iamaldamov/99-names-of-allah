@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, MouseEvent } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Volume2 } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 
@@ -704,13 +704,7 @@ export default function App() {
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>
-        <div className="name-audio-controls">
-          <a className="name-audio-button" href="https://www.naataudio.com/mp3/asma-ul-husna-mishary-rashid-1973" target="_blank" rel="noreferrer" aria-label="Слушать полное чтение 99 имён">
-            <Volume2 size={18}/> Слушать 99 имён — Мишари Рашид
-          </a>
-          <span>Полная запись откроется на странице аудио</span>
-        </div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
         <h2 className="text-enter">{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description text-enter">{selected.explanation}</p></div>
@@ -728,11 +722,6 @@ export default function App() {
         <span className="muted-label">ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ</span>
         <div className="review-session-step">Имя {item.id} · {dueReviewIds.length} {dueReviewIds.length === 1 ? "имя в очереди" : "имён в очереди"}</div>
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
-        <div className="name-audio-controls review-audio-controls">
-          <a className="name-audio-button" href="https://www.naataudio.com/mp3/asma-ul-husna-mishary-rashid-1973" target="_blank" rel="noreferrer">
-            <Volume2 size={18}/> Слушать полное чтение имён
-          </a>
-        </div>
         <p className="lesson-translit">{shownTransliteration(item)}</p>
         <h2>Вспомни значение этого имени</h2>
         {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>Показать значение <ArrowRight size={16}/></button> : <><div className="review-session-answer"><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">Удалось вспомнить значение до подсказки?</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}><Check size={17}/> Вспомнил</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)}>Нужно повторить</button></div></>}
