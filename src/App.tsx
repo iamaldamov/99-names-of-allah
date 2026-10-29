@@ -645,17 +645,12 @@ export default function App() {
         <div className="welcome-bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
         <span className="muted-label welcome-eyebrow">ДОБРО ПОЖАЛОВАТЬ</span>
         <h2 id="welcome-title">Ассаляму алейкум!</h2>
-        <p className="welcome-greeting">Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы помочь тебе изучать 99 прекрасных имён Аллаха.</p>
-        <p className="welcome-intention"><b>Перед началом сделай намерение:</b> изучать имена Аллаха ради Его довольства, лучше узнавать своего Господа и применять эти знания в жизни.</p>
-        <p className="welcome-motivation">Изучай по одному имени, вдумывайся в его смысл и регулярно повторяй. Постоянство важнее спешки.</p>
-        <p>Делись знаниями — пусть они принесут пользу и другим.</p>
-        <div className="welcome-divider"></div>
-        <span className="muted-label welcome-support-label">ПОДДЕРЖАТЬ ПРОЕКТ</span>
-        <h3>Помоги этому знанию распространяться</h3>
-        <p>Если сайт приносит пользу, можешь добровольно поддержать его развитие.</p>
-        <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
-        <button className="welcome-continue" onClick={closeWelcome}>Перейти к изучению <ArrowRight size={16}/></button>
-        <span className="welcome-signature">С уважением, Рамазан</span>
+        <p className="welcome-greeting">Я Рамазан. Создал этот бесплатный сайт, чтобы ты мог изучать 99 прекрасных имён Аллаха.</p>
+        <p className="welcome-intention">Изучай постепенно, вдумывайся в смысл и старайся применять знания в жизни. Пусть это будет ради довольства Аллаха.</p>
+        <div className="welcome-actions">
+          <button className="welcome-continue" onClick={closeWelcome}>Перейти к изучению <ArrowRight size={16}/></button>
+          <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
+        </div>
       </section></div>}
 
       {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
