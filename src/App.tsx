@@ -276,7 +276,7 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: localDayKey(), answers: challengeAnswers })); } catch {} }, [challengeAnswers]);
   useEffect(() => {
     if (challengeAnswers.length !== 5) return;
-    const score = dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0);
+    const score = challengeScore;
     setChallengeBest(old => { const next = Math.max(old, score); try { localStorage.setItem('99-names-challenge-best', String(next)); } catch {} return next; });
   }, [challengeAnswers]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
@@ -435,9 +435,9 @@ export default function App() {
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => !progress.includes(name.id));
   const todayKey = localDayKey();
-  const weekActivity = Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = localDayKey(date); return { key, label: new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'ky' ? 'ky-KG' : language === 'ar' ? 'ar' : 'en', { weekday: 'short' }).format(date), count: studyDays[key] || 0, today: key === todayKey }; });
+  const weekActivity = useMemo(() => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = localDayKey(date); return { key, label: new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'ky' ? 'ky-KG' : language === 'ar' ? 'ar' : 'en', { weekday: 'short' }).format(date), count: studyDays[key] || 0, today: key === todayKey }; }), [language, studyDays, todayKey]);
   const activeDaysThisWeek = weekActivity.filter(day => day.count > 0).length;
-  const currentStreak = (() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; })();
+  const currentStreak = useMemo(() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; }, [studyDays, todayKey]);
   const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
   const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
   const dailyChallenge = useMemo(() => {
@@ -450,6 +450,7 @@ export default function App() {
     }));
   }, [names, todayKey]);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
+  const challengeScore = useMemo(() => challengeScore, [dailyChallenge, challengeAnswers]);
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
       const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
@@ -522,9 +523,9 @@ export default function App() {
             <button onClick={() => { if (challengeCurrentAnswer === null) return; const selectedAnswer = challengeCurrentAnswer; setChallengeAnswers(old => [...old, selectedAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? "Завершить испытание" : "Следующий вопрос"} <ArrowRight size={15}/></button>
           </div>}
         </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "✦" : "✓"}</span>
-          <h3>Испытание завершено</h3><b>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0)} из 5 правильных ответов</b>
-          <p>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Вернись к именам, в которых сомневался."}</p>
+          <span className="challenge-result-mark">{challengeScore === 5 ? "✦" : "✓"}</span>
+          <h3>Испытание завершено</h3><b>{challengeScore} из 5 правильных ответов</b>
+          <p>{challengeScore === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Вернись к именам, в которых сомневался."}</p>
           <button onClick={() => { setChallengeAnswers([]); setChallengeCurrentAnswer(null); }}>Пройти ещё раз <ArrowRight size={15}/></button>
         </div>}
         <div className="challenge-foot"><span>Твой лучший результат сохраняется на этом устройстве</span><span>{challengeAnswers.length}/5</span></div>
