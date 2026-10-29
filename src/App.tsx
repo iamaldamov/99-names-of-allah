@@ -71,6 +71,23 @@ const languageText: Record<string, Record<string, string>> = {
  'Отметить как изученное':'Үйрөнүлдү деп белгилөө','Это имя уже отмечено как изученное':'Бул ысым үйрөнүлдү деп белгиленген',
  'Сохраняем…':'Сакталууда…','Связанный источник:':'Байланыштуу булак:'
  },
+   kk: {
+  '99 имён Аллаха':'Алланың 99 көркем есімі','Войти':'Кіру','Выйти':'Шығу','ПУТЬ ПОЗНАНИЯ':'ТАНЫМ ЖОЛЫ',
+  'Познакомься с именами':'Сені жаратқан Алланың','Того, Кто создал тебя.':'көркем есімдерімен таныс.','Начать обучение':'Үйренуді бастау',
+  'ТВОЙ ПУТЬ':'СЕНІҢ ЖОЛЫҢ','Твой прогресс обучения':'Оқу барысындағы жетістігің','99 имён. Одно путешествие.':'99 есім. Бір сапар.','изучено':'үйренілді',
+  'Прогресс сохраняется на этом устройстве':'Жетістігің осы құрылғыда сақталады','ПЕРВЫЕ ШАГИ':'АЛҒАШҚЫ ҚАДАМДАР',
+  'Изучай имена по порядку':'Есімдерді ретімен үйрен','Открыть каталог имён':'Есімдер тізімін ашу','Свернуть каталог':'Тізімді жабу',
+  'Найти имя, перевод или транскрипцию…':'Есімді, аудармасын немесе транскрипциясын іздеу…','Все 99':'Барлығы 99','Повторить':'Қайталау',
+  'Ничего не найдено. Попробуй изменить запрос или фильтр.':'Ештеңе табылмады. Іздеу сұрауын немесе сүзгіні өзгертіп көр.',
+  'Проверить знания':'Біліміңді тексер','Короткий тест по именам':'Есімдер бойынша қысқа тест','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'БІЛІМДІ БЕКІТУ',
+  'Проверь, что запомнил':'Нені есте сақтағаныңды тексер','Мини-тест':'Қысқа тест','КАК ПЕРЕВОДИТСЯ ИМЯ?':'БҰЛ ЕСІМНІҢ МАҒЫНАСЫ ҚАНДАЙ?',
+  'Верно! Повтори смысл имени своими словами.':'Дұрыс! Есімнің мағынасын өз сөзіңмен қайтала.','Не совсем. Правильный ответ: ':'Дәл емес. Дұрыс жауап: ',
+  'Следующий вопрос':'Келесі сұрақ','Методика обучения':'Оқу әдісі','Как запоминать и повторять':'Қалай жаттау және қайталау керек',
+  'Источники и достоверность':'Дереккөздер мен сенімділік','О создателе':'Жоба авторы','Ассаляму алейкум!':'Әссәләму алейкум!',
+  'Закрыть':'Жабу','Поддержать проект':'Жобаны қолдау','Перейти к изучению':'Үйренуге өту','ДОБРО ПОЖАЛОВАТЬ':'ҚОШ КЕЛДІҢ!',
+  'Отметить как изученное':'Үйренілді деп белгілеу','Это имя уже отмечено как изученное':'Бұл есім үйренілді деп белгіленген',
+  'Сохраняем…':'Сақталуда…','Связанный источник:':'Қатысты дереккөз:'
+  },
  en: {
  '99 имён Аллаха':'99 Names of Allah','Войти':'Sign in','Выйти':'Sign out','ПУТЬ ПОЗНАНИЯ':'A JOURNEY OF KNOWLEDGE',
  'Познакомься с именами':'Discover the names','Того, Кто создал тебя.':'of the One who created you.',
@@ -199,7 +216,7 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 export default function App() {
-  const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky') || 'ru'; } catch { return 'ru'; } });
+  const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
   const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
   const shownTransliteration = (name: NameItem) => language === 'ru' ? russianTransliterations[name.id] ?? name.transliteration : name.transliteration;
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
@@ -218,6 +235,7 @@ export default function App() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [praise, setPraise] = useState('');
   const [saveOpen, setSaveOpen] = useState(false);
   const [showAllInfo, setShowAllInfo] = useState(false);
   const [search, setSearch] = useState('');
@@ -228,16 +246,13 @@ export default function App() {
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
   const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(null);
-  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
-   const [challengeSound, setChallengeSound] = useState<boolean>(() => { try { return localStorage.getItem('99-names-challenge-sound') !== 'off'; } catch { return true; } });
-  useEffect(() => { try { localStorage.setItem('99-names-challenge-sound', challengeSound ? 'on' : 'off'); } catch {} }, [challengeSound]);
-  const challengeSoundData: Record<'tap' | 'correct' | 'wrong', string> = {
+  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });const challengeSoundData: Record<'tap' | 'correct' | 'wrong', string> = {
     tap: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgYSEfnVxdoSTl4t0YWB0k6mliGJLVXypvKl8UURci7K6nG1JSGmZubSOX0VPeKa7q4BURFmHsLqgcUtGZpa3tpJjRU10o7uug1ZEVoOuu6N0TUVjkra3lmZGS3GgurCHWURUf6u7pnhPRV+OtLmZaUhJbZy6sotcRFF8qbypfFFEXIuyupxtSUhpmbm0jl9FT3imu6uAVERZh7C6oHFLRmaWt7aSY0VNdKO7roNWRFaDrrujdE1FY5K2t5ZmRktxoLqwh1lEVH+ru6Z4T0VfjrS5mWlISW2curKLXERRfKm8qXxRRFyLsrqcbUlIaZm5s45hSFJ5orWmgFpNX4anr5l0V1VtkKemjGxZX3iWpJuCaF5pgpiekXpnZXKIl5eIdmpseoqTj4J1b3R/io2IfnZ1eoKHh4J9e3t+gYKBgA==',
     correct: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgoF5eYeNe2x9l41oZpCjelV0qp1cUZW6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrqARWmyqVxJjruHRmOurmNGh7uOSVypsmlFgLqWTVajtnFEeLmcUVGcuXhEcbajVk2Wun9FabKpXEmOu4dGY66uY0aHu45JXKmyaUV/upZNVqO2cUR4uZxRUZy5eERxtqNWTZa6f0VpsqlcSY67h0Zjrq5jRoe7jklcqbJpRYC6lk1Wo7ZxRHi5nFFRnLl4RHG2o1ZNlrp/RWmyqVxJjruHRmOurmNGh7qOTF6lrmxLgLKSVV6cq3RReqqVXl+Up3pYdqKWZmGMoX9fdJqVbmWHm4Nnc5OSdGqClIVudIyOeXB/jYR1d4aJfXd+h4N7e4KDf31/gA==',
     wrong: 'UklGRmQBAABXQVZFZm10IBAAAAABAAEAoA8AAKAPAAABAAgAZGF0YUABAACAgIKFiYyOkI+Mh4B4b2ZeWFVWWmJufIycqrS6u7iwpJaFdGRWTEVERk5ZaHiJmaeyuby5sqeZiXhoWU5GREVMVmR0hZaksLi7urSqnI18a1xQSERFSlRhcYGSoa63u7u2raCQgG9fUklEREhRXm1+jp6rtbq7t6+jlINyY1VLRURHT1tpeoubqbO6u7mxppeHdmZYTUZERk1YZnaHl6axubu6s6mbi3ppW09HREVLVWNyg5Sjr7e7urWrno5+bV5RSERESVJfb3+QoK22u7u3rqGSgXFhVEpFREhQXGt8jZyqtLq7uLCkloV0ZFZMRURGTlppeIiXpK2ztLGroZWHeW1iWlVTVVtjbXiDjpeeoqOinpePh351bmhlZGVobXN6gIaMkJKTkpCMiISAfHh2dXR1d3l7fX+BgoODgoKBgA=='
   };
   const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong', force = false) => {
-    if ((!challengeSound && !force) || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
     try {
       const audio = new Audio('data:audio/wav;base64,' + challengeSoundData[kind]);
       audio.preload = 'auto';
@@ -251,7 +266,6 @@ export default function App() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
-  const [showPrintList, setShowPrintList] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(true);
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
@@ -379,10 +393,24 @@ export default function App() {
     finally { setBusy(false); }
   };
 
+  const praiseFor = (kind: 'correct' | 'learned') => {
+    const messages: Record<string, Record<'correct' | 'learned', string[]>> = {
+      ru: { correct: ['Машаллах! Отличный ответ!', 'Машаллах! Ты справился!', 'Прекрасно! Продолжай учиться!'], learned: ['Машаллах! Ещё одно имя выучено!', 'Баракаллаху фик! Продолжай в том же духе!'] },
+      en: { correct: ['MashaAllah! Great answer!', 'MashaAllah! You got it right!', 'Wonderful! Keep learning!'], learned: ['MashaAllah! Another name learned!', 'BarakAllahu feek! Keep going!'] },
+      ar: { correct: ['ما شاء الله! إجابة رائعة!', 'أحسنت! بارك الله فيك!'], learned: ['ما شاء الله! تعلّمت اسمًا جديدًا!', 'بارك الله فيك، واصل التعلّم!'] },
+      ky: { correct: ['МашаАллах! Туура жооп!', 'Азаматсың! Ушундай улант!'], learned: ['МашаАллах! Дагы бир ысымды үйрөндүң!', 'Аллах илимиңе береке берсин!'] },
+      kk: { correct: ['МашаАлла! Дұрыс жауап!', 'Жарайсың! Осылай жалғастыр!', 'Керемет! Білімің арта берсін!'], learned: ['МашаАлла! Тағы бір есімді үйрендің!', 'Алла біліміңе береке берсін!'] }
+    };
+    const options = messages[language]?.[kind] || messages.ru[kind];
+    setPraise(options[Math.floor(Math.random() * options.length)]);
+    window.setTimeout(() => setPraise(''), 2600);
+  };
+
   const markLearned = async () => {
     if (!selected || busy) return;
     const nameId = selected.id;
     setBusy(true); setError('');
+    if (!progress.includes(nameId)) praiseFor('learned');
     setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
     setLearnedToday(old => Array.from(new Set([...old, nameId])));
     setStudyDays(old => ({ ...old, [localDayKey()]: old[localDayKey()] || 1 }));
@@ -438,10 +466,16 @@ export default function App() {
   const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
   const quizOptions = useMemo(() => quizItem ? [quizItem, ...names.filter(n => n.id !== quizItem.id).slice((quizIndex * 11) % Math.max(1, names.length - 4), (quizIndex * 11) % Math.max(1, names.length - 4) + 3)].sort((a,b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)) : [], [quizItem, names, quizIndex]);
 
+  const handleButtonSound = (event: React.MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest('button');
+    if (button && !button.hasAttribute('data-sound-special')) playChallengeSound('tap');
+  };
+
   return (
-    <main className="app-shell">
+    <main className="app-shell" onClickCapture={handleButtonSound}>
       <header className="topbar">
-        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option></select>
+        <a className="brand" href="#home" aria-label="99 имён Аллаха — главная"><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
@@ -470,7 +504,7 @@ export default function App() {
       </section>
 
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
-        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><button type="button" className="challenge-sound-toggle" aria-pressed={challengeSound} onClick={() => { const next = !challengeSound; setChallengeSound(next); if (next) playChallengeSound('tap', true); }}>{challengeSound ? 'Звук: вкл.' : 'Звук: выкл.'}</button><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
+        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
         {challengeAnswers.length < 5 ? <div className="challenge-play">
           <div className="challenge-progress"><span>ВОПРОС {challengeAnswers.length + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
           <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>Прочитай транскрипцию и выбери правильное значение имени</p></div>
@@ -479,10 +513,10 @@ export default function App() {
             const answered = challengeCurrentAnswer !== null;
             const isCorrect = option.id === correctId;
             const isSelected = option.id === challengeCurrentAnswer;
-            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); playChallengeSound(option.id === correctId ? 'correct' : 'wrong'); }}>{option.translation}</button>;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId; playChallengeSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
           })}</div>
           {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
-            <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "Верно! Отличная работа." : "Не совсем. Правильный ответ:"}</b>
+            <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
             {dailyChallenge[challengeAnswers.length]?.options.find(option => option.id === dailyChallenge[challengeAnswers.length]?.item.id)?.translation}
             <button onClick={() => { if (challengeCurrentAnswer === null) return; const selectedAnswer = challengeCurrentAnswer; setChallengeAnswers(old => [...old, selectedAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? "Завершить испытание" : "Следующий вопрос"} <ArrowRight size={15}/></button>
           </div>}
@@ -523,10 +557,10 @@ export default function App() {
             const answered = quizAnswer !== null;
             const isCorrect = option.id === quizItem.id;
             const isSelected = option.id === quizAnswer;
-            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} onClick={() => { if (answered) return; setQuizAnswer(option.id); }}>{option.translation}</button>;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id; playChallengeSound(correct ? 'correct' : 'wrong'); if (correct) praiseFor('correct'); }}>{option.translation}</button>;
           })}</div>
           {quizAnswer !== null && <div className={quizAnswer === quizItem.id ? 'challenge-feedback correct' : 'challenge-feedback wrong'}>
-            <b>{quizAnswer === quizItem.id ? 'Верно! Отличная работа.' : 'Не совсем. Правильный ответ:'}</b>
+            <b>{quizAnswer === quizItem.id ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
             {quizItem.translation}
           </div>}
           {quizAnswer !== null && <button className="quiz-next" onClick={() => { setQuizAnswers(old => [...old, quizAnswer]); setQuizIndex(i => i + 1); setQuizAnswer(null); }}>{quizIndex === 4 ? 'Показать результат' : 'Следующий вопрос'} <ArrowRight size={15}/></button>}
@@ -568,8 +602,7 @@ export default function App() {
           <p className="support-note">Поддержка полностью добровольная. Доступ к изучению, повторению и тестам не зависит от пожертвований.</p>
         </section>
       </details>
-      <div className="export-tools"><button className="secondary-button" onClick={()=>{if(!progress.length){setNotice('Пока нет изученных имён для PDF. Отметь имя как изученное и повтори.');return;}setShowPrintList(true);window.setTimeout(()=>window.requestAnimationFrame(()=>window.print()),600);}}>Печать / сохранить PDF</button></div>
-      {showPrintList && <section className="print-sheet"><h1>Изученные имена Аллаха</h1><p>Сохранено на сайте: {progress.length} из 99</p>{names.filter(n=>progress.includes(n.id)).map(n=><article key={n.id}><h2>{n.id}. {n.translation}</h2><div className="print-arabic" dir="rtl">{n.arabic}</div><p>{shownTransliteration(n)}</p><p>{n.explanation}</p></article>)}</section>}
+      {praise && <div className="praise-toast" role="status" aria-live="polite"><span>✦</span>{praise}<span>✦</span></div>}
       {notice && <p className="share-notice" role="status">{notice}</p>}
       <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
 
