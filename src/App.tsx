@@ -228,6 +228,27 @@ export default function App() {
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
   const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
+   const [challengeSound, setChallengeSound] = useState<boolean>(() => { try { return localStorage.getItem('99-names-challenge-sound') !== 'off'; } catch { return true; } });
+   useEffect(() => { try { localStorage.setItem('99-names-challenge-sound', challengeSound ? 'on' : 'off'); } catch {} }, [challengeSound]);
+   const playChallengeSound = (kind: 'tap' | 'correct' | 'wrong') => {
+     if (!challengeSound || typeof window === 'undefined' || !('AudioContext' in window)) return;
+     try {
+       const audio = new AudioContext();
+       const oscillator = audio.createOscillator();
+       const gain = audio.createGain();
+       const now = audio.currentTime;
+       const tones = kind === 'correct' ? [660, 880] : kind === 'wrong' ? [220, 165] : [520];
+       oscillator.type = 'sine';
+       oscillator.frequency.setValueAtTime(tones[0], now);
+       if (tones.length > 1) oscillator.frequency.setValueAtTime(tones[1], now + 0.11);
+       gain.gain.setValueAtTime(0.0001, now);
+       gain.gain.exponentialRampToValueAtTime(kind === 'tap' ? 0.045 : 0.065, now + 0.012);
+       gain.gain.exponentialRampToValueAtTime(0.0001, now + (kind === 'tap' ? 0.075 : 0.24));
+       oscillator.connect(gain); gain.connect(audio.destination);
+       oscillator.start(now); oscillator.stop(now + (kind === 'tap' ? 0.08 : 0.25));
+       oscillator.onended = () => { void audio.close(); };
+     } catch { /* Audio is optional; quiz must remain usable without it. */ }
+   };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizIndex, setQuizIndex] = useState(0);
@@ -303,7 +324,7 @@ export default function App() {
       const cloudIds = (data || []).filter((item: any) => item.status === 'learned').map((item: any) => Number(item.name_id)).filter((id: number) => Number.isInteger(id) && id >= 1 && id <= 99);
       setProgress(current => Array.from(new Set([...current, ...cloudIds])));
       setProgressLoadedFor(user.id);
-    }).catch(() => {
+    }, () => {
       if (alive) setNotice('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.');
     });
     return () => { alive = false; };
@@ -452,11 +473,11 @@ export default function App() {
       </section>
 
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
-        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div>
+        <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><button type="button" className="challenge-sound-toggle" aria-pressed={challengeSound} onClick={() => setChallengeSound(value => !value)}>{challengeSound ? 'Звук: вкл.' : 'Звук: выкл.'}</button><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
         {challengeAnswers.length < 5 ? <div className="challenge-play">
           <div className="challenge-progress"><span>ВОПРОС {challengeAnswers.length + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
           <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>Прочитай транскрипцию и выбери правильное значение имени</p></div>
-          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => <button key={option.id} onClick={() => setChallengeAnswers(old => old.length < 5 ? [...old, option.id] : old)}>{option.translation}</button>)}</div>
+          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => <button key={option.id} onClick={() => { if (challengeAnswers.length >= 5) return; playChallengeSound('tap'); playChallengeSound(option.id === dailyChallenge[challengeAnswers.length]?.item.id ? 'correct' : 'wrong'); setChallengeAnswers(old => old.length < 5 ? [...old, option.id] : old); }}>{option.translation}</button>)}</div>
         </div> : <div className="challenge-result">
           <span className="challenge-result-mark">{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0) === 5 ? "✦" : "✓"}</span>
           <h3>Испытание завершено</h3><b>{dailyChallenge.reduce((total, question, index) => total + (question.item.id === challengeAnswers[index] ? 1 : 0), 0)} из 5 правильных ответов</b>
