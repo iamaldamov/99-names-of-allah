@@ -699,3 +699,22 @@ html{scroll-padding-top:18px}
 .journey-stat small{color:var(--muted);font-size:10px;line-height:1.4}
 :root[data-theme="dark"] .journey-stat{background:rgba(125,157,120,.08);border-color:#405747}
 @media(max-width:560px){.journey-stats{gap:7px;margin-bottom:18px}.journey-stat{padding:12px 9px;border-radius:12px}.journey-stat span{font-size:8px;letter-spacing:.035em}.journey-stat b{font-size:22px}.journey-stat small{font-size:9px}}
+
+
+/* Focused active recall session */
+.review-session-modal{max-width:490px}
+.review-session-modal>.muted-label{display:block;margin:8px 0 10px;text-align:center}
+.review-session-step{text-align:center;color:var(--muted);font-size:11px;margin-bottom:12px}
+.review-session-arabic{margin:16px auto 8px}
+.review-session-modal>.lesson-translit{text-align:center}
+.review-session-modal>h2{text-align:center;font-size:21px;margin:18px 0 22px}
+.review-session-answer{padding:17px;border:1px solid var(--line);border-radius:15px;background:rgba(128,145,125,.07);margin:0 0 15px}
+.review-session-answer b{display:block;text-align:center;font-size:18px;color:var(--green);margin-bottom:8px}
+.review-session-answer p{margin:0;color:var(--ink);font-size:13px;line-height:1.75}
+.review-session-question{text-align:center;color:var(--muted);font-size:12px;margin:14px 0}
+.review-session-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.review-session-actions button{min-height:48px;border-radius:13px;padding:10px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.review-session-remembered{border:1px solid #b8d5bd;background:#edf7ef;color:#28633a;display:flex;align-items:center;justify-content:center;gap:7px}
+.review-session-forgot{border:1px solid var(--line);background:transparent;color:var(--ink)}
+:root[data-theme="dark"] .review-session-remembered{background:#263f2d;border-color:#45694d;color:#b7e0bd}
+@media(max-width:480px){.review-session-modal>h2{font-size:19px}.review-session-actions{grid-template-columns:1fr}}
