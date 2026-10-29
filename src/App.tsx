@@ -684,7 +684,7 @@ export default function App() {
         </div>
       </section></div>}
 
-      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className={`lesson-modal${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onTouchStart={handleLessonTouchStart} onTouchEnd={handleLessonTouchEnd}>
+      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section key={selected.id} className={`lesson-modal${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onTouchStart={handleLessonTouchStart} onTouchEnd={handleLessonTouchEnd}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>Смахни вправо — следующее имя</span><span className="swipe-hint-arrow">→</span></div>}
