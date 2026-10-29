@@ -485,8 +485,8 @@ export default function App() {
 
   const handleButtonSound = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
-    const button = target.closest('button');
-    if (button && !button.hasAttribute('data-sound-special')) playFeedbackSound('tap');
+    const button = target.closest('button[data-feedback]');
+    if (button) playFeedbackSound('tap');
   };
 
   return (
