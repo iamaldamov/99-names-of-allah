@@ -137,6 +137,10 @@ footer{padding:22px 0 82px;display:flex;align-items:center;justify-content:space
 .welcome-modal{width:min(100%,470px);max-height:min(92vh,820px);overflow-y:auto;overscroll-behavior:contain;text-align:center;padding:34px 32px 27px}
 .welcome-ornament{font:27px Amiri;color:#9caf9f;margin:2px 0 15px;letter-spacing:1px}
 .welcome-eyebrow,.welcome-support-label{justify-content:center}
+.welcome-bismillah{margin:0 auto 18px;color:#9caf9f;font:30px/1.8 'Amiri','Noto Naskh Arabic',serif;letter-spacing:0;}
+.welcome-intention{padding:12px 14px;border:1px solid #e2e9df;border-radius:14px;background:#f5f8f3;color:#526b57!important;}
+:root[data-theme="dark"] .welcome-intention{background:#223329;border-color:#405747;color:#d6e5d7!important;}
+
 .welcome-modal h2{font-size:27px;margin:10px 0 13px;letter-spacing:-.6px}
 .welcome-modal p{font-size:13px;line-height:1.8;color:#748078;margin:0 auto 11px;max-width:390px}
 .welcome-modal p b{color:#35493c}
