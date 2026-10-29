@@ -330,7 +330,7 @@ export default function App() {
     if (challengeAnswers.length !== 5) return;
     const score = challengeScore;
     setChallengeBest(old => { const next = Math.max(old, score); try { localStorage.setItem('99-names-challenge-best', String(next)); } catch {} return next; });
-  }, [challengeAnswers, challengeScore]);
+  }, [challengeAnswers]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
