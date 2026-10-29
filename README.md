@@ -14,7 +14,7 @@ A minimalist learning app for studying and memorizing the 99 Names of Allah.
 4. Run `npm run dev`.
 
 ## Supabase setup
-Run `supabase/schema.sql` in the Supabase SQL Editor. Configure email authentication first. Phone OTP requires an SMS provider and should be enabled only after provider setup.
+Run `supabase/schema.sql` in the Supabase SQL Editor. Configure email authentication first. Phone OTP requires an SMS provider and should be enabled only after provider setup.\n\nFor an existing Supabase project, also run the newest SQL file in `supabase/migrations/` in the SQL Editor. The 2026-10-29 migration removes the optional foreign-key dependency on pre-seeding the public names catalogue, so signed-in learners can save their progress even while the catalogue is still served from the app bundle.
 
 ## GitHub Pages
 Enable GitHub Actions as the Pages build and deployment source in repository Settings → Pages. Add repository Actions secrets:
