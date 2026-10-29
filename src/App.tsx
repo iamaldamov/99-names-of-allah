@@ -453,7 +453,7 @@ export default function App() {
 
     setSwipeDirection(isSwipeLeft ? 1 : -1);
     setError('');
-    setSelected(completeNames[nextId - 1] || null);
+    setSelected(names.find(name => name.id === nextId) || null);
   };
 
   const markLearned = async () => {
