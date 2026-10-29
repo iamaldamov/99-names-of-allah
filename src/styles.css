@@ -755,3 +755,23 @@ html{scroll-padding-top:18px}
     will-change: auto;
   }
 }
+
+/* Refined translucent controls and compact welcome screen */
+.lesson-navigation{background:linear-gradient(to bottom,rgba(255,255,255,.68),rgba(255,255,255,.86));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid rgba(145,165,148,.22)}
+.lesson-nav-button{background:rgba(255,255,255,.34);border:1px solid rgba(116,145,122,.32);color:#42634d;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 3px 12px rgba(32,62,42,.06);transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.lesson-nav-button.lesson-next{background:rgba(133,169,139,.22);border-color:rgba(103,145,111,.34);color:#365b42}
+.lesson-nav-button:not(:disabled):active{transform:scale(.97);background:rgba(133,169,139,.34)}
+.welcome-modal{width:min(100%,440px);max-height:calc(100dvh - 28px);overflow:visible;padding:25px 24px 22px}
+.welcome-bismillah{margin:0 auto 8px;font-size:25px;line-height:1.55}
+.welcome-modal h2{font-size:24px;margin:7px 0 9px}
+.welcome-modal p{font-size:12px;line-height:1.65;margin:0 auto 9px}
+.welcome-intention{padding:10px 12px}
+.welcome-actions{display:grid;gap:9px;margin-top:14px}
+.welcome-continue,.welcome-donation{width:100%;min-height:44px;margin:0;padding:11px 16px;justify-content:center;border-radius:24px;background:rgba(255,255,255,.38);border:1px solid rgba(116,145,122,.34);color:#416c59;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 5px 18px rgba(30,55,37,.07);transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.welcome-continue:hover,.welcome-donation:hover{background:rgba(145,180,150,.24);border-color:rgba(100,139,107,.48)}
+.welcome-continue:active,.welcome-donation:active{transform:scale(.985)}
+:root[data-theme="dark"] .lesson-navigation{background:linear-gradient(to bottom,rgba(22,34,27,.72),rgba(22,34,27,.9));border-color:rgba(180,205,183,.12)}
+:root[data-theme="dark"] .lesson-nav-button,:root[data-theme="dark"] .welcome-continue,:root[data-theme="dark"] .welcome-donation{background:rgba(205,226,207,.08);border-color:rgba(190,215,193,.2);color:#d5e6d7}
+:root[data-theme="dark"] .lesson-nav-button.lesson-next{background:rgba(145,183,151,.18);border-color:rgba(174,207,179,.25);color:#e0eee1}
+:root[data-theme="dark"] .welcome-modal{background:rgba(30,43,34,.96);border:1px solid rgba(195,220,198,.12)}
+@media(max-width:480px){.welcome-backdrop{padding:12px}.welcome-modal{max-height:calc(100dvh - 24px);padding:20px 17px 17px}.welcome-bismillah{font-size:23px;margin-bottom:5px}.welcome-modal h2{font-size:22px}.welcome-modal p{font-size:11.5px;line-height:1.58;margin-bottom:7px}.welcome-actions{gap:8px;margin-top:10px}.welcome-continue,.welcome-donation{min-height:42px;padding:10px 14px}}
