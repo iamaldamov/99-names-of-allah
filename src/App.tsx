@@ -207,7 +207,7 @@ export default function App() {
   const [publishedCount, setPublishedCount] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [progress, setProgress] = useState<number[]>(loadProgress);
-  const [progressReady, setProgressReady] = useState(false);
+  const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
   const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(loadReviewData);
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -234,7 +234,7 @@ export default function App() {
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [showPrintList, setShowPrintList] = useState(false);
-  const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return !localStorage.getItem('99-names-welcome-seen'); } catch { return true; } });
+  const [welcomeOpen, setWelcomeOpen] = useState(true);
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
@@ -264,7 +264,7 @@ export default function App() {
       if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Попробуй ещё раз.');
     }
   };
-  const closeWelcome = () => { try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Storage unavailable */ } setWelcomeOpen(false); };
+  const closeWelcome = () => setWelcomeOpen(false);
 
   useEffect(() => {
     if (!supabase) return;
@@ -291,20 +291,31 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-review-v1', JSON.stringify(reviewData)); } catch { /* Storage unavailable */ } }, [reviewData]);
   useEffect(() => { setReviewData(old => { const missing = progress.filter(id => !old[id]); if (!missing.length) return old; const next = { ...old }; missing.forEach(id => { next[id] = { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null }; }); return next; }); }, [progress]);
   useEffect(() => {
-    if (!supabase || !user) { setProgressReady(true); return; }
+    if (!supabase || !user) { setProgressLoadedFor(null); return; }
     let alive = true;
-    supabase.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data }) => {
+    setProgressLoadedFor(null);
+    supabase.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
       if (!alive) return;
-      if (data) setProgress(current => Array.from(new Set([...current, ...data.filter((x: any) => x.status === 'learned').map((x: any) => Number(x.name_id))])));
-      setProgressReady(true);
+      if (loadError) {
+        setNotice('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.');
+        return;
+      }
+      const cloudIds = (data || []).filter((item: any) => item.status === 'learned').map((item: any) => Number(item.name_id)).filter((id: number) => Number.isInteger(id) && id >= 1 && id <= 99);
+      setProgress(current => Array.from(new Set([...current, ...cloudIds])));
+      setProgressLoadedFor(user.id);
+    }).catch(() => {
+      if (alive) setNotice('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.');
     });
     return () => { alive = false; };
   }, [user]);
   useEffect(() => {
-    if (!supabase || !user || !progressReady || !progress.length) return;
+    if (!supabase || !user || progressLoadedFor !== user.id || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
-    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true });
-  }, [user, progressReady, progress]);
+    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
+      .then(({ error: saveError }) => {
+        if (saveError) setNotice('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.');
+      });
+  }, [user, progressLoadedFor, progress]);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
@@ -524,6 +535,12 @@ export default function App() {
         <h2 id="welcome-title">Ассаляму алейкум!</h2>
         <p className="welcome-greeting">Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, осмысленно и в удобное время.</p>
         <p>Пусть эти знания принесут пользу тебе и тем, с кем ты ими поделишься.</p>
+        <p className="welcome-motivation">Не стремись выучить всё за один день. Начни с одного имени, вдумайся в его смысл и возвращайся к повторению. Маленький, но постоянный шаг ценнее большого порыва на один день.</p>
+        <div className="welcome-divider"></div>
+        <span className="muted-label welcome-support-label">ПОДДЕРЖАТЬ ПРОЕКТ</span>
+        <h3>Помоги этому знанию распространяться</h3>
+        <p>Если сайт оказался полезен тебе, можешь добровольно поддержать его развитие. Любая сумма — только по твоему желанию.</p>
+        <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
         <button className="welcome-continue" onClick={closeWelcome}>Перейти к изучению <ArrowRight size={16}/></button>
         <span className="welcome-signature">С уважением, Рамазан</span>
       </section></div>}
