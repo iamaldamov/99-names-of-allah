@@ -503,11 +503,20 @@ export default function App() {
         <section className="creator-section"><div className="creator-mark">ر</div><div className="creator-content"><h2>Ассаляму алейкум!</h2><p>Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, красиво и в удобное время.</p><p>Пусть этот проект станет причиной пользы для нас и для тех, с кем мы им поделимся.</p><span className="creator-signature">С уважением, Рамазан</span></div></section>
         <section className="book-section"><div className="book-icon"><BookOpen size={22}/></div><div className="book-copy"><span className="muted-label">ЕЩЁ ОДИН МОЙ ПРОЕКТ</span><h2>Книга «Очищение нафса»</h2><p>Также я работаю над книгой о воспитании души и очищении сердца.</p><a className="book-link" href={BOOK_URL} target="_blank" rel="noreferrer">Перейти к книге <ArrowRight size={15}/></a></div></section>
       </details>
+      <details className="compact-details reveal support-details" id="support"><summary><span><b>Помощь и поддержка</b><small>Ответы на вопросы и возможность поддержать проект</small></span><ChevronRight size={18}/></summary>
+        <section className="support-content">
+          <div className="support-heading"><span className="support-symbol">♡</span><div><span className="muted-label">МЫ РАДЫ ТВОЕЙ ПОДДЕРЖКЕ</span><h2>Пусть знания распространяются</h2><p>Этот сайт создан бесплатно, чтобы каждый мог изучать прекрасные имена Аллаха. Ты можешь помочь проекту продолжать развиваться.</p></div></div>
+          <div className="support-options">
+            <article><span className="support-option-icon">♥</span><div><h3>Финансовая поддержка</h3><p>Если сайт принёс тебе пользу и у тебя есть желание, можешь добровольно поддержать его развитие. Это необязательно — все учебные материалы остаются бесплатными.</p><a className="donation-button" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a></div></article>
+            <article><span className="support-option-icon">↗</span><div><h3>Поделись сайтом</h3><p>Расскажи о проекте близким и друзьям. Возможно, благодаря твоей рекомендации кто-то начнёт изучать имена Аллаха.</p><button className="support-share-button" onClick={shareSite}><Share2 size={15}/> Поделиться сайтом</button></div></article>
+          </div>
+          <p className="support-note">Поддержка полностью добровольная. Доступ к изучению, повторению и тестам не зависит от пожертвований.</p>
+        </section>
+      </details>
       <div className="export-tools"><button className="secondary-button" onClick={()=>{if(!progress.length){setNotice('Пока нет изученных имён для PDF. Отметь имя как изученное и повтори.');return;}setShowPrintList(true);window.setTimeout(()=>window.requestAnimationFrame(()=>window.print()),600);}}>Печать / сохранить PDF</button></div>
       {showPrintList && <section className="print-sheet"><h1>Изученные имена Аллаха</h1><p>Сохранено на сайте: {progress.length} из 99</p>{names.filter(n=>progress.includes(n.id)).map(n=><article key={n.id}><h2>{n.id}. {n.translation}</h2><div className="print-arabic" dir="rtl">{n.arabic}</div><p>{shownTransliteration(n)}</p><p>{n.explanation}</p></article>)}</section>}
       {notice && <p className="share-notice" role="status">{notice}</p>}
       <footer><span>99 имён Аллаха · Учись с намерением и постоянством</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> Поделиться</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> Сохранить</button></div></footer>
-      <a className="floating-support" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer"><span>♥</span> Поддержать проект</a>
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
         <button className="modal-x" aria-label="Закрыть" onClick={closeWelcome}><X size={19}/></button>
@@ -515,11 +524,6 @@ export default function App() {
         <h2 id="welcome-title">Ассаляму алейкум!</h2>
         <p className="welcome-greeting">Меня зовут <b>Рамазан</b>. Я создал этот бесплатный сайт, чтобы каждый желающий мог изучать 99 прекрасных имён Аллаха — спокойно, осмысленно и в удобное время.</p>
         <p>Пусть эти знания принесут пользу тебе и тем, с кем ты ими поделишься.</p>
-        <div className="welcome-divider"></div>
-        <span className="muted-label welcome-support-label">ПОДДЕРЖАТЬ ПРОЕКТ</span>
-        <h3>Помоги этому знанию распространяться</h3>
-        <p>Если сайт оказался полезен тебе, можешь добровольно поддержать его развитие. Любая сумма — только по твоему желанию.</p>
-        <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
         <button className="welcome-continue" onClick={closeWelcome}>Перейти к изучению <ArrowRight size={16}/></button>
         <span className="welcome-signature">С уважением, Рамазан</span>
       </section></div>}
