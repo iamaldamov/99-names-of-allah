@@ -757,22 +757,12 @@ html{scroll-padding-top:18px}
 }
 
 /* Refined translucent controls and compact welcome screen */
-.lesson-navigation{background:linear-gradient(to bottom,rgba(255,255,255,.68),rgba(255,255,255,.86));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-top:1px solid rgba(145,165,148,.22)}
-.lesson-nav-button{background:rgba(255,255,255,.34);border:1px solid rgba(116,145,122,.32);color:#42634d;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 3px 12px rgba(32,62,42,.06);transition:background .2s ease,border-color .2s ease,transform .2s ease}
-.lesson-nav-button.lesson-next{background:rgba(133,169,139,.22);border-color:rgba(103,145,111,.34);color:#365b42}
-.lesson-nav-button:not(:disabled):active{transform:scale(.97);background:rgba(133,169,139,.34)}
 .welcome-modal{width:min(100%,440px);max-height:calc(100dvh - 28px);overflow:visible;padding:25px 24px 22px}
 .welcome-bismillah{margin:0 auto 8px;font-size:25px;line-height:1.55}
 .welcome-modal h2{font-size:24px;margin:7px 0 9px}
 .welcome-modal p{font-size:12px;line-height:1.65;margin:0 auto 9px}
 .welcome-intention{padding:10px 12px}
 .welcome-actions{display:grid;gap:9px;margin-top:14px}
-.welcome-continue,.welcome-donation{width:100%;min-height:44px;margin:0;padding:11px 16px;justify-content:center;border-radius:24px;background:rgba(255,255,255,.38);border:1px solid rgba(116,145,122,.34);color:#416c59;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 5px 18px rgba(30,55,37,.07);transition:background .2s ease,border-color .2s ease,transform .2s ease}
-.welcome-continue:hover,.welcome-donation:hover{background:rgba(145,180,150,.24);border-color:rgba(100,139,107,.48)}
-.welcome-continue:active,.welcome-donation:active{transform:scale(.985)}
-:root[data-theme="dark"] .lesson-navigation{background:linear-gradient(to bottom,rgba(22,34,27,.72),rgba(22,34,27,.9));border-color:rgba(180,205,183,.12)}
-:root[data-theme="dark"] .lesson-nav-button,:root[data-theme="dark"] .welcome-continue,:root[data-theme="dark"] .welcome-donation{background:rgba(205,226,207,.08);border-color:rgba(190,215,193,.2);color:#d5e6d7}
-:root[data-theme="dark"] .lesson-nav-button.lesson-next{background:rgba(145,183,151,.18);border-color:rgba(174,207,179,.25);color:#e0eee1}
 :root[data-theme="dark"] .welcome-modal{background:rgba(30,43,34,.96);border:1px solid rgba(195,220,198,.12)}
 @media(max-width:480px){.welcome-backdrop{padding:12px}.welcome-modal{max-height:calc(100dvh - 24px);padding:20px 17px 17px}.welcome-bismillah{font-size:23px;margin-bottom:5px}.welcome-modal h2{font-size:22px}.welcome-modal p{font-size:11.5px;line-height:1.58;margin-bottom:7px}.welcome-actions{gap:8px;margin-top:10px}.welcome-continue,.welcome-donation{min-height:42px;padding:10px 14px}}
 
@@ -855,74 +845,6 @@ html{scroll-padding-top:18px}
   from { opacity: .72; transform: translate3d(22px,0,0) scale(.992); }
   to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
-/* Separate glass-style controls throughout the interface. */
-button:not(.name-row) {
-  background-color: rgba(255,255,255,.34) !important;
-  border: 1px solid rgba(116,145,122,.30) !important;
-  border-radius: 14px;
-  -webkit-backdrop-filter: blur(13px);
-  backdrop-filter: blur(13px);
-  box-shadow: 0 3px 12px rgba(32,62,42,.055);
-  color: var(--green,#416c59);
-}
-button:not(.name-row):not(:disabled):hover {
-  background-color: rgba(145,180,150,.20) !important;
-  border-color: rgba(100,139,107,.46) !important;
-}
-button:not(.name-row):not(:disabled):active {
-  background-color: rgba(133,169,139,.27) !important;
-}
-button.primary-button:not(:disabled),
-button.welcome-continue:not(:disabled) {
-  background-color: rgba(92,132,101,.19) !important;
-  color: var(--green,#416c59);
-  border-color: rgba(100,139,107,.38) !important;
-}
-button.quiz-options button.correct,
-.quiz-options button.correct {
-  background-color: rgba(111,166,119,.22) !important;
-  border-color: rgba(91,148,100,.55) !important;
-  color: #32633e;
-}
-button.quiz-options button.incorrect,
-.quiz-options button.incorrect {
-  background-color: rgba(194,103,91,.16) !important;
-  border-color: rgba(194,103,91,.48) !important;
-  color: #9b453c;
-}
-:root[data-theme="dark"] button:not(.name-row) {
-  background-color: rgba(205,226,207,.075) !important;
-  border-color: rgba(190,215,193,.20) !important;
-  color: #d5e6d7;
-  box-shadow: 0 3px 12px rgba(0,0,0,.12);
-}
-:root[data-theme="dark"] button:not(.name-row):not(:disabled):hover {
-  background-color: rgba(145,183,151,.17) !important;
-  border-color: rgba(174,207,179,.34) !important;
-}
-:root[data-theme="dark"] button.primary-button:not(:disabled),
-:root[data-theme="dark"] button.welcome-continue:not(:disabled) {
-  background-color: rgba(145,183,151,.17) !important;
-  color: #e0eee1;
-}
-:root[data-theme="dark"] button.quiz-options button.correct,
-:root[data-theme="dark"] .quiz-options button.correct {
-  background-color: rgba(111,166,119,.22) !important;
-  color: #b7e0bd;
-}
-:root[data-theme="dark"] button.quiz-options button.incorrect,
-:root[data-theme="dark"] .quiz-options button.incorrect {
-  background-color: rgba(194,103,91,.2) !important;
-  color: #f0b9b1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .lesson-modal.swipe-direction-next,
-  .lesson-modal.swipe-direction-prev {
-    animation: none !important;
-  }
-}
-
-
 /* Keep horizontal pointer gestures reliable on touch devices. */
 .lesson-modal {
   touch-action: pan-y;
@@ -962,12 +884,6 @@ button.quiz-options button.incorrect,
 :is(.name-row, .review-queue-row, .filter-tabs, .quiz-options button,
     .challenge-options button, .review-session-actions button, .support-share-button) {
   border-radius: 17px !important;
-}
-button:not(.name-row) {
-  border-radius: var(--control-radius) !important;
-}
-button:has(svg):not(.primary-button):not(.welcome-continue):not(.quiz-options button):not(.challenge-options button) {
-  border-radius: 50% !important;
 }
 input, select, textarea, .account-form input {
   border-radius: 16px !important;
