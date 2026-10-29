@@ -624,3 +624,68 @@ html{scroll-padding-top:18px}
   .references-intro,.editorial-note,.progress-foot{color:#536157}
   .name-info small,.locked-row small,.quiz-translit{color:#59675d}
 }
+
+
+/* Refined motion, touch feedback and accessible interactive controls */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity .72s cubic-bezier(.22,.7,.2,1), transform .72s cubic-bezier(.22,.7,.2,1);
+  will-change: opacity, transform;
+}
+.reveal.revealed { opacity: 1; transform: translate3d(0,0,0); }
+.reveal.revealed > :is(h1,h2,h3,p,.eyebrow,.muted-label,.section-heading,.progress-heading,.challenge-top,.hero-caption) {
+  animation: gentle-content-in .62s cubic-bezier(.22,.7,.2,1) both;
+}
+.reveal.revealed > :is(p,.hero-copy) { animation-delay: .08s; }
+.reveal.revealed > :is(.primary-button,.journey-continue,.progress-track) { animation: gentle-content-in .62s .14s both; }
+@keyframes gentle-content-in {
+  from { opacity: 0; transform: translate3d(0,12px,0); filter: blur(1.5px); }
+  to { opacity: 1; transform: translate3d(0,0,0); filter: blur(0); }
+}
+
+/* Buttons feel consistent, clear and comfortable on touch screens. */
+:where(button,.primary-button,.donation-button,.save-button,.login-button,.secondary-button) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform .2s cubic-bezier(.2,.7,.2,1), box-shadow .2s ease,
+    background-color .2s ease, border-color .2s ease, color .2s ease, opacity .2s ease;
+}
+:where(button):not(:disabled):active {
+  transform: scale(.975);
+}
+:where(button):disabled {
+  cursor: not-allowed;
+}
+.primary-button,.welcome-continue,.challenge-result button {
+  box-shadow: 0 7px 18px rgba(55,100,72,.16);
+}
+.primary-button:not(:disabled):hover,.welcome-continue:hover,.challenge-result button:hover {
+  box-shadow: 0 10px 24px rgba(55,100,72,.22);
+}
+.name-row,.review-queue-row,.journey-continue,.filter-tabs button,
+.quiz-options button,.challenge-options button,.lesson-nav-button,
+.lesson-quick-actions button,.recall-compact button,.compact-details>summary {
+  transition: background-color .22s ease, border-color .22s ease, color .22s ease,
+    box-shadow .22s ease, transform .22s cubic-bezier(.2,.7,.2,1);
+}
+.name-row:active,.review-queue-row:active,.journey-continue:active,
+.quiz-options button:active,.challenge-options button:active {
+  transform: scale(.992);
+}
+:where(button,a,input,select,textarea,[tabindex]):focus-visible {
+  outline: 3px solid rgba(91,133,99,.55);
+  outline-offset: 3px;
+}
+@media (hover:none) and (pointer:coarse) {
+  .primary-button,.login-button,.secondary-button,.filter-tabs button,
+  .quiz-options button,.challenge-options button,.lesson-nav-button,
+  .compact-details>summary,.support-share-button {
+    min-height: 46px;
+  }
+  .name-row { min-height: 66px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .reveal,.reveal.revealed,* { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .reveal { opacity: 1; transform: none; }
+}
