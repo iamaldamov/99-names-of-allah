@@ -718,3 +718,14 @@ html{scroll-padding-top:18px}
 .review-session-forgot{border:1px solid var(--line);background:transparent;color:var(--ink)}
 :root[data-theme="dark"] .review-session-remembered{background:#263f2d;border-color:#45694d;color:#b7e0bd}
 @media(max-width:480px){.review-session-modal>h2{font-size:19px}.review-session-actions{grid-template-columns:1fr}}
+
+
+/* Arabic name pronunciation controls */
+.name-audio-controls{display:flex;flex-direction:column;align-items:center;gap:7px;margin:4px auto 18px}
+.name-audio-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:11px 19px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--green);font:700 13px 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 5px 16px rgba(34,65,43,.07)}
+.name-audio-button:hover,.name-audio-button.is-playing{background:var(--green);border-color:var(--green);color:#fff}
+.name-audio-controls>span{color:var(--muted);font-size:10px;text-align:center}
+.review-audio-controls{margin:8px auto 15px}
+:root[data-theme="dark"] .name-audio-button{background:#1d2b22;border-color:#435747;color:#d5e6d4}
+:root[data-theme="dark"] .name-audio-button:hover,:root[data-theme="dark"] .name-audio-button.is-playing{background:#55785d;border-color:#55785d;color:#fff}
+@media(max-width:480px){.name-audio-button{width:100%;max-width:290px;min-height:48px}}
