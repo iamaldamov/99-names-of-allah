@@ -994,3 +994,229 @@ input, select, textarea, .account-form input {
   from { opacity: .72; transform: translate3d(-22px,0,0) scale(.992); }
   to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
+
+
+/* 2026 visual refresh — refined typography, layered surfaces and premium controls */
+:root{
+  --ink:#1f3028;
+  --muted:#78877d;
+  --green:#315f4a;
+  --green-deep:#244b39;
+  --green-soft:#e9f1e9;
+  --line:#e3ebe3;
+  --paper:#ffffff;
+  --surface-radius:26px;
+  --soft-radius:20px;
+  --control-radius:16px;
+  --shadow-soft:0 12px 34px rgba(31,48,40,.065);
+  --shadow-card:0 18px 48px rgba(31,48,40,.085);
+  font-family:Inter,"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:-.01em;
+}
+body{
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at 88% 3%,rgba(218,232,218,.42),transparent 34rem),
+    linear-gradient(180deg,#fafbf8 0%,#f5f8f4 100%);
+  -webkit-font-smoothing:antialiased;
+}
+.app-shell{max-width:1080px;padding-left:clamp(18px,4vw,42px);padding-right:clamp(18px,4vw,42px)}
+.topbar{height:78px;border-color:rgba(218,229,218,.82)}
+.brand{font-size:16px;letter-spacing:-.65px}
+.brand-mark{width:38px;height:38px;border-radius:14px;background:linear-gradient(145deg,#edf4ed,#dfeade);box-shadow:inset 0 1px 0 #fff,0 5px 14px rgba(49,95,74,.08)}
+.hero{padding-top:82px;padding-bottom:72px}
+.hero h1{font-size:clamp(38px,5.6vw,64px);line-height:1.07;letter-spacing:-2.8px;font-weight:600}
+.hero h1 em{color:#426d53}
+.hero-copy{font-size:15px;line-height:1.9;color:#718076}
+.eyebrow,.muted-label{font-size:10px;letter-spacing:1.9px}
+.hero-art{background:radial-gradient(circle,#e8f1e8 0,#e5eee4 52%,rgba(247,250,246,.15) 73%);color:#64836c}
+.progress-card,.quiz-card,.principle-card,.book-section,.info-modal,.welcome-modal,.account-section,.action-card,.name-list,.compact-details,.review-stats>div,.review-empty,.reference-list,.lesson-modal{
+  border-radius:var(--surface-radius);
+  border-color:rgba(220,231,220,.9);
+  box-shadow:var(--shadow-soft);
+}
+.progress-card{padding:27px 30px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.progress-heading h2,.section-heading h2{letter-spacing:-.65px}
+.progress-track{height:8px;background:#edf2ec;border-radius:99px}
+.progress-track span{border-radius:99px;background:linear-gradient(90deg,#426e54,#83a98a)}
+.name-list{overflow:hidden;background:rgba(255,255,255,.9)}
+.name-row{min-height:76px;padding:14px 22px;border-bottom-color:#edf2ed;transition:background .22s,transform .22s}
+.name-row:hover,.name-row.selected{background:#f4f8f3}
+.name-row:active{transform:scale(.995)}
+.name-arabic{font-size:31px;color:#38674c}
+.name-info b{font-size:14px;letter-spacing:-.2px}
+.name-info small{font-size:11px}
+.compact-details{margin-bottom:13px;background:rgba(255,255,255,.76);overflow:hidden}
+.compact-details>summary{padding:19px 22px;min-height:72px}
+.compact-details>summary b{font-size:14px;letter-spacing:-.2px}
+.compact-details>summary>svg{transition:transform .28s ease}
+.compact-details[open]>summary>svg{transform:rotate(90deg)}
+.principle-grid{gap:14px}
+.principle-card{padding:23px;background:rgba(255,255,255,.88);transition:transform .25s,box-shadow .25s}
+.principle-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-card)}
+.share-section,.donation-section{border-radius:30px;box-shadow:var(--shadow-soft);border-color:#dce8dc}
+.share-section{background:linear-gradient(145deg,rgba(237,245,236,.95),rgba(255,255,255,.82) 68%,rgba(229,239,228,.9))}
+.donation-section{background:linear-gradient(145deg,#eaf3e9,#fbfcf9 66%,#e7f0e6)}
+.creator-mark,.book-icon,.account-icon,.info-modal-icon{border-radius:17px}
+.book-section{background:rgba(255,255,255,.86);padding:26px}
+.lesson-modal,.info-modal{border:1px solid rgba(225,234,225,.92);box-shadow:0 30px 90px rgba(22,40,29,.18)}
+.lesson-modal{padding:30px 30px 27px}
+.lesson-arabic{color:#315f49}
+.lesson-meaning{border-radius:18px}
+.source-note{border-radius:15px}
+.name-search,.account-form input{border-radius:15px;min-height:48px}
+.name-search:focus,.account-form input:focus{border-color:#87a88d;box-shadow:0 0 0 4px rgba(65,108,89,.10)}
+.quiz-card{padding:28px;background:rgba(255,255,255,.9)}
+.quiz-options button,.challenge-options button{min-height:54px;border-radius:17px;padding:12px 16px;font-weight:600;transition:transform .2s,box-shadow .2s,border-color .2s,background .2s}
+.quiz-options button:hover,.challenge-options button:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(31,48,40,.07)}
+.filter-tabs button{padding:9px 15px;border-radius:999px}
+.action-card{border-radius:23px;padding:20px 18px;background:rgba(255,255,255,.88)}
+.action-card.action-main{background:linear-gradient(145deg,#edf5ec,#e5efe4);border-color:#d9e7d8}
+.action-icon{border-radius:14px;background:linear-gradient(145deg,#edf4ed,#dfeade)}
+.account-section{background:linear-gradient(135deg,#edf4ed,#f8faf6);padding:25px}
+footer{border-top:1px solid rgba(220,230,220,.75);margin-top:22px}
+.footer-actions button{border-radius:999px;padding:10px 14px}
+
+/* Primary actions: tactile, confident, app-quality buttons */
+:where(button,.primary-button,.donation-button,.save-button,.login-button,.secondary-button){
+  -webkit-tap-highlight-color:transparent;
+}
+.primary-button,.welcome-continue,.challenge-result button,.journey-continue,.lesson-nav-button.lesson-next{
+  min-height:52px;
+  padding:14px 23px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;
+  color:#fff;
+  background:linear-gradient(135deg,#3d7657 0%,#2d6045 56%,#244d39 100%);
+  box-shadow:0 9px 22px rgba(49,95,74,.22),inset 0 1px 0 rgba(255,255,255,.2);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.01em;
+  transition:transform .22s ease,box-shadow .22s ease,filter .22s ease;
+}
+.primary-button:not(:disabled):hover,.welcome-continue:hover,.challenge-result button:hover,.journey-continue:hover,.lesson-nav-button.lesson-next:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.04);
+  box-shadow:0 13px 28px rgba(49,95,74,.27),inset 0 1px 0 rgba(255,255,255,.22);
+}
+.primary-button:not(:disabled):active,.welcome-continue:active,.challenge-result button:active,.journey-continue:active{
+  transform:translateY(1px) scale(.985);
+  box-shadow:0 4px 12px rgba(49,95,74,.2),inset 0 1px 2px rgba(0,0,0,.08);
+}
+.login-button,.secondary-button,.save-button,.support-share-button,.lesson-nav-button:not(.lesson-next),.lesson-nav-button.lesson-prev{
+  min-height:46px;
+  padding:11px 17px;
+  border:1px solid rgba(211,225,212,.95);
+  border-radius:999px;
+  color:#365c43;
+  background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(241,247,240,.82));
+  box-shadow:0 5px 14px rgba(38,65,45,.055),inset 0 1px 0 #fff;
+  font-size:12px;
+  font-weight:650;
+  transition:transform .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.login-button:hover,.secondary-button:hover,.save-button:hover,.support-share-button:hover,.lesson-nav-button:not(.lesson-next):hover{
+  transform:translateY(-2px);
+  background:#fff;
+  box-shadow:0 9px 20px rgba(38,65,45,.09);
+}
+.welcome-actions{gap:12px}
+.welcome-continue{width:100%;justify-content:center}
+.welcome-donation{min-height:50px;border-radius:999px}
+.donation-button{min-height:52px;border-radius:999px;padding:15px 25px;background:linear-gradient(135deg,#3d7657,#244d39);box-shadow:0 9px 22px rgba(49,95,74,.2)}
+.donation-button:hover{transform:translateY(-2px);box-shadow:0 13px 26px rgba(49,95,74,.25)}
+.save-button{background:rgba(255,255,255,.86)}
+.filter-tabs button{min-height:39px;font-weight:650}
+.filter-tabs button.active{background:linear-gradient(135deg,#e7f1e6,#dcebdd);border-color:#cbdccb;color:#315f49;box-shadow:inset 0 1px 0 #fff}
+.quiz-options button{background:linear-gradient(145deg,#fff,#f7faf6);border-color:#e1eae0;color:#3b5141}
+.quiz-options button.correct,.challenge-options button.is-correct{background:#eaf5e9;border-color:#9fc4a1;color:#2f6840}
+.quiz-options button.incorrect,.challenge-options button.is-wrong{background:#fff0ed;border-color:#e6b4ab;color:#994b40}
+.lesson-quick-actions button,.recall-compact button,.modal-x{
+  width:44px;height:44px;min-width:44px;min-height:44px;
+  display:inline-grid;place-items:center;
+  border-radius:50%;
+  border:1px solid rgba(215,227,216,.95);
+  background:rgba(255,255,255,.82);
+  color:#54745b;
+  box-shadow:0 5px 14px rgba(38,65,45,.07);
+}
+.close-button{padding:10px 15px;border-radius:999px;background:#f3f7f2;color:#6e7f72}
+.action-card{cursor:pointer}
+.action-card:active,.name-row:active,.review-queue-row:active{transform:scale(.99)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
+  outline:3px solid rgba(84,137,94,.3);
+  outline-offset:3px;
+}
+button:disabled{cursor:not-allowed}
+
+/* Gentle top-to-bottom entrance rhythm */
+@keyframes refined-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.hero .eyebrow{animation:refined-enter .55s .04s both}
+.hero h1{animation:refined-enter .68s .11s both}
+.hero-copy{animation:refined-enter .68s .2s both}
+.hero .primary-button{animation:refined-enter .68s .29s both}
+.progress-card{animation:refined-enter .7s .12s both}
+.learning-section,.compact-details,.share-section,.donation-section,.creator-section,.book-section{animation:refined-enter .65s both}
+@media(max-width:650px){
+  .app-shell{padding-left:17px;padding-right:17px}
+  .topbar{height:68px}
+  .hero{padding-top:55px;padding-bottom:43px}
+  .hero h1{font-size:clamp(34px,9vw,43px);letter-spacing:-1.8px;max-width:100%}
+  .hero-copy{font-size:13px;line-height:1.8}
+  .progress-card{padding:20px;border-radius:23px;margin-bottom:38px}
+  .name-row{min-height:70px;padding:12px 10px;grid-template-columns:25px 58px minmax(0,1fr) 16px}
+  .name-arabic{font-size:25px}
+  .name-info{padding-left:8px}
+  .name-info b{font-size:12px}
+  .compact-details>summary{padding:16px 17px;min-height:66px}
+  .lesson-modal{width:min(100%,440px);padding:24px 19px 22px;border-radius:26px}
+  .info-modal{border-radius:25px}
+  .primary-button,.welcome-continue,.challenge-result button,.journey-continue{min-height:52px;padding:14px 19px;font-size:13px}
+  .login-button,.secondary-button,.save-button,.support-share-button{min-height:44px;padding:10px 14px}
+  .action-grid{gap:10px}
+  .action-card{min-height:145px;padding:15px 13px;border-radius:20px}
+  .quiz-card{padding:21px 15px}
+  .quiz-options{gap:8px}
+  .quiz-options button{min-height:50px}
+  .book-section{border-radius:22px;padding:19px}
+  footer{padding:25px 0;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero .eyebrow,.hero h1,.hero-copy,.hero .primary-button,.progress-card,.learning-section,.compact-details,.share-section,.donation-section,.creator-section,.book-section{animation:none!important}
+  .primary-button,.welcome-continue,.challenge-result button,.journey-continue,.action-card,.name-row,.quiz-options button{transition:none!important}
+}
+:root[data-theme="dark"] body{
+  background:radial-gradient(ellipse at 88% 3%,rgba(47,83,59,.2),transparent 34rem),linear-gradient(180deg,#111a15,#151f19);
+}
+:root[data-theme="dark"] .progress-card,
+:root[data-theme="dark"] .name-list,
+:root[data-theme="dark"] .compact-details,
+:root[data-theme="dark"] .principle-card,
+:root[data-theme="dark"] .quiz-card,
+:root[data-theme="dark"] .book-section,
+:root[data-theme="dark"] .action-card,
+:root[data-theme="dark"] .lesson-modal,
+:root[data-theme="dark"] .info-modal{
+  background:rgba(29,43,34,.92);
+  border-color:#34483a;
+  box-shadow:0 16px 42px rgba(0,0,0,.2);
+}
+:root[data-theme="dark"] .name-row{background:transparent;border-bottom-color:#2b3c30}
+:root[data-theme="dark"] .name-row:hover,:root[data-theme="dark"] .name-row.selected{background:#25382a}
+:root[data-theme="dark"] .primary-button,:root[data-theme="dark"] .welcome-continue,:root[data-theme="dark"] .donation-button,:root[data-theme="dark"] .lesson-nav-button.lesson-next{
+  background:linear-gradient(135deg,#548565,#315f45);
+  box-shadow:0 9px 22px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.15);
+}
+:root[data-theme="dark"] .login-button,:root[data-theme="dark"] .secondary-button,:root[data-theme="dark"] .save-button,:root[data-theme="dark"] .support-share-button,:root[data-theme="dark"] .lesson-nav-button:not(.lesson-next){
+  background:linear-gradient(145deg,#26392c,#1d2d22);
+  border-color:#3b5541;color:#d1e2d1;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+:root[data-theme="dark"] .lesson-quick-actions button,:root[data-theme="dark"] .recall-compact button,:root[data-theme="dark"] .modal-x{
+  background:#25382a;border-color:#3b5541;color:#c3d9c5;
+}
+:root[data-theme="dark"] .quiz-options button{background:#24362a;border-color:#3b5140;color:#d5e2d6}
+:root[data-theme="dark"] .quiz-options button.correct{background:#24432c;border-color:#4c8054;color:#c8e7cb}
+:root[data-theme="dark"] .quiz-options button.incorrect{background:#482b29;border-color:#85504a;color:#f0c6bf}
+:root[data-theme="dark"] .share-section,:root[data-theme="dark"] .donation-section,:root[data-theme="dark"] .account-section{
+  background:linear-gradient(145deg,#203528,#1a281e 70%,#24392a);border-color:#344c39;
+}
