@@ -729,3 +729,29 @@ html{scroll-padding-top:18px}
 :root[data-theme="dark"] .name-audio-button{background:#1d2b22;border-color:#435747;color:#d5e6d4}
 :root[data-theme="dark"] .name-audio-button:hover,:root[data-theme="dark"] .name-audio-button.is-playing{background:#55785d;border-color:#55785d;color:#fff}
 @media(max-width:480px){.name-audio-button{width:100%;max-width:290px;min-height:48px}}
+
+/* Minimal scroll reveal: soft fade and a small upward movement. */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition: opacity .58s cubic-bezier(.22,.7,.2,1),
+    transform .58s cubic-bezier(.22,.7,.2,1);
+  will-change: opacity, transform;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+/* Keep the entrance quiet: no blur, bounce or competing nested animations. */
+.reveal.revealed > :is(h1,h2,h3,p,.eyebrow,.muted-label,.section-heading,.progress-heading,.challenge-top,.hero-caption,.primary-button,.journey-continue,.progress-track) {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.revealed {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
