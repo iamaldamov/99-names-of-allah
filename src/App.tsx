@@ -685,7 +685,7 @@ export default function App() {
       {reviewSessionId !== null && (() => { const item = names.find(name => name.id === reviewSessionId); return item ? <div className="modal-backdrop review-session-backdrop" onClick={() => { setReviewSessionId(null); setReviewAnswerShown(false); }}><section className="lesson-modal review-session-modal" role="dialog" aria-modal="true" aria-label="Повторение имени" onClick={e => e.stopPropagation()}>
         <button className="close-button" onClick={() => { setReviewSessionId(null); setReviewAnswerShown(false); }}>Закрыть</button>
         <span className="muted-label">ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ</span>
-        <div className="review-session-step">Имя {item.id} · {dueReviewIds.filter(id => id >= reviewSessionId).length || 1} в очереди</div>
+        <div className="review-session-step">Имя {item.id} · {dueReviewIds.length} {dueReviewIds.length === 1 ? "имя в очереди" : "имён в очереди"}</div>
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
         <p className="lesson-translit">{shownTransliteration(item)}</p>
         <h2>Вспомни значение этого имени</h2>
