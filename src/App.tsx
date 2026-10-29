@@ -485,8 +485,16 @@ export default function App() {
 
   const handleButtonSound = (event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
-    const button = target.closest('button[data-feedback]');
-    if (button) playFeedbackSound('tap');
+    const button = target.closest('button[data-feedback], button[data-sound-special]') as HTMLButtonElement | null;
+    if (!button || button.disabled) return;
+    // Short haptic feedback where the browser/device supports the Vibration API.
+    // iPhone Safari currently does not expose it, so this safely becomes a no-op there.
+    try {
+      if ('vibrate' in navigator) navigator.vibrate(10);
+    } catch { /* Haptics are optional and must never block a button action. */ }
+    if (button.hasAttribute('data-feedback') && !button.hasAttribute('data-sound-special')) {
+      playFeedbackSound('tap');
+    }
   };
 
   return (
