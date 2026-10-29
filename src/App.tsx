@@ -253,6 +253,7 @@ export default function App() {
   const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
   const [clockNow, setClockNow] = useState(() => Date.now());
   const observedDayRef = useRef(localDayKey());
+  const dayKey = localDayKey(new Date(clockNow));
   const soundContextRef = useRef<AudioContext | null>(null);
   const playFeedbackSound = (kind: 'tap' | 'correct' | 'wrong') => {
     if (typeof window === 'undefined') return;
@@ -324,7 +325,7 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
-  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: todayKey, answers: challengeAnswers, currentAnswer: challengeCurrentAnswer })); } catch {} }, [challengeAnswers, challengeCurrentAnswer, todayKey]);
+  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: dayKey, answers: challengeAnswers, currentAnswer: challengeCurrentAnswer })); } catch {} }, [challengeAnswers, challengeCurrentAnswer, dayKey]);
   useEffect(() => {
     if (challengeAnswers.length !== 5) return;
     const score = challengeScore;
@@ -353,12 +354,12 @@ export default function App() {
     return () => window.clearInterval(interval);
   }, []);
   useEffect(() => {
-    if (observedDayRef.current === todayKey) return;
-    observedDayRef.current = todayKey;
+    if (observedDayRef.current === dayKey) return;
+    observedDayRef.current = dayKey;
     setLearnedToday([]);
     setChallengeAnswers([]);
     setChallengeCurrentAnswer(null);
-  }, [todayKey]);
+  }, [dayKey]);
 
   const closeWelcome = () => setWelcomeOpen(false);
 
@@ -497,7 +498,7 @@ export default function App() {
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => !progress.includes(name.id));
-  const todayKey = localDayKey(new Date(clockNow));
+  const todayKey = dayKey;
   const weekActivity = useMemo(() => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = localDayKey(date); return { key, label: new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'ky' ? 'ky-KG' : language === 'ar' ? 'ar' : 'en', { weekday: 'short' }).format(date), count: studyDays[key] || 0, today: key === todayKey }; }), [language, studyDays, todayKey]);
   const activeDaysThisWeek = weekActivity.filter(day => day.count > 0).length;
   const currentStreak = useMemo(() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; }, [studyDays, todayKey]);
