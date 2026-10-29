@@ -282,9 +282,6 @@ export default function App() {
       }
     } catch { /* Audio is optional; the learning experience remains usable. */ }
   };
-  const openNameRecitation = () => {
-    window.open('https://www.naataudio.com/mp3/asma-ul-husna-mishary-rashid-1973', '_blank', 'noopener,noreferrer');
-  };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
