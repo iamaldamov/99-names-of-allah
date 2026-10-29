@@ -226,6 +226,8 @@ export default function App() {
   const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
   const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(loadReviewData);
+  const [reviewSessionId, setReviewSessionId] = useState<number | null>(null);
+  const [reviewAnswerShown, setReviewAnswerShown] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -466,6 +468,20 @@ export default function App() {
   }, [names, todayKey]);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= Date.now()).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress]);
   const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
+  const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
+  const finishReview = (remembered: boolean) => {
+    if (reviewSessionId === null) return;
+    const currentId = reviewSessionId;
+    recordRecall(currentId, remembered);
+    if (!remembered) {
+      setNotice('Ничего страшного. Это имя вернётся через 10 минут.');
+      setReviewSessionId(null); setReviewAnswerShown(false);
+      return;
+    }
+    const nextId = dueReviewIds.find(id => id !== currentId);
+    if (nextId !== undefined) { setReviewSessionId(nextId); setReviewAnswerShown(false); }
+    else { setReviewSessionId(null); setReviewAnswerShown(false); setNotice('Отлично! Все доступные на сегодня повторения завершены.'); }
+  };
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
       const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
@@ -601,7 +617,7 @@ export default function App() {
       <details className="compact-details reveal"><summary><span><b>Повторение и запоминание</b><small>{dueReviewIds.length ? dueReviewIds.length + ' имён ждут повторения' : 'Интервальные повторения помогут закрепить знания'}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
         <div className="review-system-intro"><span className="muted-label">ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ</span><h2>Запоминай надолго</h2><p>После изучения имя попадает в очередь повторения. Если вспомнил правильно — следующий интервал увеличивается. Если забыл — имя вернётся через 10 минут.</p></div>
         <div className="review-stats"><div><b>{dueReviewIds.length}</b><span>пора повторить</span></div><div><b>{Object.keys(reviewData).length}</b><span>в расписании</span></div><div><b>{Object.values(reviewData).reduce((sum,item)=>sum+item.correct,0)}</b><span>успешных повторений</span></div></div>
-        {dueReviewIds.length ? <div className="review-queue">{dueReviewIds.slice(0,8).map(id => { const item = names.find(n=>n.id===id); return item ? <button key={id} className="review-queue-row" data-feedback onClick={()=>setSelected(item)}><span className="review-queue-arabic" lang="ar" dir="rtl">{item.arabic}</span><span><b>{item.translation}</b><small>Повторить сейчас</small></span><ArrowRight size={16}/></button> : null; })}</div> : <div className="review-empty"><Check size={19}/><b>На сегодня всё повторено</b><span>Изученные имена появятся здесь, когда наступит срок повторения.</span></div>}
+        {dueReviewIds.length ? <div className="review-queue">{dueReviewIds.slice(0,8).map(id => { const item = names.find(n=>n.id===id); return item ? <button key={id} className="review-queue-row" data-feedback onClick={()=>startReview(id)}><span className="review-queue-arabic" lang="ar" dir="rtl">{item.arabic}</span><span><b>{item.translation}</b><small>Повторить сейчас</small></span><ArrowRight size={16}/></button> : null; })}</div> : <div className="review-empty"><Check size={19}/><b>На сегодня всё повторено</b><span>Изученные имена появятся здесь, когда наступит срок повторения.</span></div>}
         <p className="review-storage-note">Расписание хранится на этом устройстве. Чтобы не потерять его, не очищай данные браузера. Синхронизация расписания между устройствами пока не подключена.</p>
       </section></details>
       <details className="compact-details reveal"><summary><span><b>Методика обучения</b><small>Как запоминать и повторять</small></span><ChevronRight size={18}/></summary><section className="principles-section" id="method">
@@ -665,6 +681,17 @@ export default function App() {
           <button className="lesson-nav-button lesson-next" data-feedback disabled={selected.id >= 99} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id + 1) || null); }}>Следующее <ArrowRight size={15}/></button>
         </div>
       </section></div>}
+
+      {reviewSessionId !== null && (() => { const item = names.find(name => name.id === reviewSessionId); return item ? <div className="modal-backdrop review-session-backdrop" onClick={() => { setReviewSessionId(null); setReviewAnswerShown(false); }}><section className="lesson-modal review-session-modal" role="dialog" aria-modal="true" aria-label="Повторение имени" onClick={e => e.stopPropagation()}>
+        <button className="close-button" onClick={() => { setReviewSessionId(null); setReviewAnswerShown(false); }}>Закрыть</button>
+        <span className="muted-label">ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ</span>
+        <div className="review-session-step">Имя {item.id} · {dueReviewIds.filter(id => id >= reviewSessionId).length || 1} в очереди</div>
+        <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
+        <p className="lesson-translit">{shownTransliteration(item)}</p>
+        <h2>Вспомни значение этого имени</h2>
+        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>Показать значение <ArrowRight size={16}/></button> : <><div className="review-session-answer"><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">Удалось вспомнить значение до подсказки?</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}><Check size={17}/> Вспомнил</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)}>Нужно повторить</button></div></>}
+        <p className="review-storage-note">Честно оцени своё воспоминание — так интервалы будут подбираться точнее.</p>
+      </section></div> : null; })()}
 
       {accountOpen && <div className="modal-backdrop" onClick={() => setAccountOpen(false)}><section className="info-modal account-modal" role="dialog" aria-modal="true" aria-label="Аккаунт" onClick={e => e.stopPropagation()}>
         <button className="modal-x" aria-label="Закрыть" onClick={() => setAccountOpen(false)}><X size={19}/></button><div className="info-modal-icon"><UserRound size={21}/></div>
