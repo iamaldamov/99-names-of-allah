@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 
@@ -230,6 +230,8 @@ export default function App() {
   const [reviewSessionId, setReviewSessionId] = useState<number | null>(null);
   const [reviewAnswerShown, setReviewAnswerShown] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
+  const [swipeHintVisible, setSwipeHintVisible] = useState(false);
+  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
   const [email, setEmail] = useState('');
@@ -419,6 +421,35 @@ export default function App() {
   useEffect(() => () => {
     if (praiseTimeoutRef.current !== null) window.clearTimeout(praiseTimeoutRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!selected) { setSwipeHintVisible(false); return; }
+    try {
+      if (localStorage.getItem('99-names-swipe-hint-seen') === '1') return;
+      localStorage.setItem('99-names-swipe-hint-seen', '1');
+      setSwipeHintVisible(true);
+      const timer = window.setTimeout(() => setSwipeHintVisible(false), 4400);
+      return () => window.clearTimeout(timer);
+    } catch { setSwipeHintVisible(true); }
+  }, [selected?.id]);
+
+  const handleLessonTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+    const touch = event.changedTouches[0];
+    if (touch) swipeStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const handleLessonTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
+    const start = swipeStartRef.current;
+    swipeStartRef.current = null;
+    const touch = event.changedTouches[0];
+    if (!start || !touch || !selected) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (Math.abs(dx) < 58 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    const nextId = selected.id + (dx > 0 ? 1 : -1);
+    if (nextId < 1 || nextId > 99) return;
+    setError('');
+    setSelected(completeNames.find(name => name.id === nextId) || null);
+  };
 
   const markLearned = async () => {
     if (!selected || busy) return;
@@ -653,20 +684,17 @@ export default function App() {
         </div>
       </section></div>}
 
-      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className="lesson-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
+      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section className={`lesson-modal${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onTouchStart={handleLessonTouchStart} onTouchEnd={handleLessonTouchEnd}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
+        {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>Смахни вправо — следующее имя</span><span className="swipe-hint-arrow">→</span></div>}
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'} title={favorites.includes(selected.id)?'Убрать из избранного':'В избранное'}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label="Поделиться карточкой" title="Поделиться карточкой"><Share2 size={18}/></button></div>
         <h2 className="text-enter">{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">ЗНАЧЕНИЕ ИМЕНИ</span><p className="lesson-description text-enter">{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> Изучено</p>{dueReviewIds.includes(selected.id) && <div className="recall-compact"><button aria-label="Вспомнил" title="Вспомнил" data-feedback onClick={()=>{recordRecall(selected.id,true);setNotice('Повторение отмечено. Следующее — через ' + REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)] + ' дн.');setSelected(null);}}><Check size={16}/></button><button aria-label="Повторить позже" title="Повторить позже" data-feedback onClick={()=>{recordRecall(selected.id,false);setNotice('Имя вернётся на повторение через 10 минут.');setSelected(null);}}><ArrowRight size={16}/></button></div>}</> : <button className="primary-button full" data-feedback disabled={busy} onClick={markLearned}>{busy ? 'Сохраняем…' : 'Изучил'} <Check size={17}/></button>}
-        <div className="lesson-navigation">
-          <button className="lesson-nav-button" data-feedback disabled={selected.id <= 1} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id - 1) || null); }}>← Предыдущее</button>
-          <span>{selected.id} из 99</span>
-          <button className="lesson-nav-button lesson-next" data-feedback disabled={selected.id >= 99} onClick={() => { setError(''); setSelected(completeNames.find(n => n.id === selected.id + 1) || null); }}>Следующее <ArrowRight size={15}/></button>
-        </div>
+
       </section></div>}
 
       {reviewSessionId !== null && (() => { const item = names.find(name => name.id === reviewSessionId); return item ? <div className="modal-backdrop review-session-backdrop" onClick={() => { setReviewSessionId(null); setReviewAnswerShown(false); }}><section className="lesson-modal review-session-modal" role="dialog" aria-modal="true" aria-label="Повторение имени" onClick={e => e.stopPropagation()}>
