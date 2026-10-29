@@ -555,7 +555,7 @@ export default function App() {
         <h1 className="text-enter">{tr('Познакомься с именами')}</h1>
         <p className="hero-copy text-enter">Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.</p>
         <button className="primary-button" data-feedback onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
-        <div className="hero-art" aria-hidden="true"><div className="art-ring ring-one"/><div className="art-ring ring-two"/></div>
+        
       </section>
 
       <section className="progress-card reveal">
