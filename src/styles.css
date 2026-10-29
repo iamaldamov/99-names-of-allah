@@ -775,3 +775,66 @@ html{scroll-padding-top:18px}
 :root[data-theme="dark"] .lesson-nav-button.lesson-next{background:rgba(145,183,151,.18);border-color:rgba(174,207,179,.25);color:#e0eee1}
 :root[data-theme="dark"] .welcome-modal{background:rgba(30,43,34,.96);border:1px solid rgba(195,220,198,.12)}
 @media(max-width:480px){.welcome-backdrop{padding:12px}.welcome-modal{max-height:calc(100dvh - 24px);padding:20px 17px 17px}.welcome-bismillah{font-size:23px;margin-bottom:5px}.welcome-modal h2{font-size:22px}.welcome-modal p{font-size:11.5px;line-height:1.58;margin-bottom:7px}.welcome-actions{gap:8px;margin-top:10px}.welcome-continue,.welcome-donation{min-height:42px;padding:10px 14px}}
+
+
+/* One-time swipe onboarding and calm card movement. */
+.lesson-modal {
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  animation: lesson-swipe-arrive .32s cubic-bezier(.2,.75,.25,1) both;
+}
+@keyframes lesson-swipe-arrive {
+  from { opacity: .72; transform: translate3d(18px,0,0) scale(.992); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+.lesson-modal.swipe-hint-active {
+  animation: lesson-swipe-arrive .32s cubic-bezier(.2,.75,.25,1) both,
+    lesson-card-nudge 1.05s ease-in-out .45s 3;
+}
+@keyframes lesson-card-nudge {
+  0%,100% { translate: 0 0; rotate: 0deg; }
+  24% { translate: 5px 0; rotate: .45deg; }
+  52% { translate: -3px 0; rotate: -.3deg; }
+  76% { translate: 3px 0; rotate: .25deg; }
+}
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 4px auto 13px;
+  padding: 9px 13px;
+  border: 1px solid rgba(104,139,109,.2);
+  border-radius: 999px;
+  background: rgba(133,169,139,.11);
+  color: var(--green,#54745b);
+  font-size: 11px;
+  font-weight: 650;
+  animation: swipe-hint-in .35s ease both;
+}
+.swipe-hint svg { flex: none; animation: finger-swipe 1.15s ease-in-out .25s 3; }
+.swipe-hint-arrow { font-size: 17px; line-height: 1; animation: arrow-swipe 1.15s ease-in-out .25s 3; }
+@keyframes swipe-hint-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes finger-swipe {
+  0%,100% { transform: translateX(0) rotate(-8deg); }
+  45% { transform: translateX(25px) rotate(4deg); }
+}
+@keyframes arrow-swipe {
+  0%,100% { opacity: .45; transform: translateX(0); }
+  45% { opacity: 1; transform: translateX(8px); }
+}
+:root[data-theme="dark"] .swipe-hint {
+  background: rgba(145,183,151,.12);
+  border-color: rgba(174,207,179,.2);
+  color: #d0e2d2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lesson-modal,.lesson-modal.swipe-hint-active,.swipe-hint,.swipe-hint svg,.swipe-hint-arrow {
+    animation: none !important;
+  }
+}
