@@ -247,6 +247,7 @@ export default function App() {
   };
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -515,11 +516,26 @@ export default function App() {
 
       <details className="compact-details reveal"><summary><span><b>Проверить знания</b><small>Короткий тест по именам</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
         <div className="section-heading"><div><span className="muted-label">ЗАКРЕПЛЕНИЕ ЗНАНИЙ</span><h2>Проверь, что запомнил</h2></div><span className="section-total">Мини-тест</span></div>
-        {quizItem && <div className="quiz-card">
+        {quizIndex < 5 && quizItem ? <div className="quiz-card">
+          <div className="challenge-progress"><span>ВОПРОС {quizIndex + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < quizIndex ? "done" : i === quizIndex ? "current" : ""}/>)}</div></div>
           <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem)}</p>
-          <div className="quiz-options">{quizOptions.map(option => <button key={option.id} className={quizAnswer === option.id ? (option.id === quizItem.id ? 'correct' : 'incorrect') : ''} onClick={() => setQuizAnswer(option.id)}>{option.translation}</button>)}</div>
-          {quizAnswer !== null && <p className={quizAnswer === quizItem.id ? 'quiz-feedback good' : 'quiz-feedback'}>{quizAnswer === quizItem.id ? 'Верно! Повтори смысл имени своими словами.' : 'Не совсем. Правильный ответ: ' + quizItem.translation}</p>}
-          <button className="quiz-next" onClick={() => {setQuizIndex(i => i + 1);setQuizAnswer(null);}}>Следующий вопрос <ArrowRight size={15}/></button>
+          <div className="quiz-options">{quizOptions.map(option => {
+            const answered = quizAnswer !== null;
+            const isCorrect = option.id === quizItem.id;
+            const isSelected = option.id === quizAnswer;
+            return <button key={option.id} disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} onClick={() => { if (answered) return; setQuizAnswer(option.id); }}>{option.translation}</button>;
+          })}</div>
+          {quizAnswer !== null && <div className={quizAnswer === quizItem.id ? 'challenge-feedback correct' : 'challenge-feedback wrong'}>
+            <b>{quizAnswer === quizItem.id ? 'Верно! Отличная работа.' : 'Не совсем. Правильный ответ:'}</b>
+            {quizItem.translation}
+          </div>}
+          {quizAnswer !== null && <button className="quiz-next" onClick={() => { setQuizAnswers(old => [...old, quizAnswer]); setQuizIndex(i => i + 1); setQuizAnswer(null); }}>{quizIndex === 4 ? 'Показать результат' : 'Следующий вопрос'} <ArrowRight size={15}/></button>}
+        </div> : <div className="challenge-result">
+          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length === 5 ? "✦" : "✓"}</span>
+          <h3>Тест завершён</h3>
+          <b>{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length} из 5 правильных ответов</b>
+          <p>{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз."}</p>
+          <button onClick={() => { setQuizIndex(0); setQuizAnswer(null); setQuizAnswers([]); }}>Пройти ещё раз <ArrowRight size={15}/></button>
         </div>}
       </section></details>
       <details className="compact-details reveal"><summary><span><b>Повторение и запоминание</b><small>{dueReviewIds.length ? dueReviewIds.length + ' имён ждут повторения' : 'Интервальные повторения помогут закрепить знания'}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
