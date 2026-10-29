@@ -722,7 +722,7 @@ export default function App() {
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>
         <div className="name-audio-controls">
-          <button className={speakingNameId === selected.id ? 'name-audio-button is-playing' : 'name-audio-button'} data-feedback onClick={() => speakName(selected)} aria-label={speakingNameId === selected.id ? tr('Остановить') : tr('Прослушать произношение')}>
+          <button className={speakingNameId === selected.id ? 'name-audio-button is-playing' : 'name-audio-button'} onClick={() => speakName(selected)} aria-label={speakingNameId === selected.id ? tr('Остановить') : tr('Прослушать произношение')}>
             {speakingNameId === selected.id ? <VolumeX size={18}/> : <Volume2 size={18}/>}
             {speakingNameId === selected.id ? tr('Остановить') : tr('Прослушать произношение')}
           </button>
@@ -746,7 +746,7 @@ export default function App() {
         <div className="review-session-step">Имя {item.id} · {dueReviewIds.length} {dueReviewIds.length === 1 ? "имя в очереди" : "имён в очереди"}</div>
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
         <div className="name-audio-controls review-audio-controls">
-          <button className={speakingNameId === item.id ? 'name-audio-button is-playing' : 'name-audio-button'} data-feedback onClick={() => speakName(item)} aria-label={speakingNameId === item.id ? tr('Остановить') : tr('Прослушать произношение')}>
+          <button className={speakingNameId === item.id ? 'name-audio-button is-playing' : 'name-audio-button'} onClick={() => speakName(item)} aria-label={speakingNameId === item.id ? tr('Остановить') : tr('Прослушать произношение')}>
             {speakingNameId === item.id ? <VolumeX size={18}/> : <Volume2 size={18}/>}
             {speakingNameId === item.id ? tr('Остановить') : tr('Прослушать произношение')}
           </button>
