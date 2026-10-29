@@ -1,5 +1,7 @@
 const CACHE_NAME = 'asma-ul-husna-v1';
-const APP_SHELL = ['./', './manifest.webmanifest'];
+const APP_URL = new URL('./', self.location.href).href;
+const MANIFEST_URL = new URL('./manifest.webmanifest', self.location.href).href;
+const APP_SHELL = [APP_URL, MANIFEST_URL];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -29,11 +31,11 @@ self.addEventListener('fetch', event => {
         .then(response => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('./', copy));
+            caches.open(CACHE_NAME).then(cache => cache.put(APP_URL, copy));
           }
           return response;
         })
-        .catch(() => caches.match('./'))
+        .catch(() => caches.match(APP_URL))
     );
     return;
   }
