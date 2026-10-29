@@ -4,7 +4,7 @@
 .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
 .reveal.revealed{opacity:1;transform:translateY(0)}
 .hero{animation:hero-enter .8s ease both}
-.hero-art span,.share-ornament{animation:calligraphy-glow 5s ease-in-out infinite}
+.share-ornament{animation:calligraphy-glow 5s ease-in-out infinite}
 .hero-caption{position:absolute;right:0;bottom:28px;color:#a3b4a6;font:19px Amiri;letter-spacing:3px}
 .share-section{position:relative;text-align:center;padding:58px 26px;margin:10px 0 34px;border:1px solid #e3eae1;border-radius:22px;background:linear-gradient(145deg,#f1f5ef,#fafbf8 65%,#edf3ec)}
 .share-section .muted-label{justify-content:center}
