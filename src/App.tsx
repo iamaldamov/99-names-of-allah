@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, TouchEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
@@ -425,7 +425,7 @@ export default function App() {
   useEffect(() => {
     if (!selected) { setSwipeHintVisible(false); return; }
     try {
-      if (localStorage.getItem('99-names-swipe-hint-seen') === '1') return;
+      if (localStorage.getItem('99-names-swipe-hint-seen') === '1') { setSwipeHintVisible(false); return; }
       localStorage.setItem('99-names-swipe-hint-seen', '1');
       setSwipeHintVisible(true);
       const timer = window.setTimeout(() => setSwipeHintVisible(false), 4400);
@@ -433,11 +433,11 @@ export default function App() {
     } catch { setSwipeHintVisible(true); }
   }, [selected?.id]);
 
-  const handleLessonTouchStart = (event: React.TouchEvent<HTMLElement>) => {
+  const handleLessonTouchStart = (event: TouchEvent<HTMLElement>) => {
     const touch = event.changedTouches[0];
     if (touch) swipeStartRef.current = { x: touch.clientX, y: touch.clientY };
   };
-  const handleLessonTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
+  const handleLessonTouchEnd = (event: TouchEvent<HTMLElement>) => {
     const start = swipeStartRef.current;
     swipeStartRef.current = null;
     const touch = event.changedTouches[0];
