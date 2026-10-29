@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent, TouchEvent } from 'react';
+import type { FormEvent, PointerEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
@@ -434,24 +434,61 @@ export default function App() {
     } catch { setSwipeHintVisible(true); }
   }, [selected?.id]);
 
-  const handleLessonTouchStart = (event: TouchEvent<HTMLElement>) => {
-    const touch = event.changedTouches[0];
-    if (touch) swipeStartRef.current = { x: touch.clientX, y: touch.clientY };
+  const playSwipeSound = () => {
+    try {
+      const AudioContextConstructor = window.AudioContext;
+      if (!AudioContextConstructor) return;
+      const audio = new AudioContextConstructor();
+      const duration = 0.13;
+      const frameCount = Math.floor(audio.sampleRate * duration);
+      const buffer = audio.createBuffer(1, frameCount, audio.sampleRate);
+      const channel = buffer.getChannelData(0);
+      for (let i = 0; i < frameCount; i += 1) {
+        const fade = 1 - i / frameCount;
+        channel[i] = (Math.random() * 2 - 1) * fade * fade;
+      }
+      const source = audio.createBufferSource();
+      const filter = audio.createBiquadFilter();
+      const volume = audio.createGain();
+      source.buffer = buffer;
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1700, audio.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(520, audio.currentTime + duration);
+      volume.gain.setValueAtTime(0.0001, audio.currentTime);
+      volume.gain.exponentialRampToValueAtTime(0.045, audio.currentTime + 0.018);
+      volume.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + duration);
+      source.connect(filter);
+      filter.connect(volume);
+      volume.connect(audio.destination);
+      source.onended = () => { void audio.close(); };
+      source.start();
+      source.stop(audio.currentTime + duration);
+    } catch {
+      // Audio is optional; swiping must always work without it.
+    }
   };
-  const handleLessonTouchEnd = (event: TouchEvent<HTMLElement>) => {
+
+  const handleLessonPointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    swipeStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+  const handleLessonPointerUp = (event: PointerEvent<HTMLElement>) => {
     const start = swipeStartRef.current;
     swipeStartRef.current = null;
-    const touch = event.changedTouches[0];
-    if (!start || !touch || !selected) return;
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
-    if (Math.abs(dx) < 58 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    if (!start || !selected) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+
+    // A rightward finger movement advances to the next name; left returns to the previous one.
     const isSwipeRight = dx > 0;
-    setSwipeDirection(isSwipeRight ? 1 : -1);
     const nextId = selected.id + (isSwipeRight ? 1 : -1);
     if (nextId < 1 || nextId > 99) return;
+
+    setSwipeDirection(isSwipeRight ? 1 : -1);
     setError('');
-    setSelected(completeNames.find(name => name.id === nextId) || null);
+    playSwipeSound();
+    setSelected(completeNames[nextId - 1] || null);
   };
 
   const markLearned = async () => {
@@ -687,7 +724,7 @@ export default function App() {
         </div>
       </section></div>}
 
-      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section key={selected.id} className={`lesson-modal ${swipeDirection > 0 ? 'swipe-direction-next' : 'swipe-direction-prev'}${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onTouchStart={handleLessonTouchStart} onTouchEnd={handleLessonTouchEnd}>
+      {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><section key={selected.id} className={`lesson-modal ${swipeDirection > 0 ? 'swipe-direction-next' : 'swipe-direction-prev'}${swipeHintVisible ? ' swipe-hint-active' : ''}`} role="dialog" aria-modal="true" aria-label={`Имя ${selected.id} из 99`} onClick={e => e.stopPropagation()} onPointerDown={handleLessonPointerDown} onPointerUp={handleLessonPointerUp} onPointerCancel={() => { swipeStartRef.current = null; }}>
         <button className="close-button" onClick={() => setSelected(null)}>Закрыть</button>
         <div className="lesson-topline"><span className="muted-label">ИМЯ {String(selected.id).padStart(2,'0')} ИЗ 99</span><span className="lesson-progress-line">{progress.length} / 99 изучено</span></div>
         {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>Смахни вправо — следующее имя</span><span className="swipe-hint-arrow">→</span></div>}
