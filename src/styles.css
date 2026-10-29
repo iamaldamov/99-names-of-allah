@@ -822,11 +822,11 @@ html{scroll-padding-top:18px}
 }
 @keyframes finger-swipe {
   0%,100% { transform: translateX(0) rotate(-8deg); }
-  45% { transform: translateX(25px) rotate(4deg); }
+  45% { transform: translateX(-25px) rotate(4deg); }
 }
 @keyframes arrow-swipe {
   0%,100% { opacity: .45; transform: translateX(0); }
-  45% { opacity: 1; transform: translateX(8px); }
+  45% { opacity: 1; transform: translateX(-8px); }
 }
 :root[data-theme="dark"] .swipe-hint {
   background: rgba(145,183,151,.12);
