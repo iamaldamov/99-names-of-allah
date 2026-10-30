@@ -962,6 +962,11 @@ Object.assign(languageText.ar, {
   "Поддержать проект": "ادعم المشروع"
 });
 
+Object.assign(languageText.ky, {"99 имён Аллаха — главная":"Аллахтын 99 ысымы — башкы бет","Переводы значений и объяснения имён пока доступны на русском языке.":"Ысымдардын маанилеринин котормосу жана түшүндүрмөлөрү азырынча орус тилинде гана жеткиликтүү."});
+Object.assign(languageText.kk, {"99 имён Аллаха — главная":"Алланың 99 есімі — басты бет","Переводы значений и объяснения имён пока доступны на русском языке.":"Есімдердің мағынасы мен түсіндірмелерінің аудармасы әзірге тек орыс тілінде қолжетімді."});
+Object.assign(languageText.en, {"99 имён Аллаха — главная":"99 Names of Allah — home","Переводы значений и объяснения имён пока доступны на русском языке.":"Translations of the Names and their explanations are currently available in Russian only."});
+Object.assign(languageText.ar, {"99 имён Аллаха — главная":"أسماء الله الحسنى — الصفحة الرئيسية","Переводы значений и объяснения имён пока доступны на русском языке.":"ترجمات معاني الأسماء وشروحها متاحة حاليًا باللغة الروسية فقط."});
+
 const russianTransliterations: Record<number, string> = {
   1:'Ар-Рахмаан', 2:'Ар-Рахиим', 3:'Аль-Малик', 4:'Аль-Куддус', 5:'Ас-Саляам',
   6:'Аль-Муъмин', 7:'Аль-Мухаймин', 8:'Аль-Азииз', 9:'Аль-Джаббаар', 10:'Аль-Мутакаббир',
@@ -1515,14 +1520,14 @@ export default function App() {
         <div className="challenge-foot"><span>{tr('Твой лучший результат сохраняется на этом устройстве')}</span><span>{challengeAnswers.length}/5</span></div>
       </section>
       <section className="learning-section reveal" id="learning">
-        <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>
+        <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div><p className="content-language-note">{language === 'ru' ? '' : tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>
         {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>{tr('Открыть каталог имён')} <ArrowRight size={15}/></button>}
         {catalogOpen && <div className="name-list">
           <button className="catalog-close" onClick={() => setCatalogOpen(false)}>{tr('Свернуть каталог')} <X size={14}/></button>
           <div className="course-tools"><input className="name-search" aria-label={tr("Поиск имени")} value={search} onChange={e => {setSearch(e.target.value);setVisibleNamesCount(12);}} placeholder={tr('Найти имя, перевод или транскрипцию…')}/><div className="filter-tabs"><button className={activeTab === 'all' ? 'active' : ''} onClick={() => {setActiveTab('all');setVisibleNamesCount(12);}}>{tr('Все 99')}</button><button className={activeTab === 'review' ? 'active' : ''} onClick={() => {setActiveTab('review');setVisibleNamesCount(12);}}>{tr('Повторить')}</button><button className={activeTab === 'favorites' ? 'active' : ''} onClick={() => {setActiveTab('favorites');setVisibleNamesCount(12);}}>{tr('Избранное')} ({favorites.length})</button></div></div>
           {visibleNames.map(name => <button className="name-row" data-feedback key={name.id} onClick={() => setSelected(name)}>
             <span className="name-number">{String(name.id).padStart(2,'0')}</span><span className="name-arabic" lang="ar" dir="rtl">{name.arabic}</span>
-            <span className="name-info"><b>{name.translation}</b><small>{shownTransliteration(name)}</small></span><span className="favorite-indicator">{favorites.includes(name.id)?'♥':''}</span>
+            <span className="name-info" dir={language === 'ar' ? 'ltr' : undefined}><b>{name.translation}</b><small>{shownTransliteration(name)}</small></span><span className="favorite-indicator">{favorites.includes(name.id)?'♥':''}</span>
             {progress.includes(name.id) ? <Check className="row-arrow learned-check" size={18}/> : <ChevronRight className="row-arrow" size={18}/>}
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">{tr('Ничего не найдено. Попробуй изменить запрос или фильтр.')}</p>}
@@ -1610,9 +1615,9 @@ export default function App() {
         <div className="lesson-topline"><span className="muted-label">{tr("ИМЯ {id} ИЗ 99",{id:String(selected.id).padStart(2,"0")})}</span><span className="lesson-progress-line">{tr("{count} / 99 изучено",{count:progress.length})}</span></div>
         {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>{tr('Смахни влево — следующее имя')}</span><span className="swipe-hint-arrow">←</span></div>}
         <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?tr('Убрать из избранного'):tr('В избранное')} title={favorites.includes(selected.id)?tr('Убрать из избранного'):tr('В избранное')}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label={tr('Поделиться карточкой')} title={tr('Поделиться карточкой')}><Share2 size={18}/></button></div>
-        <h2 className="text-enter">{selected.translation}</h2>
+        <h2 className="text-enter" dir={language === 'ar' ? 'ltr' : undefined}>{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
-        <div className="lesson-meaning"><span className="muted-label">{tr('ЗНАЧЕНИЕ ИМЕНИ')}</span><p className="lesson-description text-enter">{selected.explanation}</p></div>
+        <div className="lesson-meaning"><span className="muted-label">{tr('ЗНАЧЕНИЕ ИМЕНИ')}</span><p className="lesson-description text-enter" dir={language === 'ar' ? 'ltr' : undefined}>{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> {tr('Изучено')}</p>{dueReviewIds.includes(selected.id) && <div className="recall-compact"><button aria-label={tr("Вспомнил")} title={tr("Вспомнил")} data-feedback onClick={()=>{recordRecall(selected.id,true);setNotice(tr('Повторение отмечено. Следующее — через {days} дн.',{days:REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)]}));setSelected(null);}}><Check size={16}/></button><button aria-label={tr("Повторить позже")} title={tr("Повторить позже")} data-feedback onClick={()=>{recordRecall(selected.id,false);setNotice(tr('Имя вернётся на повторение через 10 минут.'));setSelected(null);}}><ArrowRight size={16}/></button></div>}</> : <button className="primary-button full" data-feedback disabled={busy} onClick={markLearned}>{busy ? tr('Сохраняем…') : tr('Изучил')} <Check size={17}/></button>}
 
@@ -1625,7 +1630,7 @@ export default function App() {
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
         <p className="lesson-translit">{shownTransliteration(item)}</p>
         <h2>{tr('Вспомни значение этого имени')}</h2>
-        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')} <ArrowRight size={16}/></button> : <><div className="review-session-answer"><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}><Check size={17}/> {tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
+        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')} <ArrowRight size={16}/></button> : <><div className="review-session-answer" dir={language === 'ar' ? 'ltr' : undefined}><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}><Check size={17}/> {tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
         <p className="review-storage-note">{tr('Честно оцени своё воспоминание — так интервалы будут подбираться точнее.')}</p>
       </section></div> : null; })()}
 
@@ -1642,9 +1647,9 @@ export default function App() {
         <p className="privacy-note"><Mail size={14}/> {tr("Почта нужна для входа и восстановления доступа. Номер телефона не требуется.")}</p>
       </section></div>}
 
-      {showAllInfo && <div className="modal-backdrop" onClick={() => setShowAllInfo(false)}><section className="info-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}><button className="modal-x" onClick={() => setShowAllInfo(false)}><X size={19}/></button><div className="info-modal-icon"><BookOpen size={21}/></div><h2>{tr("Готовим полный курс из 99 имён")}</h2><p>{tr("Каждый урок должен содержать точное написание, значение, объяснение и надёжные ссылки на исламские источники. Мы не будем публиковать непроверенные сведения ради количества.")}</p><button className="primary-button full" onClick={() => setShowAllInfo(false)}>{tr("Понятно")}</button></section></div>}
+      {showAllInfo && <div className="modal-backdrop" onClick={() => setShowAllInfo(false)}><section className="info-modal" role="dialog" aria-modal="true" aria-label={tr("Готовим полный курс из 99 имён")} onClick={e => e.stopPropagation()}><button className="modal-x" aria-label={tr("Закрыть")} onClick={() => setShowAllInfo(false)}><X size={19}/></button><div className="info-modal-icon"><BookOpen size={21}/></div><h2>{tr("Готовим полный курс из 99 имён")}</h2><p>{tr("Каждый урок должен содержать точное написание, значение, объяснение и надёжные ссылки на исламские источники. Мы не будем публиковать непроверенные сведения ради количества.")}</p><button className="primary-button full" onClick={() => setShowAllInfo(false)}>{tr("Понятно")}</button></section></div>}
 
-      {saveOpen && <div className="modal-backdrop" onClick={() => setSaveOpen(false)}><section className="info-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}><button className="modal-x" onClick={() => setSaveOpen(false)}><X size={19}/></button><div className="info-modal-icon"><Bookmark size={21}/></div><h2>{tr("Сохрани сайт, чтобы вернуться")}</h2><p><b>{tr("На iPhone:")}</b> {tr("нажми «Поделиться» в Safari, затем выбери «На экран Домой» или «Добавить закладку».")}</p><p><b>{tr("В других браузерах:")}</b> {tr("добавь страницу в закладки.")}</p><button className="primary-button full" onClick={() => setSaveOpen(false)}>{tr("Понятно")}</button></section></div>}
+      {saveOpen && <div className="modal-backdrop" onClick={() => setSaveOpen(false)}><section className="info-modal" role="dialog" aria-modal="true" aria-label={tr("Сохрани сайт, чтобы вернуться")} onClick={e => e.stopPropagation()}><button className="modal-x" aria-label={tr("Закрыть")} onClick={() => setSaveOpen(false)}><X size={19}/></button><div className="info-modal-icon"><Bookmark size={21}/></div><h2>{tr("Сохрани сайт, чтобы вернуться")}</h2><p><b>{tr("На iPhone:")}</b> {tr("нажми «Поделиться» в Safari, затем выбери «На экран Домой» или «Добавить закладку».")}</p><p><b>{tr("В других браузерах:")}</b> {tr("добавь страницу в закладки.")}</p><button className="primary-button full" onClick={() => setSaveOpen(false)}>{tr("Понятно")}</button></section></div>}
 
     </main>
   );
