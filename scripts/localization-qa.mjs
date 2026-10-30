@@ -1,13 +1,13 @@
+
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 
-const sourcePath = new URL('../src/App.tsx', import.meta.url);
-const sourceText = readFileSync(sourcePath, 'utf8');
-const sourceFile = ts.createSourceFile('src/App.tsx', sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const localeNames = ['en', 'ar', 'ky', 'kk'];
-const translations = new Map(localeNames.map(locale => [locale, new Set()]));
-const usedKeys = new Set();
+const locales = ['en', 'ar', 'ky', 'kk'];
+const files = [
+  { path: '../src/App.tsx', dictionary: 'languageText', translator: 'tr' },
+  { path: '../src/GamifiedPath.tsx', dictionary: 'messages', translator: 't' }
+];
 
 function propertyName(name) {
   if (!name) return null;
@@ -15,70 +15,75 @@ function propertyName(name) {
   return null;
 }
 
-function addObjectTranslations(object, locale) {
-  if (!ts.isObjectLiteralExpression(object) || !translations.has(locale)) return;
-  const keys = translations.get(locale);
-  for (const property of object.properties) {
-    if (!ts.isPropertyAssignment(property)) continue;
-    const key = propertyName(property.name);
-    if (key !== null) keys.add(key);
-  }
-}
+function auditFile(file) {
+  const sourcePath = new URL(file.path, import.meta.url);
+  const sourceText = readFileSync(sourcePath, 'utf8');
+  const sourceFile = ts.createSourceFile(file.path, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const translations = new Map(locales.map(locale => [locale, new Set()]));
+  const usedKeys = new Set();
 
-function visit(node) {
-  if (ts.isVariableDeclaration(node)
-    && ts.isIdentifier(node.name)
-    && node.name.text === 'languageText'
-    && node.initializer
-    && ts.isObjectLiteralExpression(node.initializer)) {
-    for (const property of node.initializer.properties) {
+  function addObjectTranslations(object, locale) {
+    if (!ts.isObjectLiteralExpression(object) || !translations.has(locale)) return;
+    for (const property of object.properties) {
       if (!ts.isPropertyAssignment(property)) continue;
-      addObjectTranslations(property.initializer, propertyName(property.name));
+      const key = propertyName(property.name);
+      if (key !== null) translations.get(locale).add(key);
     }
   }
 
-  if (ts.isCallExpression(node)
-    && ts.isPropertyAccessExpression(node.expression)
-    && ts.isIdentifier(node.expression.expression)
-    && node.expression.expression.text === 'Object'
-    && node.expression.name.text === 'assign'
-    && node.arguments.length >= 2) {
-    const target = node.arguments[0];
-    if (ts.isPropertyAccessExpression(target)
-      && ts.isIdentifier(target.expression)
-      && target.expression.text === 'languageText') {
-      addObjectTranslations(node.arguments[1], target.name.text);
+  function visit(node) {
+    if (ts.isVariableDeclaration(node)
+      && ts.isIdentifier(node.name)
+      && node.name.text === file.dictionary
+      && node.initializer
+      && ts.isObjectLiteralExpression(node.initializer)) {
+      for (const property of node.initializer.properties) {
+        if (!ts.isPropertyAssignment(property)) continue;
+        addObjectTranslations(property.initializer, propertyName(property.name));
+      }
     }
+
+    if (ts.isCallExpression(node)
+      && ts.isPropertyAccessExpression(node.expression)
+      && ts.isIdentifier(node.expression.expression)
+      && node.expression.expression.text === 'Object'
+      && node.expression.name.text === 'assign'
+      && node.arguments.length >= 2) {
+      const target = node.arguments[0];
+      if (ts.isPropertyAccessExpression(target)
+        && ts.isIdentifier(target.expression)
+        && target.expression.text === file.dictionary) {
+        addObjectTranslations(node.arguments[1], target.name.text);
+      }
+    }
+
+    if (ts.isCallExpression(node)
+      && ts.isIdentifier(node.expression)
+      && node.expression.text === file.translator
+      && node.arguments.length > 0
+      && ts.isStringLiteralLike(node.arguments[0])) {
+      usedKeys.add(node.arguments[0].text);
+    }
+
+    ts.forEachChild(node, visit);
   }
 
-  if (ts.isCallExpression(node)
-    && ts.isIdentifier(node.expression)
-    && node.expression.text === 'tr'
-    && node.arguments.length > 0
-    && ts.isStringLiteralLike(node.arguments[0])) {
-    usedKeys.add(node.arguments[0].text);
+  visit(sourceFile);
+  const missing = [];
+  for (const locale of locales) {
+    const absent = [...usedKeys].filter(key => !translations.get(locale).has(key));
+    if (absent.length) missing.push({ locale, absent });
   }
-
-  ts.forEachChild(node, visit);
+  return { path: file.path, used: usedKeys.size, counts: Object.fromEntries(locales.map(locale => [locale, translations.get(locale).size])), missing };
 }
 
-visit(sourceFile);
-
-const missingByLocale = [];
-for (const locale of localeNames) {
-  const missing = [...usedKeys].filter(key => !translations.get(locale).has(key));
-  if (missing.length) missingByLocale.push({ locale, missing });
-}
-
-console.log(`Checked ${usedKeys.size} literal UI translation keys across ${localeNames.length} locales.`);
-for (const locale of localeNames) {
-  console.log(`${locale}: ${translations.get(locale).size} translation entries`);
-}
-if (missingByLocale.length) {
-  for (const { locale, missing } of missingByLocale) {
-    console.error(`Missing ${locale} translations:`);
-    for (const key of missing) console.error(`  - ${key}`);
+const results = files.map(auditFile);
+for (const result of results) {
+  console.log(`${result.path}: checked ${result.used} literal UI keys; entries ${JSON.stringify(result.counts)}`);
+  for (const { locale, absent } of result.missing) {
+    console.error(`Missing ${locale} translations in ${result.path}:`);
+    for (const key of absent) console.error(`  - ${key}`);
   }
-  assert.fail('Some visible UI messages are missing translations.');
 }
-console.log('Translation coverage passed.');
+assert.ok(results.every(result => result.missing.length === 0), 'Some visible UI messages are missing translations.');
+console.log('Translation coverage passed for the main interface and learning path.');
