@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent } from 'react';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { GamifiedPath } from './GamifiedPath';
@@ -1106,8 +1107,8 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   const [names, setNames] = useState<NameItem[]>(previewNames);
-  const [supabaseClient, setSupabaseClient] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
   const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(loadReviewData);
@@ -1252,18 +1253,27 @@ export default function App() {
   useEffect(() => {
     if (!supabaseClient) return;
     let alive = true;
-    supabaseClient.from('names').select('id,arabic,transliteration,translation,explanation,source_references').eq('content_status', 'published').order('id')
+    void supabaseClient.from('names').select('id,arabic,transliteration,translation,explanation,source_references').eq('content_status', 'published').order('id')
       .then(({ data, error: fetchError }: { data: NameItem[] | null; error: unknown }) => {
         if (!alive) return;
-        if (!fetchError && data?.length) {
+        if (fetchError) {
+          setNotice(tr('Не удалось загрузить обновлённый каталог. Используется сохранённая версия.'));
+          return;
+        }
+        if (data?.length) {
           const remote = data as NameItem[];
           setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
         }
+      })
+      .catch(() => {
+        if (alive) setNotice(tr('Не удалось связаться с каталогом. Изучение доступно в автономном режиме.'));
       });
-    supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: any } | null } }) => {
+    void supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: User | null } | null } }) => {
       if (alive) setUser(data.session?.user ?? null);
+    }).catch(() => {
+      if (alive) setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
     });
-    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: any } | null) => {
+    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: User | null } | null) => {
       if (alive) setUser(session?.user ?? null);
     });
     return () => { alive = false; listener.subscription.unsubscribe(); };
@@ -1276,7 +1286,7 @@ export default function App() {
     if (!supabaseClient || !user) { setProgressLoadedFor(null); return; }
     let alive = true;
     setProgressLoadedFor(null);
-    supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
+    void supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
       if (!alive) return;
       if (loadError) {
         setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
@@ -1285,7 +1295,7 @@ export default function App() {
       const cloudIds = (data || []).filter((item: any) => item.status === 'learned').map((item: any) => Number(item.name_id)).filter((id: number) => Number.isInteger(id) && id >= 1 && id <= 99);
       setProgress(current => Array.from(new Set([...current, ...cloudIds])));
       setProgressLoadedFor(user.id);
-    }, () => {
+    }).catch(() => {
       if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
@@ -1296,7 +1306,8 @@ export default function App() {
     void supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
       .then(({ error: saveError }: { error: unknown }) => {
         if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
-      });
+      })
+      .catch(() => setNotice(tr('Прогресс сохранён на этом устройстве, но синхронизация временно недоступна.')));
   }, [supabaseClient, user, progressLoadedFor, progress]);
 
   useEffect(() => {
@@ -1427,7 +1438,16 @@ export default function App() {
     setBusy(false);
   };
 
-  const signOut = async () => { if (supabaseClient) await supabaseClient.auth.signOut(); setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.')); };
+  const signOut = async () => {
+    if (!supabaseClient) return;
+    try {
+      const { error: signOutError } = await supabaseClient.auth.signOut();
+      if (signOutError) throw signOutError;
+      setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'));
+    } catch {
+      setError(tr('Не удалось выйти из аккаунта. Проверь подключение и попробуй ещё раз.'));
+    }
+  };
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => name.id <= unlockedNameLimit && !progress.includes(name.id));
   const accessibleNames = useMemo(() => names.filter(name => name.id <= unlockedNameLimit || progress.includes(name.id)), [names, unlockedNameLimit, progress]);
