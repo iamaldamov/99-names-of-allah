@@ -1,0 +1,91 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+
+const baseUrl = process.env.QA_BASE_URL || 'http://127.0.0.1:4173/99-names-of-allah/';
+const sizes = [
+  { width: 320, height: 740 },
+  { width: 360, height: 800 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+  { width: 1024, height: 768 },
+  { width: 1440, height: 900 },
+];
+const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+const failures = [];
+
+try {
+  for (const size of sizes) {
+    const page = await browser.newPage({
+      viewport: size,
+      deviceScaleFactor: 1,
+      isMobile: size.width <= 430,
+      hasTouch: size.width <= 430,
+    });
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+    await page.addInitScript(() => {
+      localStorage.setItem('99-names-welcome-seen', '1');
+      localStorage.setItem('asma-ul-husna-progress', JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9]));
+      localStorage.setItem('99-names-learning-path-v1', JSON.stringify({ passedStages: [], bestScores: {} }));
+    });
+    await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('.learning-path').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('.path-stage-card').count(), 11, 'The learning path should show 11 stages');
+
+    const initialLayout = await page.evaluate(() => ({
+      viewport: window.innerWidth,
+      document: document.documentElement.scrollWidth,
+      body: document.body.scrollWidth,
+    }));
+    assert.ok(initialLayout.document <= initialLayout.viewport + 1, `Horizontal overflow at ${size.width}px: ${JSON.stringify(initialLayout)}`);
+    assert.ok(initialLayout.body <= initialLayout.viewport + 1, `Body overflow at ${size.width}px: ${JSON.stringify(initialLayout)}`);
+
+    const examButton = page.locator('.path-exam-button').filter({ hasText: 'Начать итоговый экзамен' });
+    await examButton.waitFor({ state: 'visible' });
+    await examButton.click();
+    const dialog = page.locator('.path-exam-modal');
+    await dialog.waitFor({ state: 'visible' });
+    const modalLayout = await dialog.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+    });
+    assert.ok(modalLayout.left >= -1 && modalLayout.right <= size.width + 1, `Exam modal exceeds horizontal viewport at ${size.width}px: ${JSON.stringify(modalLayout)}`);
+    assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Opening the exam should lock background scrolling');
+
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(await dialog.evaluate(element => element.contains(document.activeElement)), true, 'Keyboard focus must stay inside the exam dialog');
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({ state: 'hidden' });
+    assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing the exam should restore background scrolling');
+
+    if (size.width <= 768) {
+      await page.locator('.language-select').selectOption('ar');
+      assert.equal(await page.locator('html').getAttribute('dir'), 'rtl', 'Arabic should enable right-to-left document direction');
+      const rtlLayout = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth }));
+      assert.ok(rtlLayout.document <= rtlLayout.viewport + 1, `Arabic layout overflows at ${size.width}px: ${JSON.stringify(rtlLayout)}`);
+      await examButton.click();
+      await dialog.waitFor({ state: 'visible' });
+      const closeRect = await page.locator('.path-exam-close').evaluate(element => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      });
+      assert.ok(closeRect.left >= -1 && closeRect.right <= size.width + 1, `RTL close control is outside the viewport: ${JSON.stringify(closeRect)}`);
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({ state: 'hidden' });
+    }
+
+    assert.deepEqual(pageErrors, [], `Browser runtime errors at ${size.width}px: ${pageErrors.join('; ')}`);
+    console.log(`Responsive QA passed: ${size.width}x${size.height}`);
+    await page.close();
+  }
+} catch (error) {
+  failures.push(error);
+} finally {
+  await browser.close();
+}
+
+if (failures.length) {
+  console.error(failures[0]);
+  process.exitCode = 1;
+}
