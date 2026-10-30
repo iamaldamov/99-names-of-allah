@@ -3,6 +3,7 @@ import type { FormEvent, PointerEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
+import { GamifiedPath } from './GamifiedPath';
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
@@ -243,7 +244,6 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   const [names, setNames] = useState<NameItem[]>(previewNames);
-  const [publishedCount, setPublishedCount] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
@@ -269,6 +269,7 @@ export default function App() {
   const [theme, setTheme] = useState<'light'|'dark'>(() => { try { return localStorage.getItem('99-names-theme') === 'dark' ? 'dark' : 'light'; } catch { return 'light'; } });
   const [favorites, setFavorites] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-favorites') || '[]'); return Array.isArray(v) ? v.filter((x): x is number => Number.isInteger(x) && x>=1 && x<=99) : []; } catch { return []; } });
   const [dailyGoal, setDailyGoal] = useState<number>(() => { try { const n=Number(localStorage.getItem('99-names-daily-goal')); return [1,3,5].includes(n) ? n : 1; } catch { return 1; } });
+  const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}'); const passed = Array.isArray(saved.passedStages) ? saved.passedStages.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 11) : []; return Math.min(99, (new Set(passed).size + 1) * 9); } catch { return 9; } });
   const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return (v.date === new Date().toDateString() || v.date === localDayKey()) && Array.isArray(v.ids) ? v.ids.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99) : []; } catch { return []; } });
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
@@ -337,7 +338,6 @@ export default function App() {
         if (!fetchError && data && data.length) {
           const remote = data as NameItem[];
           setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
-          setPublishedCount(data.length);
         }
       });
     supabase.auth.getSession().then(({ data }) => {
@@ -503,7 +503,8 @@ export default function App() {
 
   const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
   const percent = Math.round((progress.length / 99) * 100);
-  const nextName = names.find(name => !progress.includes(name.id));
+  const nextName = names.find(name => name.id <= unlockedNameLimit && !progress.includes(name.id));
+  const accessibleNames = useMemo(() => names.filter(name => name.id <= unlockedNameLimit || progress.includes(name.id)), [names, unlockedNameLimit, progress]);
   const todayKey = dayKey;
   const weekActivity = useMemo(() => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = localDayKey(date); return { key, label: new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'ky' ? 'ky-KG' : language === 'ar' ? 'ar' : 'en', { weekday: 'short' }).format(date), count: studyDays[key] || 0, today: key === todayKey }; }), [language, studyDays, todayKey]);
   const activeDaysThisWeek = weekActivity.filter(day => day.count > 0).length;
@@ -513,12 +514,12 @@ export default function App() {
   const dailyChallenge = useMemo(() => {
     const seed = Number(todayKey.replace(/-/g, ''));
     const rank = (id: number, salt: number) => (id * 9301 + seed * 49297 + salt * 233280) % 1000003;
-    const ordered = [...names].sort((a, b) => rank(a.id, 17) - rank(b.id, 17));
+    const ordered = [...accessibleNames].sort((a, b) => rank(a.id, 17) - rank(b.id, 17));
     return ordered.slice(0, 5).map((item, index) => ({
       item,
-      options: [item, ...names.filter(name => name.id !== item.id).sort((a, b) => rank(a.id, index * 31 + 7) - rank(b.id, index * 31 + 7)).slice(0, 3)].sort((a, b) => rank(a.id, index * 97 + 3) - rank(b.id, index * 97 + 3))
+      options: [item, ...accessibleNames.filter(name => name.id !== item.id).sort((a, b) => rank(a.id, index * 31 + 7) - rank(b.id, index * 31 + 7)).slice(0, 3)].sort((a, b) => rank(a.id, index * 97 + 3) - rank(b.id, index * 97 + 3))
     }));
-  }, [names, todayKey]);
+  }, [accessibleNames, todayKey]);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= clockNow).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress, clockNow]);
   const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
   const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
@@ -542,17 +543,17 @@ export default function App() {
     if (nextId !== undefined) { setReviewSessionId(nextId); setReviewAnswerShown(false); }
     else { setReviewSessionId(null); setReviewAnswerShown(false); setNotice('Отлично! Все доступные на сегодня повторения завершены.'); }
   };
-  const displayedNames = useMemo(() => names.filter(name => {
+  const displayedNames = useMemo(() => accessibleNames.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + shownTransliteration(name) + ' ' + name.translation).toLocaleLowerCase();
     const matches = searchable.includes(search.toLocaleLowerCase());
     const tabMatches = activeTab === 'all' || (activeTab === 'review' ? dueReviewIds.includes(name.id) : activeTab === 'favorites' ? favorites.includes(name.id) : true);
     return matches && tabMatches;
-  }), [names, search, activeTab, progress, favorites, dueReviewIds]);
+  }), [accessibleNames, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
-  const quizItem = names[(quizIndex * 7 + 2) % names.length] ?? names[0];
+  const quizItem = accessibleNames[(quizIndex * 7 + 2) % accessibleNames.length] ?? accessibleNames[0];
   const quizOptions = useMemo(() => {
     if (!quizItem) return [];
-    const distractors = names.filter(name => name.id !== quizItem.id);
+    const distractors = accessibleNames.filter(name => name.id !== quizItem.id);
     const start = (quizIndex * 11) % Math.max(1, distractors.length);
     const selectedDistractors = Array.from(
       { length: Math.min(3, distractors.length) },
@@ -561,7 +562,7 @@ export default function App() {
     return [quizItem, ...selectedDistractors].sort(
       (a, b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)
     );
-  }, [quizItem, names, quizIndex]);
+  }, [quizItem, accessibleNames, quizIndex]);
 
   return (
     <main className="app-shell">
@@ -593,6 +594,8 @@ export default function App() {
         <div className="journey-bottom"><div className="milestone-block"><div className="milestone-label"><span>БЛИЖАЙШАЯ ЦЕЛЬ</span><b>{progress.length} / {nextMilestone}</b></div><div className="milestone-track"><span style={{width: milestoneProgress + "%"}}/></div><small>{nextMilestone === 99 ? "Финишная прямая — осталось совсем немного" : `Ещё ${nextMilestone - progress.length} ${nextMilestone - progress.length === 1 ? "имя" : "имён"} до следующего рубежа`}</small></div><div className="week-summary"><b>{activeDaysThisWeek}/7</b><small>дней с занятиями за неделю</small></div></div>
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? "СЛЕДУЮЩИЙ ШАГ" : dueReviewIds.length ? "ВРЕМЯ ПОВТОРИТЬ" : "ТЫ ПРОШЁЛ ВЕСЬ СПИСОК"}</small><b>{nextName ? `Продолжить: ${nextName.translation}` : dueReviewIds.length ? "Закрепить изученное" : "Вернуться к каталогу"}</b></span><ArrowRight size={19}/></button>
       </section>
+
+      <GamifiedPath names={names} progress={progress} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
         <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
@@ -632,8 +635,8 @@ export default function App() {
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
           {displayedNames.length > visibleNames.length && <button className="show-more-names" onClick={() => setVisibleNamesCount(count => count + 12)}>Показать ещё имена ({displayedNames.length - visibleNames.length})</button>}
-          {false && publishedCount < 99 && <button className="locked-row locked-row-button" onClick={() => setShowAllInfo(true)}>
-            <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>Следующие имена</b><small>Новые уроки будут добавляться после проверки источников</small></span><span className="locked-count">ещё {99 - (publishedCount || 3)}</span>
+          {unlockedNameLimit < 99 && <button className="locked-row locked-row-button" onClick={() => document.getElementById('learning-path')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+            <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>Следующие имена закрыты</b><small>Пройди итоговый экзамен, чтобы открыть следующий этап</small></span><span className="locked-count">ещё {99 - unlockedNameLimit}</span>
           </button>}
         </div>}
         {!supabase && <p className="setup-warning">Сервис аккаунтов пока не подключён к опубликованной версии сайта.</p>}
@@ -656,10 +659,10 @@ export default function App() {
           </div>}
           {quizAnswer !== null && <button className="quiz-next" onClick={() => { setQuizAnswers(old => [...old, quizAnswer]); setQuizIndex(i => i + 1); setQuizAnswer(null); }}>{quizIndex === 4 ? 'Показать результат' : 'Следующий вопрос'} <ArrowRight size={15}/></button>}
         </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length === 5 ? "✦" : "✓"}</span>
+          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "✦" : "✓"}</span>
           <h3>Тест завершён</h3>
-          <b>{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length} из 5 правильных ответов</b>
-          <p>{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз."}</p>
+          <b>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length} из 5 правильных ответов</b>
+          <p>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз."}</p>
           <button onClick={() => { setQuizIndex(0); setQuizAnswer(null); setQuizAnswers([]); }}>Пройти ещё раз <ArrowRight size={15}/></button>
         </div>}
       </section></details>
