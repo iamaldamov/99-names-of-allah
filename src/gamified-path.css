@@ -149,3 +149,50 @@
 
 /* Make the pronunciation visible and easy to read in every exam question. */
 .path-exam-translit{margin:-4px 0 18px;text-align:center;font-size:15px;font-weight:600;letter-spacing:.025em;color:var(--muted,#777);line-height:1.5}
+
+
+/* Force the complete stage-exam dialog to follow the active site theme. */
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal {
+  background: #18231d !important;
+  color: #e8eee9 !important;
+  border-color: #405747 !important;
+  color-scheme: dark;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal :is(h2,.path-exam-question,.path-exam-arabic,.path-exam-translit) {
+  color: #e8eee9;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal :is(.path-exam-intro,.path-exam-meta,.muted-label,.path-exam-result>p) {
+  color: #b5c4b8;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-close {
+  background: #26372c !important;
+  color: #e8eee9 !important;
+  border: 1px solid #405747;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-options button {
+  background: #202f25 !important;
+  color: #e8eee9 !important;
+  border-color: #405747 !important;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-options button.is-selected {
+  background: #293d30 !important;
+  border-color: #72977a !important;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-options button.is-correct {
+  background: #203b29 !important;
+  color: #d2ead4 !important;
+  border-color: #456d4d !important;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-options button.is-wrong {
+  background: #402525 !important;
+  color: #f2ceca !important;
+  border-color: #754343 !important;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal :is(.path-exam-feedback.is-correct,.path-unlocked-message) {
+  background: #203b29 !important;
+  color: #d2ead4 !important;
+}
+html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-feedback.is-wrong {
+  background: #402525 !important;
+  color: #f2ceca !important;
+}
