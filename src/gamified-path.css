@@ -110,3 +110,17 @@
 @media(prefers-reduced-motion:reduce){
   .path-stage-card,.path-exam-modal{scroll-behavior:auto;transition:none}
 }
+
+/* Final small-screen and RTL safeguards for the staged learning path. */
+.learning-path,.path-stage-card,.path-lesson,.path-exam-modal{min-width:0}
+.path-stage-title,.path-lesson>span:nth-child(2),.path-exam-intro,.path-exam-question{overflow-wrap:anywhere}
+.learning-path[dir="rtl"] .path-exam-close{right:auto;left:15px}
+.learning-path[dir="rtl"] .path-exam-modal>.muted-label{padding-right:0;padding-left:38px}
+@media(max-width:700px){
+  .path-exam-modal{padding-bottom:max(22px,env(safe-area-inset-bottom))}
+  .path-stage-card{overflow-wrap:anywhere}
+  .path-exam-meta{letter-spacing:.035em}
+}
+@media(prefers-reduced-motion:reduce){
+  .path-exam-modal,.path-stage-card{scroll-behavior:auto;transition:none}
+}
