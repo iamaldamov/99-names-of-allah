@@ -145,3 +145,7 @@
 :root[data-theme="dark"] .path-exam-feedback.is-correct{background:#203b29;color:#d2ead4}
 :root[data-theme="dark"] .path-exam-feedback.is-wrong{background:#402525;color:#f2ceca}
 @media(max-width:700px){.path-current-card{padding:15px}}
+
+
+/* Make the pronunciation visible and easy to read in every exam question. */
+.path-exam-translit{margin:-4px 0 18px;text-align:center;font-size:15px;font-weight:600;letter-spacing:.025em;color:var(--muted,#777);line-height:1.5}
