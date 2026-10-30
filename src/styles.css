@@ -1010,3 +1010,67 @@ input, select, textarea, .account-form input {
   .site-preloader, .site-preloader__symbol i, .site-preloader__symbol b,
   .site-preloader__spinner, .site-preloader__message { animation: none !important; }
 }
+
+
+/* Lesson detail modal: compact natural height, readable width, and no clipped explanations. */
+.lesson-modal:not(.review-session-modal) {
+  width: min(100%, 500px);
+  height: auto;
+  max-height: calc(100dvh - 32px);
+  min-height: 0;
+  padding: 20px 26px 16px;
+  overflow-x: hidden;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.lesson-modal:not(.review-session-modal) > .close-button {
+  margin: 0 0 8px auto;
+  flex: 0 0 auto;
+}
+.lesson-modal:not(.review-session-modal) .lesson-topline,
+.lesson-modal:not(.review-session-modal) .lesson-arabic,
+.lesson-modal:not(.review-session-modal) .lesson-quick-actions,
+.lesson-modal:not(.review-session-modal) > h2,
+.lesson-modal:not(.review-session-modal) > .lesson-translit,
+.lesson-modal:not(.review-session-modal) .lesson-meaning,
+.lesson-modal:not(.review-session-modal) > .primary-button,
+.lesson-modal:not(.review-session-modal) > .already-learned {
+  flex-shrink: 0;
+}
+.lesson-modal:not(.review-session-modal) .lesson-arabic {
+  margin: 12px 0 5px;
+  padding: 8px 0;
+  line-height: 1.5;
+}
+.lesson-modal:not(.review-session-modal) .lesson-meaning {
+  margin: 12px 0 14px;
+  padding: 16px 17px;
+  min-height: max-content;
+}
+.lesson-modal:not(.review-session-modal) .lesson-meaning .lesson-description {
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.lesson-modal:not(.review-session-modal) > .primary-button,
+.lesson-modal:not(.review-session-modal) > .already-learned {
+  margin-bottom: 0;
+}
+@media (max-width: 480px) {
+  .lesson-modal:not(.review-session-modal) {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 16px 16px 12px;
+  }
+  .lesson-modal:not(.review-session-modal) > .close-button {
+    margin-bottom: 6px;
+  }
+  .lesson-modal:not(.review-session-modal) .lesson-arabic {
+    font-size: clamp(48px, 13vw, 58px);
+    margin-top: 9px;
+  }
+  .lesson-modal:not(.review-session-modal) .lesson-meaning {
+    margin: 10px 0 12px;
+    padding: 14px 13px;
+  }
+}
