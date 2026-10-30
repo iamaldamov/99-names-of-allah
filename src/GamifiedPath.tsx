@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Award, BookOpen, Check, ChevronRight, LockKeyhole, Play, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
+import { Award, BookOpen, Check, ChevronRight, LockKeyhole, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
 import './gamified-path.css';
 
 type LearningName = {
