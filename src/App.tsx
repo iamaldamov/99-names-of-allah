@@ -1224,7 +1224,7 @@ export default function App() {
     }
   };
   useEffect(() => {
-    const interval = window.setInterval(() => setClockNow(Date.now()), 30000);
+    const interval = window.setInterval(() => setClockNow(Date.now()), 60000);
     return () => window.clearInterval(interval);
   }, []);
   useEffect(() => {
