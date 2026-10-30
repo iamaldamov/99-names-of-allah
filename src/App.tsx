@@ -1516,31 +1516,6 @@ export default function App() {
 
       <GamifiedPath names={names} progress={progress} language={language} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
-      <section className="daily-challenge reveal" aria-label={tr("Ежедневное испытание")}>
-        <div className="challenge-top"><div><span className="muted-label">{tr('ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ')}</span><h2>{tr('Испытай свои знания')}</h2><p>{tr('Небольшая ежедневная проверка. Вопросы обновляются каждый день.')}</p></div><div className="challenge-top-actions"><div className="challenge-best"><span>{tr('РЕКОРД')}</span><b>{challengeBest}/5</b></div></div></div>
-        {challengeAnswers.length < 5 ? <div className="challenge-play">
-          <div className="challenge-progress"><span>{tr('ВОПРОС {current} ИЗ 5', {current: challengeAnswers.length + 1})}</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
-          <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>{tr('Прочитай транскрипцию и выбери правильное значение имени')}</p></div>
-          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => {
-            const correctId = dailyChallenge[challengeAnswers.length]?.item.id;
-            const answered = challengeCurrentAnswer !== null;
-            const isCorrect = option.id === correctId;
-            const isSelected = option.id === challengeCurrentAnswer;
-            return <button key={option.id} dir="auto" lang="ru" disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId;  if (correct) praiseFor('correct'); }}>{option.translation}</button>;
-          })}</div>
-          {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
-            <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
-            {dailyChallenge[challengeAnswers.length]?.options.find(option => option.id === dailyChallenge[challengeAnswers.length]?.item.id)?.translation}
-            <button onClick={() => { if (challengeCurrentAnswer === null) return; const selectedAnswer = challengeCurrentAnswer; setChallengeAnswers(old => [...old, selectedAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? tr('Завершить испытание') : tr('Следующий вопрос')} <ArrowRight size={15}/></button>
-          </div>}
-        </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{challengeScore === 5 ? "✦" : "✓"}</span>
-          <h3>{tr('Испытание завершено')}</h3><b>{tr("{count} из 5 правильных ответов",{count:challengeScore})}</b>
-          <p>{challengeScore === 5 ? tr('Прекрасный результат. Продолжай укреплять знания.') : tr('Хорошая работа. Вернись к именам, в которых сомневался.')}</p>
-          <button onClick={() => { setChallengeAnswers([]); setChallengeCurrentAnswer(null); }}>{tr('Пройти ещё раз')} <ArrowRight size={15}/></button>
-        </div>}
-        <div className="challenge-foot"><span>{tr('Твой лучший результат сохраняется на этом устройстве')}</span><span>{challengeAnswers.length}/5</span></div>
-      </section>
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
         {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>{tr('Открыть каталог имён')} <ArrowRight size={15}/></button>}
@@ -1561,30 +1536,6 @@ export default function App() {
         {!supabase && <p className="setup-warning">{tr("Сервис аккаунтов пока не подключён к опубликованной версии сайта.")}</p>}
       </section>
 
-      <details className="compact-details reveal"><summary><span><b>{tr('Проверить знания')}</b><small>{tr('Короткий тест по именам')}</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
-        <div className="section-heading"><div><span className="muted-label">{tr('ЗАКРЕПЛЕНИЕ ЗНАНИЙ')}</span><h2>{tr('Проверь, что запомнил')}</h2></div><span className="section-total">{tr('Мини-тест')}</span></div>
-        {quizIndex < 5 && quizItem ? <div className="quiz-card">
-          <div className="challenge-progress"><span>{tr('ВОПРОС {current} ИЗ 5', {current: quizIndex + 1})}</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < quizIndex ? "done" : i === quizIndex ? "current" : ""}/>)}</div></div>
-          <span className="muted-label">{tr('КАК ПЕРЕВОДИТСЯ ИМЯ?')}</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem)}</p>
-          <div className="quiz-options">{quizOptions.map(option => {
-            const answered = quizAnswer !== null;
-            const isCorrect = option.id === quizItem.id;
-            const isSelected = option.id === quizAnswer;
-            return <button key={option.id} dir="auto" lang="ru" disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id;  if (correct) praiseFor('correct'); }}>{option.translation}</button>;
-          })}</div>
-          {quizAnswer !== null && <div className={quizAnswer === quizItem.id ? 'challenge-feedback correct' : 'challenge-feedback wrong'}>
-            <b>{quizAnswer === quizItem.id ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
-            {quizItem.translation}
-          </div>}
-          {quizAnswer !== null && <button className="quiz-next" onClick={() => { setQuizAnswers(old => [...old, quizAnswer]); setQuizIndex(i => i + 1); setQuizAnswer(null); }}>{quizIndex === 4 ? tr('Показать результат') : tr('Следующий вопрос')} <ArrowRight size={15}/></button>}
-        </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "✦" : "✓"}</span>
-          <h3>{tr('Тест завершён')}</h3>
-          <b>{tr("{count} из 5 правильных ответов",{count:quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length})}</b>
-          <p>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? tr("Прекрасный результат. Продолжай укреплять знания.") : tr("Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.")}</p>
-          <button onClick={() => { setQuizIndex(0); setQuizAnswer(null); setQuizAnswers([]); }}>{tr("Пройти ещё раз")} <ArrowRight size={15}/></button>
-        </div>}
-      </section></details>
       <details className="compact-details reveal"><summary><span><b>{tr('Повторение и запоминание')}</b><small>{dueReviewIds.length ? dueReviewIds.length + ' ' + (language === 'en' ? 'Names due for review' : language === 'ar' ? 'أسماء بانتظار المراجعة' : language === 'ky' ? 'ысым кайталоону күтөт' : language === 'kk' ? 'есім қайталауды күтуде' : 'имён ждут повторения') : tr('Интервальные повторения помогут закрепить знания')}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
         <div className="review-system-intro"><span className="muted-label">{tr('ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ')}</span><h2>{tr('Запоминай надолго')}</h2><p>{tr('После изучения имя попадает в очередь повторения. Если вспомнил правильно — следующий интервал увеличивается. Если забыл — имя вернётся через 10 минут.')}</p></div>
         <div className="review-stats"><div><b>{dueReviewIds.length}</b><span>{tr('пора повторить')}</span></div><div><b>{Object.keys(reviewData).length}</b><span>{tr('в расписании')}</span></div><div><b>{Object.values(reviewData).reduce((sum,item)=>sum+item.correct,0)}</b><span>{tr('успешных повторений')}</span></div></div>
