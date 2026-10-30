@@ -8,6 +8,7 @@ on:
     branches:
       - feature/gamified-learning-path-clean
       - refine/minimal-learning-interface
+      - fix/simple-duck-mascot-and-qa
   workflow_dispatch:
 
 permissions:
