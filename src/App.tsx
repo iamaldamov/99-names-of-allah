@@ -1135,17 +1135,11 @@ export default function App() {
   const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}'); const passed = Array.isArray(saved.passedStages) ? saved.passedStages.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 11) : []; return Math.min(99, (new Set(passed).size + 1) * 9); } catch { return 9; } });
   const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return (v.date === new Date().toDateString() || v.date === localDayKey()) && Array.isArray(v.ids) ? v.ids.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99) : []; } catch { return []; } });
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
-  const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
-  const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); const id = Number(saved.currentAnswer); return saved.date === localDayKey() && Number.isInteger(id) && id >= 1 && id <= 99 ? id : null; } catch { return null; } });
-  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
   const [clockNow, setClockNow] = useState(() => Date.now());
   const observedDayRef = useRef(localDayKey());
   const dayKey = localDayKey(new Date(clockNow));
   const praiseTimeoutRef = useRef<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
-  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
-  const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
-  const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen') !== '1'; } catch { return true; } });
@@ -1210,12 +1204,6 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
-  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: dayKey, answers: challengeAnswers, currentAnswer: challengeCurrentAnswer })); } catch {} }, [challengeAnswers, challengeCurrentAnswer, dayKey]);
-  useEffect(() => {
-    if (challengeAnswers.length !== 5) return;
-    const score = challengeScore;
-    setChallengeBest(old => { const next = Math.max(old, score); try { localStorage.setItem('99-names-challenge-best', String(next)); } catch {} return next; });
-  }, [challengeAnswers]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
@@ -1430,15 +1418,6 @@ export default function App() {
   const currentStreak = useMemo(() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; }, [studyDays, todayKey]);
   const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
   const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
-  const dailyChallenge = useMemo(() => {
-    const seed = Number(todayKey.replace(/-/g, ''));
-    const rank = (id: number, salt: number) => (id * 9301 + seed * 49297 + salt * 233280) % 1000003;
-    const ordered = [...accessibleNames].sort((a, b) => rank(a.id, 17) - rank(b.id, 17));
-    return ordered.slice(0, 5).map((item, index) => ({
-      item,
-      options: [item, ...accessibleNames.filter(name => name.id !== item.id).sort((a, b) => rank(a.id, index * 31 + 7) - rank(b.id, index * 31 + 7)).slice(0, 3)].sort((a, b) => rank(a.id, index * 97 + 3) - rank(b.id, index * 97 + 3))
-    }));
-  }, [accessibleNames, todayKey]);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= clockNow).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress, clockNow]);
   const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
   const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
@@ -1469,19 +1448,7 @@ export default function App() {
     return matches && tabMatches;
   }), [accessibleNames, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
-  const quizItem = accessibleNames[(quizIndex * 7 + 2) % accessibleNames.length] ?? accessibleNames[0];
-  const quizOptions = useMemo(() => {
-    if (!quizItem) return [];
-    const distractors = accessibleNames.filter(name => name.id !== quizItem.id);
-    const start = (quizIndex * 11) % Math.max(1, distractors.length);
-    const selectedDistractors = Array.from(
-      { length: Math.min(3, distractors.length) },
-      (_, index) => distractors[(start + index) % distractors.length]
-    );
-    return [quizItem, ...selectedDistractors].sort(
-      (a, b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)
-    );
-  }, [quizItem, accessibleNames, quizIndex]);
+
 
   return (
     <main className="app-shell">
