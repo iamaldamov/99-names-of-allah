@@ -1230,8 +1230,6 @@ export default function App() {
     if (observedDayRef.current === dayKey) return;
     observedDayRef.current = dayKey;
     setLearnedToday([]);
-    setChallengeAnswers([]);
-    setChallengeCurrentAnswer(null);
   }, [dayKey]);
 
   const closeWelcome = () => { setWelcomeOpen(false); try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Welcome can be closed even when storage is unavailable. */ } };
@@ -1419,7 +1417,6 @@ export default function App() {
   const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
   const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= clockNow).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress, clockNow]);
-  const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
   const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
