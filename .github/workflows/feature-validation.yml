@@ -24,3 +24,17 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Run production build
         run: npm run build
+      - name: Install Chromium for responsive checks
+        run: npx playwright install --with-deps chromium
+      - name: Start production preview
+        run: npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/preview.log 2>&1 &
+      - name: Wait for production preview
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/99-names-of-allah/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/preview.log
+          exit 1
+      - name: Check mobile and RTL layouts
+        run: npm run test:responsive
