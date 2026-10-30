@@ -85,6 +85,28 @@ try {
       await page.keyboard.press('Escape');
       await lessonDialog.waitFor({ state: 'hidden' });
       assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing a Name card should restore background scrolling');
+
+      await page.evaluate(() => {
+        localStorage.setItem('asma-ul-husna-progress', JSON.stringify([]));
+        localStorage.removeItem('99-names-swipe-hint-seen-v2');
+      });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.locator('.path-lesson:not(:disabled)').first().click();
+      await lessonDialog.waitFor({ state: 'visible' });
+      await page.locator('.swipe-hint').waitFor({ state: 'visible' });
+      assert.equal(await page.locator('.swipe-hint svg').count(), 1, 'The first lesson should show an animated hand gesture hint');
+      const swipe = async () => {
+        await lessonDialog.dispatchEvent('pointerdown', { pointerType: 'touch', button: 0, clientX: 220, clientY: 300 });
+        await lessonDialog.dispatchEvent('pointerup', { pointerType: 'touch', button: 0, clientX: 120, clientY: 300 });
+      };
+      await swipe();
+      assert.match(await lessonDialog.getAttribute('aria-label'), /02/, 'The first lesson should allow swiping to its second name');
+      await swipe();
+      assert.match(await lessonDialog.getAttribute('aria-label'), /03/, 'The first lesson should allow swiping to its third name');
+      await swipe();
+      assert.match(await lessonDialog.getAttribute('aria-label'), /03/, 'The first lesson must stop after exactly three names');
+      await page.keyboard.press('Escape');
+      await lessonDialog.waitFor({ state: 'hidden' });
     }
 
     if (size.width <= 768) {
