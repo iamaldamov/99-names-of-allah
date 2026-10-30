@@ -30,7 +30,9 @@ try {
       localStorage.setItem('99-names-learning-path-v1', JSON.stringify({ passedStages: [], bestScores: {} }));
     });
     await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('.site-preloader').waitFor({ state: 'visible' });
     await page.locator('.learning-path').waitFor({ state: 'visible' });
+    await page.locator('.site-preloader').waitFor({ state: 'hidden' });
     assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
     assert.equal(await page.locator('.daily-challenge').count(), 0, 'The legacy daily quiz must be removed');
     assert.equal(await page.locator('.compact-details:has(.practice-section)').count(), 0, 'The duplicate mini quiz must be removed');
