@@ -91,7 +91,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
     const pool = shuffled(stage.names);
     const examQuestions = Array.from({ length: 10 }, (_, index) => {
       const correct = pool[index % pool.length];
-      const distractors = shuffled(names.filter(name => name.id !== correct.id)).slice(0, 3);
+      const distractors = shuffled(stage.names.filter(name => name.id !== correct.id)).slice(0, 3);
       return { nameId: correct.id, options: shuffled([correct, ...distractors]) };
     });
     setExamStage(stageId);
