@@ -8,12 +8,20 @@ const greetings: Record<DuckLanguage, string> = {
   kk: 'Сәлем! Күн сайын аз-аздан үйренейік.',
 };
 
+const duckTitles: Record<DuckLanguage, string> = {
+  ru: 'Милый жёлтый утёнок',
+  en: 'Friendly yellow duck',
+  ar: 'بطة صفراء لطيفة',
+  ky: 'Сүйкүмдүү сары өрдөк',
+  kk: 'Сүйкімді сары үйрек',
+};
+
 export function DuckMascot({ language }: { language: DuckLanguage }) {
   return (
-    <aside className="duck-mascot" aria-label={greetings[language]}>
+    <aside className="duck-mascot">
       <div className="duck-speech" lang={language} dir={language === 'ar' ? 'rtl' : 'auto'}>{greetings[language]}</div>
       <svg className="duck-mascot-art" viewBox="0 0 220 190" role="img" aria-labelledby="duck-title">
-        <title id="duck-title">Friendly yellow duck mascot</title>
+        <title id="duck-title">{duckTitles[language]}</title>
         <ellipse cx="112" cy="166" rx="63" ry="11" fill="#dce8d9" />
         <path d="M54 122c-9-15-8-34 4-47 11-12 30-15 48-9 20-8 47-1 59 15 10 13 13 32 5 48-9 20-31 29-63 27-27-2-44-13-53-34Z" fill="#f6cf58" stroke="#d8a93b" strokeWidth="3" />
         <path d="M56 111c-16-9-27-6-35 4 15 3 24 10 29 21" fill="#efbd45" stroke="#d8a93b" strokeWidth="3" strokeLinejoin="round" />
