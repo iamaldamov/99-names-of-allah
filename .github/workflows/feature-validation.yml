@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/gamified-learning-path-clean
+      - refine/minimal-learning-interface
   workflow_dispatch:
 
 permissions:
