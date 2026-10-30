@@ -1203,7 +1203,7 @@ export default function App() {
       window.cancelAnimationFrame(focusFrame);
       previouslyFocused?.focus();
     };
-  }, [activeAppModal]);
+  }, [activeAppModal, selected?.id, reviewSessionId]);
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
