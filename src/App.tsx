@@ -143,6 +143,23 @@ Object.assign(languageText.ar, {
  'ПУТЬ ПОЗНАНИЯ':'رحلة المعرفة','Ежедневная цель':'الهدف اليومي','ТВОЯ ПРИВЫЧКА':'عادتك','Маленький шаг каждый день':'خطوة صغيرة كل يوم','Не гонись за количеством. Главное — возвращаться к знаниям.':'لا تتعجل في الكمية، فالأهم هو العودة إلى التعلّم.','дней подряд':'أيام متتالية','ОСТАЛОСЬ ИЗУЧИТЬ':'متبقٍ للتعلّم','ПОРА ПОВТОРИТЬ':'حان وقت المراجعة','ЦЕЛЬ НА СЕГОДНЯ':'هدف اليوم','БЛИЖАЙШАЯ ЦЕЛЬ':'الهدف القادم','ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ':'خمسة أسئلة كل يوم','Испытай свои знания':'اختبر معرفتك','Небольшая ежедневная проверка. Вопросы обновляются каждый день.':'اختبار يومي قصير. تتجدد الأسئلة كل يوم.','РЕКОРД':'أفضل نتيجة','Прочитай транскрипцию и выбери правильное значение имени':'اقرأ اللفظ واختر المعنى الصحيح للاسم.','Завершить испытание':'إنهاء التحدي','Следующий вопрос':'السؤال التالي','Испытание завершено':'اكتمل التحدي','Прекрасный результат. Продолжай укреплять знания.':'نتيجة رائعة. واصل ترسيخ علمك.','Хорошая работа. Вернись к именам, в которых сомневался.':'أحسنت. راجع الأسماء التي لم تكن متأكدًا منها.','Пройти ещё раз':'حاول مجددًا','Твой лучший результат сохраняется на этом устройстве':'تُحفظ أفضل نتيجة على هذا الجهاز','Избранное':'المفضلة','Ничего не найдено. Попробуй изменить запрос или фильтр.':'لم يتم العثور على نتائج. جرّب تغيير البحث أو التصفية.','Показать ещё имена':'عرض المزيد من الأسماء','Следующие имена закрыты':'الأسماء التالية مغلقة','Пройди итоговый экзамен, чтобы открыть следующий этап':'اجتز الاختبار النهائي لفتح المرحلة التالية.','Проверить знания':'اختبر معرفتك','Короткий тест по именам':'اختبار قصير حول الأسماء','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'مراجعة المعرفة','Проверь, что запомнил':'اختبر ما تذكّرته','Мини-тест':'اختبار قصير','КАК ПЕРЕВОДИТСЯ ИМЯ?':'ما معنى هذا الاسم؟','Показать результат':'عرض النتيجة','Тест завершён':'اكتمل الاختبار','Повторение и запоминание':'المراجعة والحفظ','Методика обучения':'منهجية التعلّم','Источники и достоверность':'المصادر والتوثيق','О создателе':'عن المنشئ'
 });
 
+Object.assign(languageText.ky, {
+ 'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'Аллахтын 99 көркөм ысымын шашпай, түшүнүү менен жана кайталап үйрөн. Окуу акысыз.',
+ 'ВОПРОС {current} ИЗ 5':'5 суроонун {current}-суроосу','КАК ПЕРЕВОДИТСЯ ИМЯ?':'БУЛ ЫСЫМ КАНДАЙ КОТОРУЛАТ?','Тест завершён':'Тест аяктады','изученных имён':'үйрөнүлгөн ысым','цель выполнена':'максат аткарылды','Без занятий':'Сабак болгон жок','изучено':'үйрөнүлдү','имя ждёт повторения':'ысым кайталоону күтөт','имён ждут повторения':'ысым кайталоону күтөт','ещё':'дагы'
+});
+Object.assign(languageText.kk, {
+ 'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'Алланың 99 көркем есімін асықпай, түсініп және қайталау арқылы өз қарқыныңмен үйрен. Оқу тегін.',
+ 'ВОПРОС {current} ИЗ 5':'5 сұрақтың {current}-сұрағы','Тест завершён':'Тест аяқталды','изученных имён':'үйренілген есім','цель выполнена':'мақсат орындалды','Без занятий':'Сабақ болған жоқ','изучено':'үйренілді','имя ждёт повторения':'есім қайталауды күтуде','имён ждут повторения':'есім қайталауды күтуде','ещё':'тағы'
+});
+Object.assign(languageText.en, {
+ 'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'Learn the 99 beautiful Names of Allah gradually, thoughtfully and through review, at your own pace. Learning is free.',
+ 'ВОПРОС {current} ИЗ 5':'QUESTION {current} OF 5','изученных имён':'Names learned','цель выполнена':'goal completed','Без занятий':'No study','изучено':'learned','имя ждёт повторения':'Name due for review','имён ждут повторения':'Names due for review','ещё':'more'
+});
+Object.assign(languageText.ar, {
+ 'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'تعلّم أسماء الله الحسنى التسعة والتسعين تدريجيًا وبفهم ومراجعة، وفق وتيرتك الخاصة. التعلّم مجاني.',
+ 'ВОПРОС {current} ИЗ 5':'السؤال {current} من 5','изученных имён':'أسماء تم تعلّمها','цель выполнена':'تم تحقيق الهدف','Без занятий':'لا توجد دراسة','изучено':'تم تعلّمها','имя ждёт повторения':'اسم بانتظار المراجعة','имён ждут повторения':'أسماء بانتظار المراجعة','ещё':'أخرى'
+});
+
 const russianTransliterations: Record<number, string> = {
   1:'Ар-Рахмаан', 2:'Ар-Рахиим', 3:'Аль-Малик', 4:'Аль-Куддус', 5:'Ас-Саляам',
   6:'Аль-Муъмин', 7:'Аль-Мухаймин', 8:'Аль-Азииз', 9:'Аль-Джаббаар', 10:'Аль-Мутакаббир',
@@ -235,12 +252,10 @@ export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
-  const tr = (value: string) => language === 'ru' ? value : languageText[language][value] || value;
-  useEffect(() => {
-    try { localStorage.setItem('99-names-language', language); } catch { /* Language remains selected for this session. */ }
-    document.documentElement.lang = language;
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
-  }, [language]);
+  const tr = (value: string, values: Record<string, string | number> = {}) => {
+    const template = language === 'ru' ? value : languageText[language][value] || value;
+    return Object.entries(values).reduce((result, [key, replacement]) => result.replaceAll(`{${key}}`, String(replacement)), template);
+  };
   const shownTransliteration = (name: NameItem) => language === 'ru' ? russianTransliterations[name.id] ?? name.transliteration : name.transliteration;
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   useEffect(() => {
@@ -619,7 +634,7 @@ export default function App() {
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
         <div className="challenge-top"><div><span className="muted-label">{tr('ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ')}</span><h2>{tr('Испытай свои знания')}</h2><p>{tr('Небольшая ежедневная проверка. Вопросы обновляются каждый день.')}</p></div><div className="challenge-top-actions"><div className="challenge-best"><span>{tr('РЕКОРД')}</span><b>{challengeBest}/5</b></div></div></div>
         {challengeAnswers.length < 5 ? <div className="challenge-play">
-          <div className="challenge-progress"><span>ВОПРОС {challengeAnswers.length + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
+          <div className="challenge-progress"><span>{tr('ВОПРОС {current} ИЗ 5', {current: challengeAnswers.length + 1})}</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
           <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>{tr('Прочитай транскрипцию и выбери правильное значение имени')}</p></div>
           <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => {
             const correctId = dailyChallenge[challengeAnswers.length]?.item.id;
@@ -664,8 +679,8 @@ export default function App() {
       <details className="compact-details reveal"><summary><span><b>{tr('Проверить знания')}</b><small>{tr('Короткий тест по именам')}</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
         <div className="section-heading"><div><span className="muted-label">{tr('ЗАКРЕПЛЕНИЕ ЗНАНИЙ')}</span><h2>{tr('Проверь, что запомнил')}</h2></div><span className="section-total">{tr('Мини-тест')}</span></div>
         {quizIndex < 5 && quizItem ? <div className="quiz-card">
-          <div className="challenge-progress"><span>ВОПРОС {quizIndex + 1} ИЗ 5</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < quizIndex ? "done" : i === quizIndex ? "current" : ""}/>)}</div></div>
-          <span className="muted-label">КАК ПЕРЕВОДИТСЯ ИМЯ?</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem)}</p>
+          <div className="challenge-progress"><span>{tr('ВОПРОС {current} ИЗ 5', {current: quizIndex + 1})}</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < quizIndex ? "done" : i === quizIndex ? "current" : ""}/>)}</div></div>
+          <span className="muted-label">{tr('КАК ПЕРЕВОДИТСЯ ИМЯ?')}</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem)}</p>
           <div className="quiz-options">{quizOptions.map(option => {
             const answered = quizAnswer !== null;
             const isCorrect = option.id === quizItem.id;
