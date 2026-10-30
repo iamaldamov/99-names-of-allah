@@ -4,6 +4,7 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { GamifiedPath } from './GamifiedPath';
+import { DuckMascot } from './DuckMascot';
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
@@ -1559,6 +1560,7 @@ export default function App() {
         <h1 className="text-enter">{tr('Познакомься с именами')}</h1>
         <p className="hero-copy text-enter">{tr('Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.')}</p>
         <button className="primary-button" data-feedback onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
+        <DuckMascot language={language} />
         
       </section>
 
