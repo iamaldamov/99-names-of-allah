@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Award, BookOpen, Check, ChevronRight, LockKeyhole, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
 import './gamified-path.css';
 
@@ -63,6 +63,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState(0);
   const [result, setResult] = useState<number | null>(null);
+  const examDialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pathState)); } catch { /* Local progress remains usable for this session. */ }
@@ -138,14 +139,44 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
   useEffect(() => {
     if (examStage === null) return;
     const previousOverflow = document.body.style.overflow;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = examDialogRef.current;
+    const getFocusable = () => dialog
+      ? Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'))
+          .filter(element => element.getAttribute('aria-hidden') !== 'true')
+      : [];
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeExam();
+      if (event.key === 'Escape') {
+        closeExam();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
+    requestAnimationFrame(() => {
+      const initialTarget = dialog?.querySelector<HTMLElement>('.path-exam-close') ?? dialog;
+      initialTarget?.focus();
+    });
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
     };
   }, [examStage]);
 
@@ -241,7 +272,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
 
       {examStage !== null && (
         <div className="path-exam-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) closeExam(); }}>
-          <section className="path-exam-modal" role="dialog" aria-modal="true" aria-labelledby="path-exam-title">
+          <section ref={examDialogRef} className="path-exam-modal" role="dialog" tabIndex={-1} aria-modal="true" aria-labelledby="path-exam-title">
             <button className="path-exam-close" type="button" onClick={closeExam} aria-label="Закрыть экзамен"><X size={19} /></button>
             {result === null ? (
               <>
