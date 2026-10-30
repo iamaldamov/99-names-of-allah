@@ -277,7 +277,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   progress: number[];
   onOpenName: (name: LearningName) => void;
   onUnlockedNameLimit: (limit: number) => void;
-  getTransliteration: (name: LearningName) => string;
+  getTransliteration: (nameId: number) => string;
   language: UiLanguage;
 }) {
   const t = (key: string, values: Record<string, string | number> = {}) => translate(language, key, values);
@@ -494,7 +494,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                 {currentQuestion && (
                   <>
                     <div className="path-exam-arabic" lang="ar" dir="rtl">{currentName?.arabic}</div>
-                    <p className="path-exam-translit" dir="auto">{currentName ? getTransliteration(currentName) : ''}</p>
+                    <p className="path-exam-translit" dir="auto">{currentName ? getTransliteration(currentName.id) : ''}</p>
                     <h3 className="path-exam-question">{t('Какое значение соответствует этому имени?')}</h3>
                     <div className="path-exam-options">
                       {currentQuestion.options.map(option => (
