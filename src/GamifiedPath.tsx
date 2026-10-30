@@ -254,8 +254,8 @@ function readPathState(): PathState {
         for (let stage = 1; stage <= 11 && saved.includes(stage); stage += 1) contiguous.push(stage);
         return contiguous;
       })(),
-      bestScores: raw.bestScores && typeof raw.bestScores === 'object'
-        ? Object.fromEntries(Object.entries(raw.bestScores).filter(([id, score]) => Number(id) >= 1 && Number(id) <= 11 && typeof score === 'number' && score >= 0 && score <= 10))
+      bestScores: raw.bestScores && typeof raw.bestScores === 'object' && !Array.isArray(raw.bestScores)
+        ? Object.fromEntries(Object.entries(raw.bestScores).filter(([id, score]) => Number.isInteger(Number(id)) && Number(id) >= 1 && Number(id) <= 11 && Number.isInteger(score) && score >= 0 && score <= 10))
         : {},
     };
   } catch {
@@ -522,13 +522,13 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                           className={checked && option.id === currentQuestion.nameId ? 'is-correct' : checked && option.id === answer ? 'is-wrong' : answer === option.id ? 'is-selected' : ''}
                           onClick={() => setAnswer(option.id)}
                         >
-                          <span>{option.translation}</span>
+                          <span dir="auto" lang="ru">{option.translation}</span>
                           {checked && option.id === currentQuestion.nameId && <Check size={17} />}
                         </button>
                       ))}
                     </div>
                     {checked && (
-                      <p className={answer === currentQuestion.nameId ? 'path-exam-feedback is-correct' : 'path-exam-feedback is-wrong'}>
+                      <p dir="auto" className={answer === currentQuestion.nameId ? 'path-exam-feedback is-correct' : 'path-exam-feedback is-wrong'}>
                         {answer === currentQuestion.nameId ? t('Верно! Продолжай.') : t('Правильный ответ: {answer}.', {answer: currentCorrect?.translation ?? 'см. карточку имени'})}
                       </p>
                     )}
