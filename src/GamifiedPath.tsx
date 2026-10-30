@@ -90,8 +90,10 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
     const stage = stages.find(item => item.id === stageId);
     if (!stage || stage.names.length !== STAGE_SIZE || !stage.names.every(name => progress.includes(name.id))) return;
     const pool = shuffled(stage.names);
+    // Nine names make ten questions, so repeat one randomly rather than always repeating question one.
+    const questionNames = shuffled([...pool, pool[Math.floor(Math.random() * pool.length)]]);
     const examQuestions = Array.from({ length: 10 }, (_, index) => {
-      const correct = pool[index % pool.length];
+      const correct = questionNames[index];
       const distractors = shuffled(stage.names.filter(name => name.id !== correct.id)).slice(0, 3);
       return { nameId: correct.id, options: shuffled([correct, ...distractors]) };
     });
@@ -169,13 +171,14 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
     };
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
-    requestAnimationFrame(() => {
+    const focusFrame = window.requestAnimationFrame(() => {
       const initialTarget = dialog?.querySelector<HTMLElement>('.path-exam-close') ?? dialog;
       initialTarget?.focus();
     });
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
+      window.cancelAnimationFrame(focusFrame);
       previouslyFocused?.focus();
     };
   }, [examStage]);
