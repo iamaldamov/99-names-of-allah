@@ -940,6 +940,7 @@ input, select, textarea, .account-form input {
   color: var(--ink, #26342e);
   animation: preloader-appear .3s ease both;
 }
+.site-preloader.is-leaving { animation: preloader-exit .28s ease forwards; pointer-events: none; }
 .site-preloader__content { width: min(100%, 340px); display: flex; flex-direction: column; align-items: center; text-align: center; }
 .site-preloader__symbol {
   position: relative;
@@ -977,6 +978,7 @@ input, select, textarea, .account-form input {
 @keyframes preloader-spin { to { transform: rotate(360deg); } }
 @keyframes preloader-orbit { 0%,100% { transform: scale(.96); opacity: .55; } 50% { transform: scale(1.04); opacity: 1; } }
 @keyframes preloader-appear { from { opacity: 0; } to { opacity: 1; } }
+@keyframes preloader-exit { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
 @keyframes preloader-message { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 :root[data-theme="dark"] .site-preloader { background: #111b15; color: #e8eee9; }
 :root[data-theme="dark"] .site-preloader__symbol { background: #24382b; color: #c8dfce; }
