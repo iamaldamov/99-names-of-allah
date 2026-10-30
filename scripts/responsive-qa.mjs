@@ -37,7 +37,7 @@ try {
     const uiContracts = await page.evaluate(() => {
       const buttons = Array.from(document.querySelectorAll('button'));
       const unnamedButtons = buttons
-        .filter(button => !(button.getAttribute('aria-label') || button.getAttribute('title') || button.innerText || '').trim())
+        .filter(button => !(button.getAttribute('aria-label') || button.getAttribute('title') || button.textContent || '').trim())
         .map(button => button.outerHTML.slice(0, 180));
       const anchors = Array.from(document.querySelectorAll('a'));
       const brokenAnchors = anchors.filter(anchor => {
