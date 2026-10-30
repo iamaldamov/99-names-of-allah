@@ -1,0 +1,27 @@
+name: Feature branch validation
+
+on:
+  push:
+    branches:
+      - feature/gamified-learning-path-clean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: TypeScript and production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run production build
+        run: npm run build
