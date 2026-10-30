@@ -1076,8 +1076,19 @@ function downloadBlob(blob: Blob, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
+
+const loadingMessages: Record<'ru' | 'en' | 'ar' | 'ky' | 'kk', string[]> = {
+  ru: ['Обучение полностью бесплатное.', 'Каждый день — маленький шаг к знаниям.', 'Проект создан для всех желающих учиться.', 'Вы можете поддержать развитие проекта.'],
+  en: ['Learning is completely free.', 'Every day is a small step towards knowledge.', 'This project is open to everyone.', 'You can support the project’s development.'],
+  ar: ['التعلّم مجاني بالكامل.', 'كل يوم خطوة صغيرة نحو المعرفة.', 'هذا المشروع متاح للجميع.', 'يمكنك دعم تطوير المشروع.'],
+  ky: ['Окуу толугу менен акысыз.', 'Күн сайын билимге карай кичинекей кадам.', 'Долбоор үйрөнүүнү каалагандардын баарына ачык.', 'Долбоордун өнүгүшүнө колдоо көрсөтө аласыз.'],
+  kk: ['Оқу толығымен тегін.', 'Күн сайын білімге қарай кішкентай қадам.', 'Жоба үйренгісі келетін баршаға ашық.', 'Жобаның дамуына қолдау көрсете аласыз.'],
+};
+
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const tr = (value: string, values: Record<string, string | number> = {}) => {
@@ -1085,6 +1096,37 @@ export default function App() {
     return Object.entries(values).reduce((result, [key, replacement]) => result.replaceAll(`{${key}}`, String(replacement)), template);
   };
   const shownTransliteration = (name: NameItem) => language === 'ru' ? russianTransliterations[name.id] ?? name.transliteration : name.transliteration;
+  useEffect(() => {
+    let active = true;
+    let finishTimer: number | undefined;
+    const startedAt = performance.now();
+    const pageReady = document.readyState === 'complete'
+      ? Promise.resolve()
+      : new Promise<void>(resolve => window.addEventListener('load', () => resolve(), { once: true }));
+    const fontsReady = document.fonts?.ready ?? Promise.resolve();
+    const fallback = new Promise<void>(resolve => window.setTimeout(resolve, 2200));
+
+    void Promise.race([Promise.all([pageReady, fontsReady]), fallback]).then(() => {
+      const remaining = Math.max(0, 750 - (performance.now() - startedAt));
+      finishTimer = window.setTimeout(() => {
+        if (active) setInitialLoading(false);
+      }, remaining);
+    });
+
+    return () => {
+      active = false;
+      if (finishTimer !== undefined) window.clearTimeout(finishTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!initialLoading) return;
+    const messages = loadingMessages[language];
+    const interval = window.setInterval(() => {
+      setLoadingMessageIndex(index => (index + 1) % messages.length);
+    }, 2600);
+    return () => window.clearInterval(interval);
+  }, [initialLoading, language]);
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -1489,7 +1531,16 @@ export default function App() {
 
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" aria-busy={initialLoading}>
+      {initialLoading && <div className="site-preloader" role="status" aria-live="polite">
+        <div className="site-preloader__content">
+          <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
+          <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
+          <div className="site-preloader__spinner" aria-hidden="true"><span /></div>
+          <p className="site-preloader__message" key={loadingMessageIndex}>{loadingMessages[language][loadingMessageIndex]}</p>
+          <p className="site-preloader__note">{language === 'en' ? 'A free learning project' : language === 'ar' ? 'مشروع تعليمي مجاني' : language === 'ky' ? 'Акысыз билим берүү долбоору' : language === 'kk' ? 'Тегін білім беру жобасы' : 'Бесплатный образовательный проект'}</p>
+        </div>
+      </div>}
       <header className={`topbar${headerVisible ? '' : ' topbar-hidden'}`} aria-hidden={!headerVisible} inert={!headerVisible}>
         <a className="brand" href="#home" aria-label={tr("99 имён Аллаха — главная")}><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label={tr("Переключить тему")}>{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
@@ -1608,7 +1659,7 @@ export default function App() {
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
         <p className="lesson-translit">{shownTransliteration(item)}</p>
         <h2>{tr('Вспомни значение этого имени')}</h2>
-        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')} <ArrowRight size={16}/></button> : <><div className="review-session-answer" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}><Check size={17}/> {tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
+        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')}</button> : <><div className="review-session-answer" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}>{tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
         <p className="review-storage-note">{tr('Честно оцени своё воспоминание — так интервалы будут подбираться точнее.')}</p>
       </section></div> : null; })()}
 
