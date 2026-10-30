@@ -1273,7 +1273,7 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-review-v1', JSON.stringify(reviewData)); } catch { /* Storage unavailable */ } }, [reviewData]);
   useEffect(() => { setReviewData(old => { const missing = progress.filter(id => !old[id]); if (!missing.length) return old; const next = { ...old }; missing.forEach(id => { next[id] = { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null }; }); return next; }); }, [progress]);
   useEffect(() => {
-    if (!supabase || !user) { setProgressLoadedFor(null); return; }
+    if (!supabaseClient || !user) { setProgressLoadedFor(null); return; }
     let alive = true;
     setProgressLoadedFor(null);
     supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
@@ -1289,9 +1289,9 @@ export default function App() {
       if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
-  }, [user]);
+  }, [user, supabaseClient]);
   useEffect(() => {
-    if (!supabase || !user || progressLoadedFor !== user.id || !progress.length) return;
+    if (!supabaseClient || !user || progressLoadedFor !== user.id || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
     void supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
       .then(({ error: saveError }) => {
@@ -1413,7 +1413,7 @@ export default function App() {
     setStudyDays(old => ({ ...old, [localDayKey()]: old[localDayKey()] || 1 }));
     setReviewData(old => old[nameId] ? old : { ...old, [nameId]: { box: 0, dueAt: addDays(1), seen: 0, correct: 0, lastReviewedAt: null } });
     setNotice(tr('Имя отмечено как изученное. Первое повторение запланировано на завтра.'));
-    if (supabase && user) {
+    if (supabaseClient && user) {
       try {
         const { error: saveError } = await supabaseClient.from('user_progress').upsert({
           user_id: user.id, name_id: nameId, status: 'learned', confidence: 3,
