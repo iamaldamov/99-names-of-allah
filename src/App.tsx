@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent } from 'react';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
-import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { GamifiedPath } from './GamifiedPath';
 
@@ -1107,6 +1106,7 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   const [names, setNames] = useState<NameItem[]>(previewNames);
+  const [supabaseClient, setSupabaseClient] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
@@ -1235,25 +1235,39 @@ export default function App() {
 
   const closeWelcome = () => { setWelcomeOpen(false); try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Welcome can be closed even when storage is unavailable. */ } };
 
+  // Load the optional cloud/account client after the first paint so it does not delay the learning interface.
   useEffect(() => {
-    if (!supabase) return;
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
     let alive = true;
-    supabase.from('names').select('id,arabic,transliteration,translation,explanation,source_references').eq('content_status', 'published').order('id')
-      .then(({ data, error: fetchError }) => {
+    const timer = window.setTimeout(() => {
+      void import('./lib/supabase').then(({ supabase: client }) => {
+        if (alive) setSupabaseClient(client);
+      }).catch(() => {
+        if (alive) setNotice(tr('Не удалось подключить аккаунт. Локальное изучение доступно.'));
+      });
+    }, 700);
+    return () => { alive = false; window.clearTimeout(timer); };
+  }, []);
+
+  useEffect(() => {
+    if (!supabaseClient) return;
+    let alive = true;
+    supabaseClient.from('names').select('id,arabic,transliteration,translation,explanation,source_references').eq('content_status', 'published').order('id')
+      .then(({ data, error: fetchError }: { data: NameItem[] | null; error: unknown }) => {
         if (!alive) return;
-        if (!fetchError && data && data.length) {
+        if (!fetchError && data?.length) {
           const remote = data as NameItem[];
           setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
         }
       });
-    supabase.auth.getSession().then(({ data }) => {
+    supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: any } | null } }) => {
       if (alive) setUser(data.session?.user ?? null);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: any } | null) => {
       if (alive) setUser(session?.user ?? null);
     });
     return () => { alive = false; listener.subscription.unsubscribe(); };
-  }, []);
+  }, [supabaseClient]);
 
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-progress', JSON.stringify(progress)); } catch { /* Storage unavailable */ } }, [progress]);
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-review-v1', JSON.stringify(reviewData)); } catch { /* Storage unavailable */ } }, [reviewData]);
@@ -1262,7 +1276,7 @@ export default function App() {
     if (!supabase || !user) { setProgressLoadedFor(null); return; }
     let alive = true;
     setProgressLoadedFor(null);
-    supabase.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
+    supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
       if (!alive) return;
       if (loadError) {
         setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
@@ -1279,11 +1293,11 @@ export default function App() {
   useEffect(() => {
     if (!supabase || !user || progressLoadedFor !== user.id || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
-    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
+    void supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
       .then(({ error: saveError }) => {
         if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
       });
-  }, [user, progressLoadedFor, progress]);
+  }, [supabaseClient, user, progressLoadedFor, progress]);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
@@ -1308,20 +1322,20 @@ export default function App() {
 
   const submitAccount = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase) { setError(tr('Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.')); return; }
+    if (!supabaseClient) { setError(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY ? tr('Подключение аккаунта загружается. Попробуй ещё раз через секунду.') : tr('Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.')); return; }
     setBusy(true); setError(''); setMessage('');
     try {
       if (accountMode === 'signup') {
-        const { data, error: authError } = await supabase.auth.signUp({ email: email.trim(), password });
+        const { data, error: authError } = await supabaseClient.auth.signUp({ email: email.trim(), password });
         if (authError) throw authError;
         if (data.session) { setMessage(tr('Аккаунт создан. Ты вошёл в систему.')); setAccountOpen(false); }
         else setMessage(tr('Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.'));
       } else if (accountMode === 'login') {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { error: authError } = await supabaseClient.auth.signInWithPassword({ email: email.trim(), password });
         if (authError) throw authError;
         setAccountOpen(false); setMessage(tr('Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.'));
       } else {
-        const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: SITE_URL });
+        const { error: authError } = await supabaseClient.auth.resetPasswordForEmail(email.trim(), { redirectTo: SITE_URL });
         if (authError) throw authError;
         setMessage(tr('Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.'));
       }
@@ -1401,7 +1415,7 @@ export default function App() {
     setNotice(tr('Имя отмечено как изученное. Первое повторение запланировано на завтра.'));
     if (supabase && user) {
       try {
-        const { error: saveError } = await supabase.from('user_progress').upsert({
+        const { error: saveError } = await supabaseClient.from('user_progress').upsert({
           user_id: user.id, name_id: nameId, status: 'learned', confidence: 3,
           times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(),
           next_review_at: new Date(Date.now() + 86400000).toISOString(), updated_at: new Date().toISOString()
@@ -1413,7 +1427,7 @@ export default function App() {
     setBusy(false);
   };
 
-  const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.')); };
+  const signOut = async () => { if (supabaseClient) await supabaseClient.auth.signOut(); setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.')); };
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => name.id <= unlockedNameLimit && !progress.includes(name.id));
   const accessibleNames = useMemo(() => names.filter(name => name.id <= unlockedNameLimit || progress.includes(name.id)), [names, unlockedNameLimit, progress]);
