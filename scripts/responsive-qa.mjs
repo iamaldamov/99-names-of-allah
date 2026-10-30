@@ -41,7 +41,7 @@ try {
     assert.ok(initialLayout.document <= initialLayout.viewport + 1, `Horizontal overflow at ${size.width}px: ${JSON.stringify(initialLayout)}`);
     assert.ok(initialLayout.body <= initialLayout.viewport + 1, `Body overflow at ${size.width}px: ${JSON.stringify(initialLayout)}`);
 
-    const examButton = page.locator('.path-exam-button').filter({ hasText: 'Начать итоговый экзамен' });
+    const examButton = page.locator('.path-exam-button').first();
     await examButton.waitFor({ state: 'visible' });
     await examButton.click();
     const dialog = page.locator('.path-exam-modal');
@@ -61,6 +61,7 @@ try {
 
     if (size.width <= 768) {
       await page.locator('.language-select').selectOption('ar');
+      await page.waitForFunction(() => document.documentElement.dir === 'rtl');
       assert.equal(await page.locator('html').getAttribute('dir'), 'rtl', 'Arabic should enable right-to-left document direction');
       const rtlLayout = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth }));
       assert.ok(rtlLayout.document <= rtlLayout.viewport + 1, `Arabic layout overflows at ${size.width}px: ${JSON.stringify(rtlLayout)}`);
