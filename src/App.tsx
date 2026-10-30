@@ -1116,6 +1116,7 @@ export default function App() {
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [swipeHintVisible, setSwipeHintVisible] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
+  const [swipeRange, setSwipeRange] = useState<{ min: number; max: number } | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -1350,12 +1351,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!selected) { setSwipeHintVisible(false); return; }
+    if (!selected) {
+      setSwipeHintVisible(false);
+      setSwipeRange(null);
+      return;
+    }
     try {
-      if (localStorage.getItem('99-names-swipe-hint-seen') === '1') { setSwipeHintVisible(false); return; }
-      localStorage.setItem('99-names-swipe-hint-seen', '1');
+      if (localStorage.getItem('99-names-swipe-hint-seen-v2') === '1') { setSwipeHintVisible(false); return; }
       setSwipeHintVisible(true);
-      const timer = window.setTimeout(() => setSwipeHintVisible(false), 4400);
+      const timer = window.setTimeout(() => setSwipeHintVisible(false), 6000);
       return () => window.clearTimeout(timer);
     } catch { setSwipeHintVisible(true); }
   }, [selected?.id]);
@@ -1375,8 +1379,11 @@ export default function App() {
     // A leftward finger movement advances to the next name; right returns to the previous one.
     const isSwipeLeft = dx < 0;
     const nextId = selected.id + (isSwipeLeft ? 1 : -1);
-    if (nextId < 1 || nextId > 99) return;
+    const allowedRange = swipeRange ?? { min: 1, max: unlockedNameLimit };
+    if (nextId < allowedRange.min || nextId > allowedRange.max) return;
 
+    try { localStorage.setItem('99-names-swipe-hint-seen-v2', '1'); } catch { /* Hint can still be dismissed for this session. */ }
+    setSwipeHintVisible(false);
     setSwipeDirection(isSwipeLeft ? 1 : -1);
     setError('');
     setSelected(names.find(name => name.id === nextId) || null);
@@ -1478,7 +1485,7 @@ export default function App() {
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? tr('Следующий шаг') : dueReviewIds.length ? tr('Время повторить') : tr('Ты прошёл весь список')}</small><b dir={language === 'ar' ? 'auto' : undefined}>{nextName ? `${language === 'ru' ? 'Продолжить' : language === 'en' ? 'Continue' : language === 'ar' ? 'متابعة' : language === 'ky' ? 'Улантуу' : 'Жалғастыру'}: ${nextName.translation}` : dueReviewIds.length ? tr('Закрепить изученное') : tr('Вернуться к каталогу')}</b></span><ArrowRight size={19}/></button>
       </section>
 
-      <GamifiedPath names={names} progress={progress} language={language} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} language={language} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
