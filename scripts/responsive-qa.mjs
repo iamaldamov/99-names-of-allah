@@ -47,7 +47,7 @@ try {
         try { new URL(href, window.location.href); return false; } catch { return true; }
       }).map(anchor => anchor.outerHTML.slice(0, 180));
       const unsafeExternalLinks = anchors
-        .filter(anchor => anchor.target === '_blank' && !/\\b(?:noopener|noreferrer)\\b/.test(anchor.rel))
+        .filter(anchor => anchor.target === '_blank' && !/\b(?:noopener|noreferrer)\b/.test(anchor.rel))
         .map(anchor => anchor.outerHTML.slice(0, 180));
       const unlabeledControls = Array.from(document.querySelectorAll('input:not([type="hidden"]), select, textarea'))
         .filter(control => {
