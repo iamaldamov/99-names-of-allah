@@ -1088,6 +1088,7 @@ const loadingMessages: Record<'ru' | 'en' | 'ar' | 'ky' | 'kk', string[]> = {
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
   const [initialLoading, setInitialLoading] = useState(true);
+  const [preloaderLeaving, setPreloaderLeaving] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -1098,6 +1099,7 @@ export default function App() {
   const shownTransliteration = (name: NameItem) => language === 'ru' ? russianTransliterations[name.id] ?? name.transliteration : name.transliteration;
   useEffect(() => {
     let active = true;
+    let startTimer: number | undefined;
     let finishTimer: number | undefined;
     const startedAt = performance.now();
     const pageReady = document.readyState === 'complete'
@@ -1108,13 +1110,18 @@ export default function App() {
 
     void Promise.race([Promise.all([pageReady, fontsReady]), fallback]).then(() => {
       const remaining = Math.max(0, 750 - (performance.now() - startedAt));
-      finishTimer = window.setTimeout(() => {
-        if (active) setInitialLoading(false);
+      startTimer = window.setTimeout(() => {
+        if (!active) return;
+        setPreloaderLeaving(true);
+        finishTimer = window.setTimeout(() => {
+          if (active) setInitialLoading(false);
+        }, 280);
       }, remaining);
     });
 
     return () => {
       active = false;
+      if (startTimer !== undefined) window.clearTimeout(startTimer);
       if (finishTimer !== undefined) window.clearTimeout(finishTimer);
     };
   }, []);
@@ -1532,7 +1539,7 @@ export default function App() {
 
   return (
     <main className="app-shell" aria-busy={initialLoading}>
-      {initialLoading && <div className="site-preloader" role="status" aria-live="polite">
+      {initialLoading && <div className={`site-preloader${preloaderLeaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
         <div className="site-preloader__content">
           <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
           <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
