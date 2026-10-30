@@ -124,3 +124,24 @@
 @media(prefers-reduced-motion:reduce){
   .path-exam-modal,.path-stage-card{scroll-behavior:auto;transition:none}
 }
+
+
+/* Minimal learning path: show only the active stage and inherit the global theme. */
+.path-stage-list{display:block}
+.path-current-card{max-width:680px;margin:0 auto}
+.learning-path{background:var(--paper,#fff);color:var(--ink,#26372e)}
+.path-stage-card,.path-exam-modal{background:var(--paper,#fff);color:var(--ink,#26372e)}
+.path-overview{background:color-mix(in srgb,var(--ink,#26372e) 5%,var(--paper,#fff))}
+.path-lesson{color:var(--ink,#26372e)}
+:root[data-theme="dark"] .learning-path,
+:root[data-theme="dark"] .path-stage-card,
+:root[data-theme="dark"] .path-exam-modal{background:#18231d;color:#e8eee9;border-color:#34443b}
+:root[data-theme="dark"] .path-overview,
+:root[data-theme="dark"] .path-lesson,
+:root[data-theme="dark"] .path-exam-close{background:#202f25;color:#e8eee9;border-color:#405747}
+:root[data-theme="dark"] .path-exam-options button{background:#202f25;color:#e8eee9;border-color:#405747}
+:root[data-theme="dark"] .path-exam-options button.is-correct{background:#203b29;color:#d2ead4;border-color:#456d4d}
+:root[data-theme="dark"] .path-exam-options button.is-wrong{background:#402525;color:#f2ceca;border-color:#754343}
+:root[data-theme="dark"] .path-exam-feedback.is-correct{background:#203b29;color:#d2ead4}
+:root[data-theme="dark"] .path-exam-feedback.is-wrong{background:#402525;color:#f2ceca}
+@media(max-width:700px){.path-current-card{padding:15px}}
