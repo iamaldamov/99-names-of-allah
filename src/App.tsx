@@ -1276,7 +1276,7 @@ export default function App() {
     if (!supabaseClient || !user) { setProgressLoadedFor(null); return; }
     let alive = true;
     setProgressLoadedFor(null);
-    supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
+    supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
       if (!alive) return;
       if (loadError) {
         setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
@@ -1294,7 +1294,7 @@ export default function App() {
     if (!supabaseClient || !user || progressLoadedFor !== user.id || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
     void supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
-      .then(({ error: saveError }) => {
+      .then(({ error: saveError }: { error: unknown }) => {
         if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
       });
   }, [supabaseClient, user, progressLoadedFor, progress]);
@@ -1518,7 +1518,7 @@ export default function App() {
             <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>{tr('Следующие имена закрыты')}</b><small>{tr('Пройди итоговый экзамен, чтобы открыть следующий этап')}</small></span><span className="locked-count">ещё {99 - unlockedNameLimit}</span>
           </button>}
         </div>}
-        {!supabase && <p className="setup-warning">{tr("Сервис аккаунтов пока не подключён к опубликованной версии сайта.")}</p>}
+        {!supabaseClient && !import.meta.env.VITE_SUPABASE_URL && <p className="setup-warning">{tr("Сервис аккаунтов пока не подключён к опубликованной версии сайта.")}</p>}
       </section>
 
       <details className="compact-details reveal"><summary><span><b>{tr('Повторение и запоминание')}</b><small>{dueReviewIds.length ? dueReviewIds.length + ' ' + (language === 'en' ? 'Names due for review' : language === 'ar' ? 'أسماء بانتظار المراجعة' : language === 'ky' ? 'ысым кайталоону күтөт' : language === 'kk' ? 'есім қайталауды күтуде' : 'имён ждут повторения') : tr('Интервальные повторения помогут закрепить знания')}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
