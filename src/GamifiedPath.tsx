@@ -26,8 +26,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "LEARNING PATH",
     "Твой путь изучения": "Your learning journey",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "Move step by step: three short lessons, followed by a knowledge check.",
-    "Набрано {xp} игровых очков опыта": "{xp} game experience points earned",
-    "опыт": "XP earned",
+    "Всего баллов: {xp}": "Total points: {xp}",
+    "Всего баллов": "TOTAL POINTS",
     "ТЕКУЩИЙ ЭТАП": "CURRENT STAGE",
     "{count} из 9 имён изучено": "{count} of 9 names learned",
     "Открыто {count} из 11 этапов": "{count} of 11 stages unlocked",
@@ -78,8 +78,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "ЭТАПТАР БОЮНЧА ҮЙРӨНҮҮ",
     "Твой путь изучения": "Үйрөнүү жолуң",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "Акырындык менен үйрөн: үч кыска сабак, андан кийин билимди текшерүү.",
-    "Набрано {xp} игровых очков опыта": "{xp} оюн тажрыйба упайы топтолду",
-    "опыт": "тажрыйба упайы",
+    "Всего баллов: {xp}": "Жалпы упай: {xp}",
+    "Всего баллов": "ЖАЛПЫ УПАЙ",
     "ТЕКУЩИЙ ЭТАП": "УЧУРДАГЫ ЭТАП",
     "{count} из 9 имён изучено": "9 ысымдын {count} үйрөнүлдү",
     "Открыто {count} из 11 этапов": "11 этаптын {count} ачылды",
@@ -130,8 +130,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "КЕЗЕҢДЕР БОЙЫНША ОҚУ",
     "Твой путь изучения": "Сенің оқу жолың",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "Біртіндеп үйрен: үш қысқа сабақ, содан кейін білімді тексеру.",
-    "Набрано {xp} игровых очков опыта": "{xp} ойын тәжірибе ұпайы жиналды",
-    "опыт": "тәжірибе ұпайы",
+    "Всего баллов: {xp}": "Жалпы ұпай: {xp}",
+    "Всего баллов": "ЖАЛПЫ ҰПАЙ",
     "ТЕКУЩИЙ ЭТАП": "АҒЫМДАҒЫ КЕЗЕҢ",
     "{count} из 9 имён изучено": "9 есімнің {count} үйренілді",
     "Открыто {count} из 11 этапов": "11 кезеңнің {count} ашық",
@@ -272,11 +272,12 @@ function shuffled<T,>(items: T[]): T[] {
   return result;
 }
 
-export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, language }: {
+export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, getTransliteration, language }: {
   names: LearningName[];
   progress: number[];
   onOpenName: (name: LearningName) => void;
   onUnlockedNameLimit: (limit: number) => void;
+  getTransliteration: (name: LearningName) => string;
   language: UiLanguage;
 }) {
   const t = (key: string, values: Record<string, string | number> = {}) => translate(language, key, values);
@@ -309,6 +310,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   const xp = completedLessons * 5 + pathState.passedStages.length * 20;
   const activeStage = stages.find(stage => stage.id === unlockedCount) ?? stages[0];
   const currentQuestion = questions[questionIndex];
+  const currentName = names.find(name => name.id === currentQuestion?.nameId);
   const currentCorrect = currentQuestion?.options.find(option => option.id === currentQuestion.nameId);
 
   const startExam = (stageId: number) => {
@@ -422,10 +424,10 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
             <h2 id="learning-path-title">{t('Твой путь изучения')}</h2>
             <p>{t('Двигайся постепенно: три коротких урока, затем проверка знаний.')}</p>
           </div>
-          <div className="path-xp" aria-label={t('Набрано {xp} игровых очков опыта', {xp})}>
+          <div className="path-xp" aria-label={t('Всего баллов: {xp}', {xp})}>
             <Sparkles size={17} />
-            <b>{xp} XP</b>
-            <small>{t('опыт')}</small>
+            <b>{xp}</b>
+            <small>{t('Всего баллов')}</small>
           </div>
         </div>
 
@@ -491,7 +493,8 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                 <div className="path-exam-meta"><span>{t('ВОПРОС {current} ИЗ 10', {current: questionIndex + 1})}</span><span>{t('{count} правильных', {count: score})}</span></div>
                 {currentQuestion && (
                   <>
-                    <div className="path-exam-arabic" lang="ar" dir="rtl">{names.find(name => name.id === currentQuestion.nameId)?.arabic}</div>
+                    <div className="path-exam-arabic" lang="ar" dir="rtl">{currentName?.arabic}</div>
+                    <p className="path-exam-translit" dir="auto">{currentName ? getTransliteration(currentName) : ''}</p>
                     <h3 className="path-exam-question">{t('Какое значение соответствует этому имени?')}</h3>
                     <div className="path-exam-options">
                       {currentQuestion.options.map(option => (
