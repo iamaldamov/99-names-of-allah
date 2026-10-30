@@ -1264,10 +1264,10 @@ export default function App() {
           const remote = data as NameItem[];
           setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
         }
-      })
+      }))
       .catch(() => {
         if (alive) setNotice(tr('Не удалось связаться с каталогом. Изучение доступно в автономном режиме.'));
-      }));
+      });
     void supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: User | null } | null } }) => {
       if (alive) setUser(data.session?.user ?? null);
     }).catch(() => {
