@@ -1188,6 +1188,12 @@ Object.assign(languageText.ar, {
  'Поделиться':'مشاركة','Сохранить':'حفظ','Изучил':'تعلّمت','Изучено':'تم التعلّم'
 });
 
+
+Object.assign(languageText.ky, {'Язык':'Тил','ИМЯ {id} ИЗ 99':'{id}-ысым · 99дан','ЗНАЧЕНИЕ ИМЕНИ':'ЫСЫМДЫН МААНИСИ','Вспомнил':'Эстедим','Повторить позже':'Кийин кайталоо','Показать значение':'Маанисин көрсөтүү','Удалось вспомнить значение до подсказки?':'Маанисин жардамсыз эстей алдыңбы?','Нужно повторить':'Кайталоо керек','Поделиться карточкой':'Карточканы бөлүшүү','Убрать из избранного':'Тандалгандардан алып салуу','В избранное':'Тандалгандарга кошуу'});
+Object.assign(languageText.kk, {'Язык':'Тіл','ИМЯ {id} ИЗ 99':'{id}-есім · 99-дан','ЗНАЧЕНИЕ ИМЕНИ':'ЕСІМНІҢ МАҒЫНАСЫ','Вспомнил':'Еске түсірдім','Повторить позже':'Кейін қайталау','Показать значение':'Мағынасын көрсету','Удалось вспомнить значение до подсказки?':'Мағынасын көмексіз еске түсіре алдың ба?','Нужно повторить':'Қайталау керек','Поделиться карточкой':'Карточкамен бөлісу','Убрать из избранного':'Таңдаулылардан алып тастау','В избранное':'Таңдаулыларға қосу'});
+Object.assign(languageText.en, {'Язык':'Language','ИМЯ {id} ИЗ 99':'NAME {id} OF 99','ЗНАЧЕНИЕ ИМЕНИ':'MEANING OF THE NAME','Вспомнил':'I remembered','Повторить позже':'Review later','Показать значение':'Show meaning','Удалось вспомнить значение до подсказки?':'Did you remember the meaning before seeing the hint?','Нужно повторить':'I need to review','Поделиться карточкой':'Share this card','Убрать из избранного':'Remove from favourites','В избранное':'Add to favourites'});
+Object.assign(languageText.ar, {'Язык':'اللغة','ИМЯ {id} ИЗ 99':'الاسم {id} من ٩٩','ЗНАЧЕНИЕ ИМЕНИ':'معنى الاسم','Вспомнил':'تذكّرت','Повторить позже':'المراجعة لاحقًا','Показать значение':'عرض المعنى','Удалось вспомнить значение до подсказки؟':'هل تذكّرت المعنى قبل ظهور التلميح؟','Нужно повторить':'أحتاج إلى المراجعة','Поделиться карточкой':'مشاركة البطاقة','Убрать из избранного':'إزالة من المفضّلة','В избранное':'إضافة إلى المفضّلة'});
+
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
   const [initialLoading, setInitialLoading] = useState(true);
@@ -1653,7 +1659,7 @@ export default function App() {
         </div>
       </div>}
       <header className={`topbar${headerVisible ? '' : ' topbar-hidden'}`} aria-hidden={!headerVisible} inert={!headerVisible}>
-        <a className="brand" href="#home" aria-label={tr("99 имён Аллаха — главная")}><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label={tr("Переключить тему")}>{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
+        <a className="brand" href="#home" aria-label={tr("99 имён Аллаха — главная")}><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label={tr("Переключить тему")}>{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label={tr("Язык")} value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
