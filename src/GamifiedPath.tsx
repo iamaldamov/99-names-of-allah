@@ -135,6 +135,20 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
     setResult(null);
   };
 
+  useEffect(() => {
+    if (examStage === null) return;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeExam();
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [examStage]);
+
   return (
     <>
       <section className="learning-path reveal" id="learning-path" aria-labelledby="learning-path-title">
