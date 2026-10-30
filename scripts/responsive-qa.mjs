@@ -58,6 +58,9 @@ try {
 
     await page.keyboard.press('Shift+Tab');
     assert.equal(await dialog.evaluate(element => element.contains(document.activeElement)), true, 'Keyboard focus must stay inside the exam dialog');
+    await page.locator('.theme-toggle').focus();
+    await page.keyboard.press('Tab');
+    assert.equal(await dialog.evaluate(element => element.contains(document.activeElement)), true, 'Tab navigation must return focus to the exam when focus escapes');
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
     assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing the exam should restore background scrolling');
