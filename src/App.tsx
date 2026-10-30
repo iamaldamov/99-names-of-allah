@@ -1077,12 +1077,69 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 
-const loadingMessages: Record<'ru' | 'en' | 'ar' | 'ky' | 'kk', string[]> = {
-  ru: ['Обучение полностью бесплатное.', 'Каждый день — маленький шаг к знаниям.', 'Проект создан для всех желающих учиться.', 'Вы можете поддержать развитие проекта.'],
-  en: ['Learning is completely free.', 'Every day is a small step towards knowledge.', 'This project is open to everyone.', 'You can support the project’s development.'],
-  ar: ['التعلّم مجاني بالكامل.', 'كل يوم خطوة صغيرة نحو المعرفة.', 'هذا المشروع متاح للجميع.', 'يمكنك دعم تطوير المشروع.'],
-  ky: ['Окуу толугу менен акысыз.', 'Күн сайын билимге карай кичинекей кадам.', 'Долбоор үйрөнүүнү каалагандардын баарына ачык.', 'Долбоордун өнүгүшүнө колдоо көрсөтө аласыз.'],
-  kk: ['Оқу толығымен тегін.', 'Күн сайын білімге қарай кішкентай қадам.', 'Жоба үйренгісі келетін баршаға ашық.', 'Жобаның дамуына қолдау көрсете аласыз.'],
+type LoadingMessage = { text: string; source: string; kind: 'quran' | 'hadith' | 'reflection' };
+
+const loadingMessages: Record<'ru' | 'en' | 'ar' | 'ky' | 'kk', LoadingMessage[]> = {
+  ru: [
+    { text: '«Господи! Приумножь мои знания».', source: 'Коран · Та Ха, 20:114', kind: 'quran' },
+    { text: '«Разве равны те, которые знают, и те, которые не знают?»', source: 'Коран · Аз-Зумар, 39:9', kind: 'quran' },
+    { text: 'Аллах возвышает по степеням тех, кому даровано знание.', source: 'Коран · Аль-Муджадиля, 58:11 · фрагмент', kind: 'quran' },
+    { text: '«О рабы Мои! Не отчаивайтесь в милости Аллаха».', source: 'Коран · Аз-Зумар, 39:53 · фрагмент', kind: 'quran' },
+    { text: 'Кто вступил на путь поиска знания, тому Аллах облегчит путь в Рай.', source: 'Сахих Муслим, 2699', kind: 'hadith' },
+    { text: 'Кому Аллах желает блага, тому дарует понимание религии.', source: 'Сахих аль-Бухари, 71', kind: 'hadith' },
+    { text: 'Этот проект создан, чтобы каждый мог бесплатно изучать 99 имён Аллаха.', source: 'О проекте', kind: 'reflection' },
+    { text: 'Не спеши: изучай понемногу, вдумывайся в смысл и возвращайся к повторению.', source: 'Напоминание для изучающего', kind: 'reflection' },
+    { text: 'Знание становится полезнее, когда его изучают искренне и применяют в жизни.', source: 'Напоминание для изучающего', kind: 'reflection' },
+    { text: 'Сегодня достаточно сделать ещё один небольшой шаг к знаниям.', source: 'Напоминание для изучающего', kind: 'reflection' },
+  ],
+  en: [
+    { text: '“My Lord, increase me in knowledge.”', source: 'Qur’an · Ta-Ha, 20:114', kind: 'quran' },
+    { text: '“Are those who know equal to those who do not know?”', source: 'Qur’an · Az-Zumar, 39:9', kind: 'quran' },
+    { text: 'Allah raises in rank those who have been given knowledge.', source: 'Qur’an · Al-Mujadila, 58:11 · excerpt', kind: 'quran' },
+    { text: '“O My servants, do not despair of the mercy of Allah.”', source: 'Qur’an · Az-Zumar, 39:53 · excerpt', kind: 'quran' },
+    { text: 'Whoever follows a path seeking knowledge, Allah will make a path to Paradise easy for them.', source: 'Sahih Muslim, 2699', kind: 'hadith' },
+    { text: 'When Allah wishes good for someone, He grants them understanding of the religion.', source: 'Sahih al-Bukhari, 71', kind: 'hadith' },
+    { text: 'This project makes learning the 99 Names of Allah freely accessible to everyone.', source: 'About this project', kind: 'reflection' },
+    { text: 'Take your time: learn a little, reflect on the meaning, and return to review.', source: 'A learning reminder', kind: 'reflection' },
+    { text: 'Knowledge becomes more beneficial when it is learned sincerely and put into practice.', source: 'A learning reminder', kind: 'reflection' },
+    { text: 'Today, one small step towards knowledge is enough.', source: 'A learning reminder', kind: 'reflection' },
+  ],
+  ar: [
+    { text: 'وَقُل رَّبِّ زِدْنِي عِلْمًا', source: 'القرآن الكريم · طه، ١١٤', kind: 'quran' },
+    { text: 'هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ', source: 'القرآن الكريم · الزمر، ٩', kind: 'quran' },
+    { text: 'يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ', source: 'القرآن الكريم · المجادلة، ١١ · مقتطف', kind: 'quran' },
+    { text: 'يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَىٰ أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ', source: 'القرآن الكريم · الزمر، ٥٣ · مقتطف', kind: 'quran' },
+    { text: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ', source: 'صحيح مسلم، ٢٦٩٩', kind: 'hadith' },
+    { text: 'مَنْ يُرِدِ اللَّهُ بِهِ خَيْرًا يُفَقِّهْهُ فِي الدِّينِ', source: 'صحيح البخاري، ٧١', kind: 'hadith' },
+    { text: 'هذا المشروع يتيح للجميع تعلّم أسماء الله الحسنى مجانًا.', source: 'عن المشروع', kind: 'reflection' },
+    { text: 'تعلّم قليلًا كل يوم، وتأمّل في المعنى، وداوم على المراجعة.', source: 'تذكير للمتعلّم', kind: 'reflection' },
+    { text: 'ينتفع الإنسان بالعلم حين يتعلّمه بإخلاص ويعمل به.', source: 'تذكير للمتعلّم', kind: 'reflection' },
+    { text: 'خطوة صغيرة اليوم تقرّبك من المعرفة.', source: 'تذكير للمتعلّم', kind: 'reflection' },
+  ],
+  ky: [
+    { text: '«Раббым! Илимимди арттыр».', source: 'Куран · Та Ха, 20:114', kind: 'quran' },
+    { text: '«Билгендер менен билбегендер теңби?»', source: 'Куран · Аз-Зумар, 39:9', kind: 'quran' },
+    { text: 'Аллах силерден ыйман келтиргендердин жана илим берилгендердин даражаларын көтөрөт.', source: 'Куран · Аль-Мужадала, 58:11 · үзүндү', kind: 'quran' },
+    { text: '«Эй, өздөрүнө зыян кылууда чектен ашкан пенделерим! Аллахтын ырайымынан үмүт үзбөгүлө».', source: 'Куран · Аз-Зумар, 39:53 · үзүндү', kind: 'quran' },
+    { text: 'Ким илим издөө жолуна түшсө, Аллах ага Бейишке баруучу жолду жеңилдетет.', source: 'Сахих Муслим, 2699', kind: 'hadith' },
+    { text: 'Аллах кимге жакшылык кааласа, ага динди түшүнүүнү насип кылат.', source: 'Сахих аль-Бухари, 71', kind: 'hadith' },
+    { text: 'Бул долбоор ар бир адамга Аллахтын 99 ысымын акысыз үйрөнүүгө мүмкүнчүлүк берет.', source: 'Долбоор жөнүндө', kind: 'reflection' },
+    { text: 'Шашпа: аз-аздан үйрөн, маанисине ой жүгүрт жана кайталап тур.', source: 'Үйрөнүүчүгө эскертүү', kind: 'reflection' },
+    { text: 'Илим аны чын ыклас менен үйрөнүп, жашоодо колдонгондо пайдалуу болот.', source: 'Үйрөнүүчүгө эскертүү', kind: 'reflection' },
+    { text: 'Бүгүн билимге карай дагы бир кичинекей кадам ташта.', source: 'Үйрөнүүчүгө эскертүү', kind: 'reflection' },
+  ],
+  kk: [
+    { text: '«Раббым! Білімімді арттыра гөр».', source: 'Құран · Та Һа, 20:114', kind: 'quran' },
+    { text: '«Білетіндер мен білмейтіндер тең бе?»', source: 'Құран · Әз-Зүмәр, 39:9', kind: 'quran' },
+    { text: 'Алла сендердің араларыңдағы иман келтіргендердің және білім берілгендердің дәрежелерін көтереді.', source: 'Құран · Әл-Мүжәдәлә, 58:11 · үзінді', kind: 'quran' },
+    { text: '«Өздеріне зиян келтіруде шектен шыққан құлдарым! Алланың рақымынан үміт үзбеңдер».', source: 'Құран · Әз-Зүмәр, 39:53 · үзінді', kind: 'quran' },
+    { text: 'Кім білім іздеу жолына түссе, Алла оған Жәннатқа апарар жолды жеңілдетеді.', source: 'Сахих Муслим, 2699', kind: 'hadith' },
+    { text: 'Алла біреуге жақсылық қаласа, оған дінді түсінуді нәсіп етеді.', source: 'Сахих әл-Бұхари, 71', kind: 'hadith' },
+    { text: 'Бұл жоба әр адамға Алланың 99 көркем есімін тегін үйренуге мүмкіндік береді.', source: 'Жоба туралы', kind: 'reflection' },
+    { text: 'Асықпа: аз-аздан үйрен, мағынасына ой жүгірт және қайталап отыр.', source: 'Үйренушіге ескерту', kind: 'reflection' },
+    { text: 'Білім шынайы ықыласпен үйреніліп, өмірде қолданылғанда пайдалы болады.', source: 'Үйренушіге ескерту', kind: 'reflection' },
+    { text: 'Бүгін білімге қарай тағы бір шағын қадам жаса.', source: 'Үйренушіге ескерту', kind: 'reflection' },
+  ],
 };
 
 export default function App() {
@@ -1106,10 +1163,10 @@ export default function App() {
       ? Promise.resolve()
       : new Promise<void>(resolve => window.addEventListener('load', () => resolve(), { once: true }));
     const fontsReady = document.fonts?.ready ?? Promise.resolve();
-    const fallback = new Promise<void>(resolve => window.setTimeout(resolve, 2200));
+    const fallback = new Promise<void>(resolve => window.setTimeout(resolve, 5200));
 
     void Promise.race([Promise.all([pageReady, fontsReady]), fallback]).then(() => {
-      const remaining = Math.max(0, 750 - (performance.now() - startedAt));
+      const remaining = Math.max(0, 1900 - (performance.now() - startedAt));
       startTimer = window.setTimeout(() => {
         if (!active) return;
         setPreloaderLeaving(true);
@@ -1131,7 +1188,7 @@ export default function App() {
     const messages = loadingMessages[language];
     const interval = window.setInterval(() => {
       setLoadingMessageIndex(index => (index + 1) % messages.length);
-    }, 2600);
+    }, 2200);
     return () => window.clearInterval(interval);
   }, [initialLoading, language]);
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
@@ -1544,7 +1601,8 @@ export default function App() {
           <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
           <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
           <div className="site-preloader__spinner" aria-hidden="true"><span /></div>
-          <p className="site-preloader__message" key={loadingMessageIndex}>{loadingMessages[language][loadingMessageIndex]}</p>
+          <p className="site-preloader__message" key={loadingMessageIndex} lang={language} dir={language === 'ar' ? 'rtl' : 'auto'}>{loadingMessages[language][loadingMessageIndex % loadingMessages[language].length].text}</p>
+          <p className="site-preloader__source" lang={language} dir={language === 'ar' ? 'rtl' : 'auto'}>{loadingMessages[language][loadingMessageIndex % loadingMessages[language].length].source}</p>
           <p className="site-preloader__note">{language === 'en' ? 'A free learning project' : language === 'ar' ? 'مشروع تعليمي مجاني' : language === 'ky' ? 'Акысыз билим берүү долбоору' : language === 'kk' ? 'Тегін білім беру жобасы' : 'Бесплатный образовательный проект'}</p>
         </div>
       </div>}
