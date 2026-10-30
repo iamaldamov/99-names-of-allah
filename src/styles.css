@@ -1074,3 +1074,39 @@ input, select, textarea, .account-form input {
     padding: 14px 13px;
   }
 }
+
+
+/* Friendly learning companion — a simple inline duck, not a stock/photo asset. */
+.hero { position: relative; }
+.hero-copy { max-width: min(440px, 62%); }
+.duck-mascot {
+  position: absolute;
+  right: 14px;
+  bottom: 18px;
+  width: 220px;
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+  animation: duck-bob 3.8s ease-in-out infinite;
+}
+.duck-mascot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.duck-speech {
+  margin-bottom: -3px;
+  padding: 8px 13px;
+  border: 1px solid #e5ecdf;
+  border-radius: 16px 16px 16px 4px;
+  background: #fff;
+  color: #55715b;
+  box-shadow: 0 5px 18px #26342e0d;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+@keyframes duck-bob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+@media(max-width:650px) {
+  .hero { padding-bottom: 210px; }
+  .hero-copy { max-width: 100%; }
+  .duck-mascot { width: 158px; right: 10px; bottom: 4px; }
+  .duck-speech { font-size: 10px; padding: 6px 10px; }
+}
+@media(prefers-reduced-motion:reduce) { .duck-mascot { animation: none; } }
