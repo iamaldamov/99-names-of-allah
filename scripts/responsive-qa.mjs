@@ -114,7 +114,7 @@ try {
         }
       }
       const examScoreText = await page.locator('.path-exam-result>strong').innerText();
-      assert.match(examScoreText, /^\\d+ из 10$/, 'The completed exam should show a score out of ten');
+      assert.match(examScoreText, /^\d+ из 10$/, 'The completed exam should show a score out of ten');
       const examScore = Number(examScoreText.split(' ')[0]);
       await page.waitForFunction(score => {
         const state = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}');
