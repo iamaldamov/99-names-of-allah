@@ -1095,7 +1095,8 @@ export default function App() {
       window.requestAnimationFrame(() => {
         const currentY = Math.max(0, window.scrollY);
         const delta = currentY - lastScrollY.current;
-        if (currentY < 48) setHeaderVisible(true);
+        const focusInsideHeader = document.activeElement instanceof HTMLElement && document.activeElement.closest('.topbar') !== null;
+        if (focusInsideHeader || currentY < 48) setHeaderVisible(true);
         else if (delta > 7) setHeaderVisible(false);
         else if (delta < -7) setHeaderVisible(true);
         lastScrollY.current = currentY;
@@ -1484,7 +1485,7 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className={`topbar${headerVisible ? '' : ' topbar-hidden'}`}>
+      <header className={`topbar${headerVisible ? '' : ' topbar-hidden'}`} aria-hidden={!headerVisible} inert={!headerVisible}>
         <a className="brand" href="#home" aria-label={tr("99 имён Аллаха — главная")}><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label={tr("Переключить тему")}>{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
