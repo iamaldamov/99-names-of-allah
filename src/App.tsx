@@ -637,8 +637,8 @@ export default function App() {
           </button>)}
           {displayedNames.length === 0 && <p className="empty-results">Ничего не найдено. Попробуй изменить запрос или фильтр.</p>}
           {displayedNames.length > visibleNames.length && <button className="show-more-names" onClick={() => setVisibleNamesCount(count => count + 12)}>Показать ещё имена ({displayedNames.length - visibleNames.length})</button>}
-          {false && publishedCount < 99 && <button className="locked-row locked-row-button" onClick={() => setShowAllInfo(true)}>
-            <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>Следующие имена</b><small>Новые уроки будут добавляться после проверки источников</small></span><span className="locked-count">ещё {99 - (publishedCount || 3)}</span>
+          {unlockedNameLimit < 99 && <button className="locked-row locked-row-button" onClick={() => document.getElementById('learning-path')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+            <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>Следующие имена закрыты</b><small>Пройди итоговый экзамен, чтобы открыть следующий этап</small></span><span className="locked-count">ещё {99 - unlockedNameLimit}</span>
           </button>}
         </div>}
         {!supabase && <p className="setup-warning">Сервис аккаунтов пока не подключён к опубликованной версии сайта.</p>}
