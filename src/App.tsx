@@ -1122,6 +1122,62 @@ export default function App() {
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen') !== '1'; } catch { return true; } });
+  const activeAppModal = reviewSessionId !== null ? 'review' : selected ? 'lesson' : accountOpen ? 'account' : welcomeOpen ? 'welcome' : showAllInfo ? 'info' : saveOpen ? 'save' : null;
+  useEffect(() => {
+    if (!activeAppModal) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = activeAppModal === 'review'
+      ? document.querySelector<HTMLElement>('.review-session-modal')
+      : activeAppModal === 'lesson'
+        ? document.querySelector<HTMLElement>('.lesson-modal:not(.review-session-modal)')
+        : activeAppModal === 'account'
+          ? document.querySelector<HTMLElement>('.account-modal')
+          : activeAppModal === 'welcome'
+            ? document.querySelector<HTMLElement>('.welcome-modal')
+            : document.querySelector<HTMLElement>('.info-modal');
+    if (!dialog) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const getFocusable = () => Array.from(dialog.querySelectorAll<HTMLElement>(
+      'button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+    )).filter(element => element.getAttribute('aria-hidden') !== 'true');
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (activeAppModal === 'review') { setReviewSessionId(null); setReviewAnswerShown(false); }
+        else if (activeAppModal === 'lesson') setSelected(null);
+        else if (activeAppModal === 'account') setAccountOpen(false);
+        else if (activeAppModal === 'welcome') {
+          setWelcomeOpen(false);
+          try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* ignore */ }
+        } else if (activeAppModal === 'info') setShowAllInfo(false);
+        else if (activeAppModal === 'save') setSaveOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (!focusable.length) { event.preventDefault(); dialog.focus(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    const focusFrame = window.requestAnimationFrame(() => {
+      const target = getFocusable()[0] ?? dialog;
+      if (!dialog.hasAttribute('tabindex')) dialog.setAttribute('tabindex', '-1');
+      target.focus();
+    });
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+      window.cancelAnimationFrame(focusFrame);
+      previouslyFocused?.focus();
+    };
+  }, [activeAppModal]);
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
   useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
