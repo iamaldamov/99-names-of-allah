@@ -72,3 +72,41 @@
 .path-unlocked-message{display:flex;justify-content:center;align-items:center;gap:7px;margin:14px 0;padding:12px;border-radius:12px;background:rgba(43,144,104,.1);color:#25835f;font-size:12px;font-weight:700}
 @media(max-width:700px){.learning-path{padding:19px 15px;border-radius:21px}.learning-path-heading{gap:10px}.learning-path-heading p{max-width:260px}.path-xp{min-width:68px;padding:9px 10px}.path-xp b{font-size:17px}.path-stage-list{grid-template-columns:1fr}.path-stage-card{padding:15px}.path-overview-main p{width:100%;margin:0}.path-exam-backdrop{padding:10px}.path-exam-modal{padding:23px 17px;border-radius:20px;max-height:94vh}}
 @media(prefers-reduced-motion:reduce){.path-overview-track span,.path-stage-progress span{transition:none}}
+
+
+/* Mobile, keyboard and right-to-left refinements */
+.learning-path :is(button,a,[tabindex]):focus-visible{outline:3px solid color-mix(in srgb,var(--accent,#3b8064) 72%,white);outline-offset:3px}
+.path-lesson,.path-exam-close,.path-exam-options button,.path-exam-submit{min-height:44px}
+.path-exam-backdrop{overscroll-behavior:contain}
+.path-exam-modal{width:min(100%,520px);max-height:min(92dvh,860px);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.learning-path[dir="rtl"] .learning-path-heading,
+.learning-path[dir="rtl"] .path-stage-top,
+.learning-path[dir="rtl"] .path-stage-footer,
+.learning-path[dir="rtl"] .path-lesson,
+.learning-path[dir="rtl"] .path-exam-meta{direction:rtl}
+.learning-path[dir="rtl"] .path-exam-options button{text-align:right}
+.learning-path[dir="rtl"] .path-exam-options button svg{margin-inline-start:0;margin-inline-end:auto}
+.learning-path[dir="rtl"] .path-lesson>svg:last-child{transform:rotate(180deg)}
+.learning-path[dir="rtl"] .path-overview-main p{margin-inline-start:auto;margin-inline-end:0}
+@media(max-width:700px){
+  .path-exam-modal{width:100%;max-height:calc(100dvh - 20px);padding:22px 16px;padding-bottom:max(22px,env(safe-area-inset-bottom))}
+  .path-exam-backdrop{align-items:flex-end;padding:10px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+  .path-exam-options button{min-height:48px;padding:13px 12px}
+  .path-lesson{min-height:54px}
+  .path-stage-card{overflow-wrap:anywhere}
+}
+@media(max-width:380px){
+  .learning-path{padding:17px 12px}
+  .learning-path-heading{align-items:center}
+  .path-xp{min-width:60px;padding:8px}
+  .path-stage-card{padding:13px}
+  .path-stage-title h3{font-size:16px}
+  .path-exam-modal{padding-inline:13px}
+}
+@media(orientation:landscape) and (max-height:520px){
+  .path-exam-backdrop{align-items:flex-start}
+  .path-exam-modal{max-height:calc(100dvh - 20px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .path-stage-card,.path-exam-modal{scroll-behavior:auto;transition:none}
+}
