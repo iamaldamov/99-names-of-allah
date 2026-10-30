@@ -244,7 +244,6 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   const [names, setNames] = useState<NameItem[]>(previewNames);
-  const [publishedCount, setPublishedCount] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
@@ -339,7 +338,6 @@ export default function App() {
         if (!fetchError && data && data.length) {
           const remote = data as NameItem[];
           setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
-          setPublishedCount(data.length);
         }
       });
     supabase.auth.getSession().then(({ data }) => {
