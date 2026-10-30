@@ -33,6 +33,34 @@ try {
     await page.locator('.site-preloader').waitFor({ state: 'visible' });
     await page.locator('.learning-path').waitFor({ state: 'visible' });
     await page.locator('.site-preloader').waitFor({ state: 'hidden' });
+
+    const uiContracts = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const unnamedButtons = buttons
+        .filter(button => !(button.getAttribute('aria-label') || button.getAttribute('title') || button.innerText || '').trim())
+        .map(button => button.outerHTML.slice(0, 180));
+      const anchors = Array.from(document.querySelectorAll('a'));
+      const brokenAnchors = anchors.filter(anchor => {
+        const href = anchor.getAttribute('href');
+        if (!href || !href.trim() || href.trim() === '#') return true;
+        if (href.startsWith('#')) return !document.getElementById(href.slice(1));
+        try { new URL(href, window.location.href); return false; } catch { return true; }
+      }).map(anchor => anchor.outerHTML.slice(0, 180));
+      const unsafeExternalLinks = anchors
+        .filter(anchor => anchor.target === '_blank' && !/\\b(?:noopener|noreferrer)\\b/.test(anchor.rel))
+        .map(anchor => anchor.outerHTML.slice(0, 180));
+      const unlabeledControls = Array.from(document.querySelectorAll('input:not([type="hidden"]), select, textarea'))
+        .filter(control => {
+          const hasExplicitLabel = control.labels && control.labels.length > 0;
+          return !hasExplicitLabel && !control.getAttribute('aria-label') && !control.getAttribute('aria-labelledby');
+        })
+        .map(control => control.outerHTML.slice(0, 180));
+      return { buttonCount: buttons.length, unnamedButtons, anchorCount: anchors.length, brokenAnchors, unsafeExternalLinks, unlabeledControls };
+    });
+    assert.deepEqual(uiContracts.unnamedButtons, [], `Buttons without an accessible name: ${JSON.stringify(uiContracts.unnamedButtons)}`);
+    assert.deepEqual(uiContracts.brokenAnchors, [], `Links without a valid target: ${JSON.stringify(uiContracts.brokenAnchors)}`);
+    assert.deepEqual(uiContracts.unsafeExternalLinks, [], `External links opened in a new tab must use noopener or noreferrer: ${JSON.stringify(uiContracts.unsafeExternalLinks)}`);
+    assert.deepEqual(uiContracts.unlabeledControls, [], `Form controls without an accessible label: ${JSON.stringify(uiContracts.unlabeledControls)}`);
     assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
     assert.equal(await page.locator('.daily-challenge').count(), 0, 'The legacy daily quiz must be removed');
     assert.equal(await page.locator('.compact-details:has(.practice-section)').count(), 0, 'The duplicate mini quiz must be removed');
