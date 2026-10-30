@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
+import { supabase } from './lib/supabase';
 import { Award, BookOpen, Check, ChevronRight, LockKeyhole, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
 import './gamified-path.css';
 
@@ -272,15 +274,17 @@ function shuffled<T,>(items: T[]): T[] {
   return result;
 }
 
-export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, language }: {
+export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, language, user }: {
   names: LearningName[];
   progress: number[];
   onOpenName: (name: LearningName) => void;
   onUnlockedNameLimit: (limit: number) => void;
   language: UiLanguage;
+  user: User | null;
 }) {
   const t = (key: string, values: Record<string, string | number> = {}) => translate(language, key, values);
   const [pathState, setPathState] = useState<PathState>(readPathState);
+  const [pathHydratedFor, setPathHydratedFor] = useState<string | null>(null);
   const [examStage, setExamStage] = useState<number | null>(null);
   const [questions, setQuestions] = useState<LessonQuestion[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -291,8 +295,41 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   const examDialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    if (!user) {
+      setPathHydratedFor(null);
+      return;
+    }
+    const remote = user.user_metadata?.learning_path_v1 as Partial<PathState> | undefined;
+    if (remote && typeof remote === 'object') {
+      const remotePassed = Array.isArray(remote.passedStages)
+        ? remote.passedStages.filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= 11)
+        : [];
+      const remoteScores = remote.bestScores && typeof remote.bestScores === 'object' && !Array.isArray(remote.bestScores)
+        ? remote.bestScores
+        : {};
+      setPathState(local => {
+        const passed = [...new Set([...local.passedStages, ...remotePassed])].sort((a, b) => a - b);
+        const contiguous: number[] = [];
+        for (let stage = 1; stage <= 11 && passed.includes(stage); stage += 1) contiguous.push(stage);
+        const bestScores = { ...local.bestScores };
+        for (const [id, value] of Object.entries(remoteScores)) {
+          const stageId = Number(id);
+          if (Number.isInteger(stageId) && stageId >= 1 && stageId <= 11 && Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 10) {
+            bestScores[stageId] = Math.max(bestScores[stageId] ?? 0, Number(value));
+          }
+        }
+        return { passedStages: contiguous, bestScores };
+      });
+    }
+    setPathHydratedFor(user.id);
+  }, [user?.id]);
+
+  useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pathState)); } catch { /* Local progress remains usable for this session. */ }
-  }, [pathState]);
+    if (user && supabase && pathHydratedFor === user.id) {
+      void supabase.auth.updateUser({ data: { learning_path_v1: pathState } });
+    }
+  }, [pathState, user?.id, pathHydratedFor]);
 
   const unlockedCount = Math.min(11, pathState.passedStages.length + 1);
   useEffect(() => { onUnlockedNameLimit(unlockedCount * STAGE_SIZE); }, [unlockedCount, onUnlockedNameLimit]);
