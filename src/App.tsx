@@ -661,10 +661,10 @@ export default function App() {
           </div>}
           {quizAnswer !== null && <button className="quiz-next" onClick={() => { setQuizAnswers(old => [...old, quizAnswer]); setQuizIndex(i => i + 1); setQuizAnswer(null); }}>{quizIndex === 4 ? 'Показать результат' : 'Следующий вопрос'} <ArrowRight size={15}/></button>}
         </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length === 5 ? "✦" : "✓"}</span>
+          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "✦" : "✓"}</span>
           <h3>Тест завершён</h3>
-          <b>{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length} из 5 правильных ответов</b>
-          <p>{quizAnswers.filter((answer, index) => answer === names[(index * 7 + 2) % names.length]?.id).length === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз."}</p>
+          <b>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length} из 5 правильных ответов</b>
+          <p>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз."}</p>
           <button onClick={() => { setQuizIndex(0); setQuizAnswer(null); setQuizAnswers([]); }}>Пройти ещё раз <ArrowRight size={15}/></button>
         </div>}
       </section></details>
