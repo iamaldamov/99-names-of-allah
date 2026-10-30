@@ -100,11 +100,11 @@ try {
         await lessonDialog.dispatchEvent('pointerup', { pointerType: 'touch', button: 0, clientX: 120, clientY: 300 });
       };
       await swipe();
-      assert.match(await lessonDialog.getAttribute('aria-label'), /02/, 'The first lesson should allow swiping to its second name');
+      assert.match(await lessonDialog.getAttribute('aria-label'), /Имя 2 из 99/, 'The first lesson should allow swiping to its second name');
       await swipe();
-      assert.match(await lessonDialog.getAttribute('aria-label'), /03/, 'The first lesson should allow swiping to its third name');
+      assert.match(await lessonDialog.getAttribute('aria-label'), /Имя 3 из 99/, 'The first lesson should allow swiping to its third name');
       await swipe();
-      assert.match(await lessonDialog.getAttribute('aria-label'), /03/, 'The first lesson must stop after exactly three names');
+      assert.match(await lessonDialog.getAttribute('aria-label'), /Имя 3 из 99/, 'The first lesson must stop after exactly three names');
       await page.keyboard.press('Escape');
       await lessonDialog.waitFor({ state: 'hidden' });
     }
