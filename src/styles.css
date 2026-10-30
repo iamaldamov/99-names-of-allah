@@ -940,3 +940,6 @@ input, select, textarea, .account-form input {
 @media (prefers-reduced-motion: reduce) {
   .topbar { transition: none; }
 }
+
+/* Small language notice for untranslated source explanations. */
+.content-language-note{margin:0 0 16px;color:var(--muted,#777);font-size:11px;line-height:1.55}
