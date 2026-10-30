@@ -926,3 +926,83 @@ input, select, textarea, .account-form input {
     transition: none;
   }
 }
+
+
+/* Calm, lightweight first-visit loading screen. */
+.site-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--paper, #f7f8f5);
+  color: var(--ink, #26342e);
+  animation: preloader-appear .3s ease both;
+}
+.site-preloader__content { width: min(100%, 340px); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.site-preloader__symbol {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 15px;
+  border-radius: 21px;
+  background: #e8efe9;
+  color: #416c59;
+  box-shadow: 0 10px 28px rgba(38, 52, 46, .08);
+}
+.site-preloader__symbol span { font: 39px/1 Amiri, serif; }
+.site-preloader__symbol i, .site-preloader__symbol b {
+  position: absolute;
+  inset: -7px;
+  border: 1px solid rgba(65, 108, 89, .22);
+  border-radius: 25px;
+  animation: preloader-orbit 3.4s ease-in-out infinite;
+}
+.site-preloader__symbol b { inset: -13px; border-color: rgba(65, 108, 89, .12); animation-delay: -.8s; }
+.site-preloader__brand { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.025em; }
+.site-preloader__spinner {
+  width: 27px;
+  height: 27px;
+  margin: 26px 0 17px;
+  border: 2px solid rgba(65, 108, 89, .16);
+  border-top-color: #416c59;
+  border-radius: 50%;
+  animation: preloader-spin .85s linear infinite;
+}
+.site-preloader__message { min-height: 24px; margin: 0; color: var(--ink, #26342e); font-size: 13px; line-height: 1.6; animation: preloader-message .35s ease both; }
+.site-preloader__note { margin: 9px 0 0; color: var(--muted, #89938b); font-size: 10px; letter-spacing: .04em; }
+@keyframes preloader-spin { to { transform: rotate(360deg); } }
+@keyframes preloader-orbit { 0%,100% { transform: scale(.96); opacity: .55; } 50% { transform: scale(1.04); opacity: 1; } }
+@keyframes preloader-appear { from { opacity: 0; } to { opacity: 1; } }
+@keyframes preloader-message { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+:root[data-theme="dark"] .site-preloader { background: #111b15; color: #e8eee9; }
+:root[data-theme="dark"] .site-preloader__symbol { background: #24382b; color: #c8dfce; }
+:root[data-theme="dark"] .site-preloader__message { color: #e8eee9; }
+:root[data-theme="dark"] .site-preloader__note { color: #a8b8ab; }
+:root[data-theme="dark"] .site-preloader__spinner { border-color: rgba(200, 223, 206, .18); border-top-color: #b9d8c1; }
+
+/* Compact the spaced repetition card without changing its learning controls. */
+.review-session-modal { max-width: 420px; padding: 21px 23px 19px; }
+.review-session-modal .close-button { min-height: 32px; margin: 0 0 12px auto; }
+.review-session-modal>.muted-label { margin: 0 0 6px; }
+.review-session-step { margin-bottom: 7px; }
+.review-session-arabic { margin: 7px auto 3px; font-size: clamp(48px, 8vw, 58px); line-height: 1.45; }
+.review-session-modal>.lesson-translit { margin: 3px 0 12px; }
+.review-session-modal>h2 { margin: 10px 0 15px; font-size: 19px; }
+.review-session-answer { padding: 13px 15px; margin-bottom: 11px; }
+.review-session-answer p { line-height: 1.6; }
+.review-session-question { margin: 10px 0; }
+.review-storage-note { margin: 10px 0 0; font-size: 10px; line-height: 1.45; }
+@media(max-height:700px) {
+  .review-session-modal { max-height: calc(100dvh - 24px); overflow-y: auto; padding-top: 15px; padding-bottom: 14px; }
+  .review-session-arabic { margin-top: 2px; font-size: 48px; }
+  .review-session-modal>h2 { margin: 7px 0 10px; }
+  .review-storage-note { margin-top: 7px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .site-preloader, .site-preloader__symbol i, .site-preloader__symbol b,
+  .site-preloader__spinner, .site-preloader__message { animation: none !important; }
+}
