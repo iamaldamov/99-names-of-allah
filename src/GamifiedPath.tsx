@@ -246,9 +246,14 @@ function readPathState(): PathState {
   try {
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') as Partial<PathState>;
     return {
-      passedStages: Array.isArray(raw.passedStages)
-        ? [...new Set(raw.passedStages.filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= 11))]
-        : [],
+      passedStages: (() => {
+        const saved = Array.isArray(raw.passedStages)
+          ? [...new Set(raw.passedStages.filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= 11))].sort((a, b) => a - b)
+          : [];
+        const contiguous: number[] = [];
+        for (let stage = 1; stage <= 11 && saved.includes(stage); stage += 1) contiguous.push(stage);
+        return contiguous;
+      })(),
       bestScores: raw.bestScores && typeof raw.bestScores === 'object'
         ? Object.fromEntries(Object.entries(raw.bestScores).filter(([id, score]) => Number(id) >= 1 && Number(id) <= 11 && typeof score === 'number' && score >= 0 && score <= 10))
         : {},
