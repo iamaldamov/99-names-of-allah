@@ -436,7 +436,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
           <small className="path-overview-note">{t('Открыто этапов: {count} из 11', {count: unlockedCount})}</small>
         </div>
 
-        <article className={\`path-stage-card is-unlocked is-current\${pathState.passedStages.includes(activeStage.id) ? ' is-passed' : ''}\`}>
+        <article className={`path-stage-card is-unlocked is-current${pathState.passedStages.includes(activeStage.id) ? ' is-passed' : ''}`}>
           <div className="path-stage-top">
             <span className="path-stage-number">{pathState.passedStages.includes(activeStage.id) ? <Check size={17} /> : String(activeStage.id).padStart(2, '0')}</span>
             <div className="path-stage-title">
@@ -445,7 +445,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
             </div>
             <span className="path-stage-count">{activeStage.names.filter(name => progress.includes(name.id)).length}/9</span>
           </div>
-          <div className="path-stage-progress"><span style={{ width: \`\${(activeStage.names.filter(name => progress.includes(name.id)).length / 9) * 100}%\` }} /></div>
+          <div className="path-stage-progress"><span style={{ width: `${(activeStage.names.filter(name => progress.includes(name.id)).length / 9) * 100}%` }} /></div>
           <div className="path-lessons">
             {activeStage.lessons.map((lesson, lessonIndex) => {
               const done = lesson.length === LESSON_SIZE && lesson.every(name => progress.includes(name.id));
@@ -453,7 +453,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
               const available = previousDone && lesson.length > 0;
               const nextName = lesson.find(name => !progress.includes(name.id)) ?? lesson[0];
               return (
-                <button type="button" key={lessonIndex} className={\`path-lesson\${done ? ' is-done' : ''}\`} disabled={!available || !nextName} onClick={() => nextName && onOpenName(nextName)} aria-label={t('Урок {id}, {status}', {id: lessonIndex + 1, status: done ? 'пройден' : available ? 'открыть' : 'закрыт'})}>
+                <button type="button" key={lessonIndex} className={`path-lesson${done ? ' is-done' : ''}`} disabled={!available || !nextName} onClick={() => nextName && onOpenName(nextName)} aria-label={t('Урок {id}, {status}', {id: lessonIndex + 1, status: done ? 'пройден' : available ? 'открыть' : 'закрыт'})}>
                   <span className="path-lesson-icon">{done ? <Check size={15} /> : available ? <BookOpen size={15} /> : <LockKeyhole size={14} />}</span>
                   <span><b>{t('Урок {id}', {id: lessonIndex + 1})}</b><small>{done ? t('Завершён · 3 имени') : available ? t('{count}/3 изучено', {count: lesson.filter(name => progress.includes(name.id)).length}) : t('Сначала заверши предыдущий')}</small></span>
                   {available && !done && <ChevronRight size={16} />}
@@ -471,9 +471,6 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
             )}
           </div>
         </article>
-      </section>
-
-
       </section>
 
       {examStage !== null && (
