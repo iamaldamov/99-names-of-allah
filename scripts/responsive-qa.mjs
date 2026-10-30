@@ -51,6 +51,7 @@ try {
       return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
     });
     assert.ok(modalLayout.left >= -1 && modalLayout.right <= size.width + 1, `Exam modal exceeds horizontal viewport at ${size.width}px: ${JSON.stringify(modalLayout)}`);
+    assert.ok(modalLayout.top >= -1 && modalLayout.bottom <= size.height + 1, `Exam modal exceeds vertical viewport at ${size.width}px: ${JSON.stringify(modalLayout)}`);
     assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Opening the exam should lock background scrolling');
 
     await page.keyboard.press('Shift+Tab');
