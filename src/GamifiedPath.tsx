@@ -374,6 +374,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
       : [];
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        event.preventDefault();
         closeExam();
         return;
       }
@@ -386,7 +387,11 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
       }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const focusIsOutsideDialog = !dialog?.contains(document.activeElement);
+      if (focusIsOutsideDialog) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
