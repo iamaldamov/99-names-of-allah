@@ -98,6 +98,30 @@ try {
     await page.locator('.theme-toggle').click();
 
     if (size.width === 390) {
+      await examButton.click();
+      await dialog.waitFor({ state: 'visible' });
+      for (let question = 0; question < 10; question += 1) {
+        await page.locator('.path-exam-options button').first().click();
+        await page.locator('.path-exam-submit').click();
+        if (question < 9) {
+          await page.locator('.path-exam-submit').click();
+          await page.getByText(`ВОПРОС ${question + 2} ИЗ 10`, { exact: true }).waitFor({ state: 'visible' });
+        } else {
+          await page.getByText('РЕЗУЛЬТАТ ЭКЗАМЕНА', { exact: true }).waitFor({ state: 'visible' });
+        }
+      }
+      const examScoreText = await page.locator('.path-exam-result>strong').innerText();
+      assert.match(examScoreText, /^\\d+ из 10$/, 'The completed exam should show a score out of ten');
+      const examScore = Number(examScoreText.split(' ')[0]);
+      await page.waitForFunction(score => {
+        const state = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}');
+        return score >= 8 ? state.passedStages?.includes(1) : !state.passedStages?.includes(1);
+      }, examScore);
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({ state: 'hidden' });
+    }
+
+    if (size.width === 390) {
       await page.locator('.catalog-toggle').click();
       await page.locator('.name-row').first().click();
       const lessonDialog = page.locator('.lesson-modal:not(.review-session-modal)');
