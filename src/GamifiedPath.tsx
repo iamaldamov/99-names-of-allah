@@ -26,8 +26,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "LEARNING PATH",
     "Твой путь изучения": "Your learning journey",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "Move step by step: three short lessons, followed by a knowledge check.",
-    "Набрано {xp} игровых очков опыта": "{xp} game experience points earned",
-    "опыт": "XP earned",
+    "Всего баллов: {xp}": "Total points: {xp}",
+    "Всего баллов": "TOTAL POINTS",
     "ТЕКУЩИЙ ЭТАП": "CURRENT STAGE",
     "{count} из 9 имён изучено": "{count} of 9 names learned",
     "Открыто {count} из 11 этапов": "{count} of 11 stages unlocked",
@@ -78,8 +78,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "ЭТАПТАР БОЮНЧА ҮЙРӨНҮҮ",
     "Твой путь изучения": "Үйрөнүү жолуң",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "Акырындык менен үйрөн: үч кыска сабак, андан кийин билимди текшерүү.",
-    "Набрано {xp} игровых очков опыта": "{xp} оюн тажрыйба упайы топтолду",
-    "опыт": "тажрыйба упайы",
+    "Всего баллов: {xp}": "Жалпы упай: {xp}",
+    "Всего баллов": "ЖАЛПЫ УПАЙ",
     "ТЕКУЩИЙ ЭТАП": "УЧУРДАГЫ ЭТАП",
     "{count} из 9 имён изучено": "9 ысымдын {count} үйрөнүлдү",
     "Открыто {count} из 11 этапов": "11 этаптын {count} ачылды",
@@ -130,8 +130,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "КЕЗЕҢДЕР БОЙЫНША ОҚУ",
     "Твой путь изучения": "Сенің оқу жолың",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "Біртіндеп үйрен: үш қысқа сабақ, содан кейін білімді тексеру.",
-    "Набрано {xp} игровых очков опыта": "{xp} ойын тәжірибе ұпайы жиналды",
-    "опыт": "тәжірибе ұпайы",
+    "Всего баллов: {xp}": "Жалпы ұпай: {xp}",
+    "Всего баллов": "ЖАЛПЫ ҰПАЙ",
     "ТЕКУЩИЙ ЭТАП": "АҒЫМДАҒЫ КЕЗЕҢ",
     "{count} из 9 имён изучено": "9 есімнің {count} үйренілді",
     "Открыто {count} из 11 этапов": "11 кезеңнің {count} ашық",
@@ -182,6 +182,8 @@ const messages: Record<Exclude<UiLanguage, 'ru'>, Record<string, string>> = {
     "ОБУЧЕНИЕ ПО ЭТАПАМ": "مسار التعلّم",
     "Твой путь изучения": "رحلتك في التعلّم",
     "Двигайся постепенно: три коротких урока, затем проверка знаний.": "تقدّم تدريجيًا: ثلاثة دروس قصيرة، ثم اختبار للمعرفة.",
+    "Всего баллов: {xp}": "إجمالي النقاط: {xp}",
+    "Всего баллов": "إجمالي النقاط",
     "Набрано {xp} игровых очков опыта": "تم جمع {xp} من نقاط الخبرة",
     "опыт": "نقاط خبرة",
     "ТЕКУЩИЙ ЭТАП": "المرحلة الحالية",
@@ -272,11 +274,12 @@ function shuffled<T,>(items: T[]): T[] {
   return result;
 }
 
-export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, language }: {
+export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, getTransliteration, language }: {
   names: LearningName[];
   progress: number[];
   onOpenName: (name: LearningName) => void;
   onUnlockedNameLimit: (limit: number) => void;
+  getTransliteration: (nameId: number) => string;
   language: UiLanguage;
 }) {
   const t = (key: string, values: Record<string, string | number> = {}) => translate(language, key, values);
@@ -309,6 +312,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   const xp = completedLessons * 5 + pathState.passedStages.length * 20;
   const activeStage = stages.find(stage => stage.id === unlockedCount) ?? stages[0];
   const currentQuestion = questions[questionIndex];
+  const currentName = names.find(name => name.id === currentQuestion?.nameId);
   const currentCorrect = currentQuestion?.options.find(option => option.id === currentQuestion.nameId);
 
   const startExam = (stageId: number) => {
@@ -374,6 +378,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
       : [];
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        event.preventDefault();
         closeExam();
         return;
       }
@@ -386,7 +391,11 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
       }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const focusIsOutsideDialog = !dialog?.contains(document.activeElement);
+      if (focusIsOutsideDialog) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -417,10 +426,10 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
             <h2 id="learning-path-title">{t('Твой путь изучения')}</h2>
             <p>{t('Двигайся постепенно: три коротких урока, затем проверка знаний.')}</p>
           </div>
-          <div className="path-xp" aria-label={t('Набрано {xp} игровых очков опыта', {xp})}>
+          <div className="path-xp" aria-label={t('Всего баллов: {xp}', {xp})}>
             <Sparkles size={17} />
-            <b>{xp} XP</b>
-            <small>{t('опыт')}</small>
+            <b>{xp}</b>
+            <small>{t('Всего баллов')}</small>
           </div>
         </div>
 
@@ -436,66 +445,41 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
           <small className="path-overview-note">{t('Открыто этапов: {count} из 11', {count: unlockedCount})}</small>
         </div>
 
-        <div className="path-stage-list">
-          {stages.map(stage => {
-            const unlocked = stage.id === 1 || pathState.passedStages.includes(stage.id - 1);
-            const passed = pathState.passedStages.includes(stage.id);
-            const learnedCount = stage.names.filter(name => progress.includes(name.id)).length;
-            const allLearned = stage.names.length === STAGE_SIZE && learnedCount === STAGE_SIZE;
-            const isCurrent = stage.id === unlockedCount;
-            return (
-              <article className={`path-stage-card${unlocked ? ' is-unlocked' : ' is-locked'}${passed ? ' is-passed' : ''}${isCurrent ? ' is-current' : ''}`} key={stage.id}>
-                <div className="path-stage-top">
-                  <span className="path-stage-number">{passed ? <Check size={17} /> : unlocked ? String(stage.id).padStart(2, '0') : <LockKeyhole size={16} />}</span>
-                  <div className="path-stage-title">
-                    <span>{t(passed ? 'ЭТАП ЗАВЕРШЁН' : unlocked ? (isCurrent ? 'ТВОЙ ТЕКУЩИЙ ЭТАП' : 'ЭТАП ДОСТУПЕН') : 'ПОКА ЗАКРЫТ')}</span>
-                    <h3>{t('Этап {id}', {id: stage.id})}</h3>
-                  </div>
-                  <span className="path-stage-count">{learnedCount}/9</span>
-                </div>
-                <div className="path-stage-progress"><span style={{ width: `${(learnedCount / 9) * 100}%` }} /></div>
-                {unlocked ? (
-                  <>
-                    <div className="path-lessons">
-                      {stage.lessons.map((lesson, lessonIndex) => {
-                        const done = lesson.length === LESSON_SIZE && lesson.every(name => progress.includes(name.id));
-                        const previousDone = lessonIndex === 0 || stage.lessons[lessonIndex - 1].every(name => progress.includes(name.id));
-                        const available = previousDone && lesson.length > 0;
-                        const nextName = lesson.find(name => !progress.includes(name.id)) ?? lesson[0];
-                        return (
-                          <button
-                            type="button"
-                            key={lessonIndex}
-                            className={`path-lesson${done ? ' is-done' : ''}`}
-                            disabled={!available || !nextName}
-                            onClick={() => nextName && onOpenName(nextName)}
-                            aria-label={t('Урок {id}, {status}', {id: lessonIndex + 1, status: done ? 'пройден' : available ? 'открыть' : 'закрыт'})}
-                          >
-                            <span className="path-lesson-icon">{done ? <Check size={15} /> : available ? <BookOpen size={15} /> : <LockKeyhole size={14} />}</span>
-                            <span><b>{t('Урок {id}', {id: lessonIndex + 1})}</b><small>{done ? t('Завершён · 3 имени') : available ? t('{count}/3 изучено', {count: lesson.filter(name => progress.includes(name.id)).length}) : t('Сначала заверши предыдущий')}</small></span>
-                            {available && !done && <ChevronRight size={16} />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="path-stage-footer">
-                      {passed ? (
-                        <span className="path-passed-label"><Check size={15} /> {t('Экзамен пройден · лучший результат {score}/10', {score: pathState.bestScores[stage.id] ?? PASS_SCORE})}</span>
-                      ) : (
-                        <button type="button" className="path-exam-button" disabled={!allLearned} onClick={() => startExam(stage.id)}>
-                          <Trophy size={16} /> {allLearned ? t('Начать итоговый экзамен') : t('До экзамена: изучи ещё {count}', {count: STAGE_SIZE - learnedCount})}
-                        </button>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <p className="path-locked-note"><LockKeyhole size={14} /> {t('Пройди экзамен предыдущего этапа, чтобы открыть этот раздел.')}</p>
-                )}
-              </article>
-            );
-          })}
-        </div>
-        <p className="path-footnote">{t('Этапы — только удобная структура обучения. Они не обозначают степень достоинства имён или духовный ранг человека. Прогресс этой версии игрового пути пока сохраняется на устройстве.')}</p>
+        <article className="path-stage-card path-current-card">
+          <div className="path-stage-top">
+            <span className="path-stage-number">{pathState.passedStages.includes(activeStage.id) ? <Check size={17} /> : String(activeStage.id).padStart(2, '0')}</span>
+            <div className="path-stage-title">
+              <span>{t('ТВОЙ ТЕКУЩИЙ ЭТАП')}</span>
+              <h3>{t('Этап {id}', {id: activeStage.id})}</h3>
+            </div>
+            <span className="path-stage-count">{activeStage.names.filter(name => progress.includes(name.id)).length}/9</span>
+          </div>
+          <div className="path-stage-progress"><span style={{ width: `${(activeStage.names.filter(name => progress.includes(name.id)).length / 9) * 100}%` }} /></div>
+          <div className="path-lessons">
+            {activeStage.lessons.map((lesson, lessonIndex) => {
+              const done = lesson.length === LESSON_SIZE && lesson.every(name => progress.includes(name.id));
+              const previousDone = lessonIndex === 0 || activeStage.lessons[lessonIndex - 1].every(name => progress.includes(name.id));
+              const available = previousDone && lesson.length > 0;
+              const nextName = lesson.find(name => !progress.includes(name.id)) ?? lesson[0];
+              return (
+                <button type="button" key={lessonIndex} className={`path-lesson${done ? ' is-done' : ''}`} disabled={!available || !nextName} onClick={() => nextName && onOpenName(nextName)} aria-label={t('Урок {id}, {status}', {id: lessonIndex + 1, status: done ? 'пройден' : available ? 'открыть' : 'закрыт'})}>
+                  <span className="path-lesson-icon">{done ? <Check size={15} /> : available ? <BookOpen size={15} /> : <LockKeyhole size={14} />}</span>
+                  <span><b>{t('Урок {id}', {id: lessonIndex + 1})}</b><small>{done ? t('Завершён · 3 имени') : available ? t('{count}/3 изучено', {count: lesson.filter(name => progress.includes(name.id)).length}) : t('Сначала заверши предыдущий')}</small></span>
+                  {available && !done && <ChevronRight size={16} />}
+                </button>
+              );
+            })}
+          </div>
+          <div className="path-stage-footer">
+            {pathState.passedStages.includes(activeStage.id) ? (
+              <span className="path-passed-label"><Check size={15} /> {t('Экзамен пройден · лучший результат {score}/10', {score: pathState.bestScores[activeStage.id] ?? PASS_SCORE})}</span>
+            ) : (
+              <button type="button" className="path-exam-button" disabled={!activeStage.names.every(name => progress.includes(name.id))} onClick={() => startExam(activeStage.id)}>
+                <Trophy size={16} /> {activeStage.names.every(name => progress.includes(name.id)) ? t('Начать итоговый экзамен') : t('До экзамена: изучи ещё {count}', {count: STAGE_SIZE - activeStage.names.filter(name => progress.includes(name.id)).length})}
+              </button>
+            )}
+          </div>
+        </article>
       </section>
 
       {examStage !== null && (
@@ -511,7 +495,8 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                 <div className="path-exam-meta"><span>{t('ВОПРОС {current} ИЗ 10', {current: questionIndex + 1})}</span><span>{t('{count} правильных', {count: score})}</span></div>
                 {currentQuestion && (
                   <>
-                    <div className="path-exam-arabic" lang="ar" dir="rtl">{names.find(name => name.id === currentQuestion.nameId)?.arabic}</div>
+                    <div className="path-exam-arabic" lang="ar" dir="rtl">{currentName?.arabic}</div>
+                    <p className="path-exam-translit" dir="auto">{currentName ? getTransliteration(currentName.id) : ''}</p>
                     <h3 className="path-exam-question">{t('Какое значение соответствует этому имени?')}</h3>
                     <div className="path-exam-options">
                       {currentQuestion.options.map(option => (

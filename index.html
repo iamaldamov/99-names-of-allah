@@ -14,9 +14,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet"></noscript>
+    <style>
+      #root .site-preloader--static{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:24px;background:#f7f8f5;color:#26342e;font-family:Arial,sans-serif}
+      #root .site-preloader--static .boot-content{display:flex;flex-direction:column;align-items:center;text-align:center}
+      #root .site-preloader--static .boot-mark{width:62px;height:62px;display:grid;place-items:center;margin-bottom:15px;border-radius:21px;background:#e8efe9;color:#416c59;font:39px/1 Georgia,serif}
+      #root .site-preloader--static .boot-spin{width:27px;height:27px;margin:26px 0 17px;border:2px solid #dce6de;border-top-color:#416c59;border-radius:50%;animation:boot-spin .85s linear infinite}
+      #root .site-preloader--static p{margin:0;font-size:13px;line-height:1.6}
+      #root .site-preloader--static small{margin-top:9px;color:#89938b;font-size:10px;letter-spacing:.04em}
+      @keyframes boot-spin{to{transform:rotate(360deg)}}
+      @media(prefers-reduced-motion:reduce){#root .site-preloader--static .boot-spin{animation:none}}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="site-preloader site-preloader--static" role="status" aria-live="polite"><div class="boot-content"><div class="boot-mark" aria-hidden="true">أ</div><strong>99 имён Аллаха</strong><div class="boot-spin" aria-hidden="true"></div><p>Готовим пространство для изучения.</p><small>Бесплатный образовательный проект</small></div></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

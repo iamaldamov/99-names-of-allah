@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent } from 'react';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
-import { supabase } from './lib/supabase';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { GamifiedPath } from './GamifiedPath';
 
@@ -1076,8 +1076,20 @@ function downloadBlob(blob: Blob, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
+
+const loadingMessages: Record<'ru' | 'en' | 'ar' | 'ky' | 'kk', string[]> = {
+  ru: ['Обучение полностью бесплатное.', 'Каждый день — маленький шаг к знаниям.', 'Проект создан для всех желающих учиться.', 'Вы можете поддержать развитие проекта.'],
+  en: ['Learning is completely free.', 'Every day is a small step towards knowledge.', 'This project is open to everyone.', 'You can support the project’s development.'],
+  ar: ['التعلّم مجاني بالكامل.', 'كل يوم خطوة صغيرة نحو المعرفة.', 'هذا المشروع متاح للجميع.', 'يمكنك دعم تطوير المشروع.'],
+  ky: ['Окуу толугу менен акысыз.', 'Күн сайын билимге карай кичинекей кадам.', 'Долбоор үйрөнүүнү каалагандардын баарына ачык.', 'Долбоордун өнүгүшүнө колдоо көрсөтө аласыз.'],
+  kk: ['Оқу толығымен тегін.', 'Күн сайын білімге қарай кішкентай қадам.', 'Жоба үйренгісі келетін баршаға ашық.', 'Жобаның дамуына қолдау көрсете аласыз.'],
+};
+
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [preloaderLeaving, setPreloaderLeaving] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const tr = (value: string, values: Record<string, string | number> = {}) => {
@@ -1085,6 +1097,43 @@ export default function App() {
     return Object.entries(values).reduce((result, [key, replacement]) => result.replaceAll(`{${key}}`, String(replacement)), template);
   };
   const shownTransliteration = (name: NameItem) => language === 'ru' ? russianTransliterations[name.id] ?? name.transliteration : name.transliteration;
+  useEffect(() => {
+    let active = true;
+    let startTimer: number | undefined;
+    let finishTimer: number | undefined;
+    const startedAt = performance.now();
+    const pageReady = document.readyState === 'complete'
+      ? Promise.resolve()
+      : new Promise<void>(resolve => window.addEventListener('load', () => resolve(), { once: true }));
+    const fontsReady = document.fonts?.ready ?? Promise.resolve();
+    const fallback = new Promise<void>(resolve => window.setTimeout(resolve, 2200));
+
+    void Promise.race([Promise.all([pageReady, fontsReady]), fallback]).then(() => {
+      const remaining = Math.max(0, 750 - (performance.now() - startedAt));
+      startTimer = window.setTimeout(() => {
+        if (!active) return;
+        setPreloaderLeaving(true);
+        finishTimer = window.setTimeout(() => {
+          if (active) setInitialLoading(false);
+        }, 280);
+      }, remaining);
+    });
+
+    return () => {
+      active = false;
+      if (startTimer !== undefined) window.clearTimeout(startTimer);
+      if (finishTimer !== undefined) window.clearTimeout(finishTimer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!initialLoading) return;
+    const messages = loadingMessages[language];
+    const interval = window.setInterval(() => {
+      setLoadingMessageIndex(index => (index + 1) % messages.length);
+    }, 2600);
+    return () => window.clearInterval(interval);
+  }, [initialLoading, language]);
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -1107,7 +1156,8 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   const [names, setNames] = useState<NameItem[]>(previewNames);
-  const [user, setUser] = useState<any>(null);
+  const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [progress, setProgress] = useState<number[]>(loadProgress);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
   const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(loadReviewData);
@@ -1116,6 +1166,7 @@ export default function App() {
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [swipeHintVisible, setSwipeHintVisible] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
+  const [swipeRange, setSwipeRange] = useState<{ min: number; max: number } | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
@@ -1135,17 +1186,11 @@ export default function App() {
   const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}'); const passed = Array.isArray(saved.passedStages) ? saved.passedStages.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 11) : []; return Math.min(99, (new Set(passed).size + 1) * 9); } catch { return 9; } });
   const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return (v.date === new Date().toDateString() || v.date === localDayKey()) && Array.isArray(v.ids) ? v.ids.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99) : []; } catch { return []; } });
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
-  const [challengeAnswers, setChallengeAnswers] = useState<number[]>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); return saved.date === localDayKey() && Array.isArray(saved.answers) ? saved.answers.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99).slice(0, 5) : []; } catch { return []; } });
-  const [challengeCurrentAnswer, setChallengeCurrentAnswer] = useState<number | null>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-daily-challenge') || '{}'); const id = Number(saved.currentAnswer); return saved.date === localDayKey() && Number.isInteger(id) && id >= 1 && id <= 99 ? id : null; } catch { return null; } });
-  const [challengeBest, setChallengeBest] = useState<number>(() => { try { const score = Number(localStorage.getItem('99-names-challenge-best')); return Number.isInteger(score) && score >= 0 && score <= 5 ? score : 0; } catch { return 0; } });
   const [clockNow, setClockNow] = useState(() => Date.now());
   const observedDayRef = useRef(localDayKey());
   const dayKey = localDayKey(new Date(clockNow));
   const praiseTimeoutRef = useRef<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
-  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
-  const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
-  const [quizIndex, setQuizIndex] = useState(0);
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen') !== '1'; } catch { return true; } });
@@ -1210,12 +1255,6 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
-  useEffect(() => { try { localStorage.setItem('99-names-daily-challenge', JSON.stringify({ date: dayKey, answers: challengeAnswers, currentAnswer: challengeCurrentAnswer })); } catch {} }, [challengeAnswers, challengeCurrentAnswer, dayKey]);
-  useEffect(() => {
-    if (challengeAnswers.length !== 5) return;
-    const score = challengeScore;
-    setChallengeBest(old => { const next = Math.max(old, score); try { localStorage.setItem('99-names-challenge-best', String(next)); } catch {} return next; });
-  }, [challengeAnswers]);
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
@@ -1235,47 +1274,68 @@ export default function App() {
     }
   };
   useEffect(() => {
-    const interval = window.setInterval(() => setClockNow(Date.now()), 30000);
+    const interval = window.setInterval(() => setClockNow(Date.now()), 60000);
     return () => window.clearInterval(interval);
   }, []);
   useEffect(() => {
     if (observedDayRef.current === dayKey) return;
     observedDayRef.current = dayKey;
     setLearnedToday([]);
-    setChallengeAnswers([]);
-    setChallengeCurrentAnswer(null);
   }, [dayKey]);
 
   const closeWelcome = () => { setWelcomeOpen(false); try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Welcome can be closed even when storage is unavailable. */ } };
 
+  // Load the optional cloud/account client after the first paint so it does not delay the learning interface.
   useEffect(() => {
-    if (!supabase) return;
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
     let alive = true;
-    supabase.from('names').select('id,arabic,transliteration,translation,explanation,source_references').eq('content_status', 'published').order('id')
-      .then(({ data, error: fetchError }) => {
+    const timer = window.setTimeout(() => {
+      void import('./lib/supabase').then(({ supabase: client }) => {
+        if (alive) setSupabaseClient(client);
+      }).catch(() => {
+        if (alive) setNotice(tr('Не удалось подключить аккаунт. Локальное изучение доступно.'));
+      });
+    }, 700);
+    return () => { alive = false; window.clearTimeout(timer); };
+  }, []);
+
+  useEffect(() => {
+    if (!supabaseClient) return;
+    let alive = true;
+    void Promise.resolve(supabaseClient.from('names').select('id,arabic,transliteration,translation,explanation,source_references').eq('content_status', 'published').order('id')
+      .then(({ data, error: fetchError }: { data: NameItem[] | null; error: unknown }) => {
         if (!alive) return;
-        if (!fetchError && data && data.length) {
+        if (fetchError) {
+          setNotice(tr('Не удалось загрузить обновлённый каталог. Используется сохранённая версия.'));
+          return;
+        }
+        if (data?.length) {
           const remote = data as NameItem[];
           setNames(completeNames.map(local => remote.find(item => item.id === local.id) ?? local));
         }
+      }))
+      .catch(() => {
+        if (alive) setNotice(tr('Не удалось связаться с каталогом. Изучение доступно в автономном режиме.'));
       });
-    supabase.auth.getSession().then(({ data }) => {
+    void supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: User | null } | null } }) => {
       if (alive) setUser(data.session?.user ?? null);
+    }).catch(() => {
+      if (alive) setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: User | null } | null) => {
       if (alive) setUser(session?.user ?? null);
     });
     return () => { alive = false; listener.subscription.unsubscribe(); };
-  }, []);
+  }, [supabaseClient]);
 
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-progress', JSON.stringify(progress)); } catch { /* Storage unavailable */ } }, [progress]);
   useEffect(() => { try { localStorage.setItem('asma-ul-husna-review-v1', JSON.stringify(reviewData)); } catch { /* Storage unavailable */ } }, [reviewData]);
   useEffect(() => { setReviewData(old => { const missing = progress.filter(id => !old[id]); if (!missing.length) return old; const next = { ...old }; missing.forEach(id => { next[id] = { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null }; }); return next; }); }, [progress]);
   useEffect(() => {
-    if (!supabase || !user) { setProgressLoadedFor(null); return; }
+    if (!supabaseClient || !user) { setProgressLoadedFor(null); return; }
     let alive = true;
     setProgressLoadedFor(null);
-    supabase.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
+    void Promise.resolve(supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
       if (!alive) return;
       if (loadError) {
         setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
@@ -1284,19 +1344,20 @@ export default function App() {
       const cloudIds = (data || []).filter((item: any) => item.status === 'learned').map((item: any) => Number(item.name_id)).filter((id: number) => Number.isInteger(id) && id >= 1 && id <= 99);
       setProgress(current => Array.from(new Set([...current, ...cloudIds])));
       setProgressLoadedFor(user.id);
-    }, () => {
+    })).catch(() => {
       if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
-  }, [user]);
+  }, [user, supabaseClient]);
   useEffect(() => {
-    if (!supabase || !user || progressLoadedFor !== user.id || !progress.length) return;
+    if (!supabaseClient || !user || progressLoadedFor !== user.id || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
-    void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
-      .then(({ error: saveError }) => {
+    void Promise.resolve(supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
+      .then(({ error: saveError }: { error: unknown }) => {
         if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
-      });
-  }, [user, progressLoadedFor, progress]);
+      }))
+      .catch(() => setNotice(tr('Прогресс сохранён на этом устройстве, но синхронизация временно недоступна.')));
+  }, [supabaseClient, user, progressLoadedFor, progress]);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
@@ -1321,20 +1382,20 @@ export default function App() {
 
   const submitAccount = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase) { setError(tr('Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.')); return; }
+    if (!supabaseClient) { setError(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY ? tr('Подключение аккаунта загружается. Попробуй ещё раз через секунду.') : tr('Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.')); return; }
     setBusy(true); setError(''); setMessage('');
     try {
       if (accountMode === 'signup') {
-        const { data, error: authError } = await supabase.auth.signUp({ email: email.trim(), password });
+        const { data, error: authError } = await supabaseClient.auth.signUp({ email: email.trim(), password });
         if (authError) throw authError;
         if (data.session) { setMessage(tr('Аккаунт создан. Ты вошёл в систему.')); setAccountOpen(false); }
         else setMessage(tr('Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.'));
       } else if (accountMode === 'login') {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { error: authError } = await supabaseClient.auth.signInWithPassword({ email: email.trim(), password });
         if (authError) throw authError;
         setAccountOpen(false); setMessage(tr('Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.'));
       } else {
-        const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: SITE_URL });
+        const { error: authError } = await supabaseClient.auth.resetPasswordForEmail(email.trim(), { redirectTo: SITE_URL });
         if (authError) throw authError;
         setMessage(tr('Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.'));
       }
@@ -1364,12 +1425,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!selected) { setSwipeHintVisible(false); return; }
+    if (!selected) {
+      setSwipeHintVisible(false);
+      setSwipeRange(null);
+      return;
+    }
     try {
-      if (localStorage.getItem('99-names-swipe-hint-seen') === '1') { setSwipeHintVisible(false); return; }
-      localStorage.setItem('99-names-swipe-hint-seen', '1');
+      if (localStorage.getItem('99-names-swipe-hint-seen-v2') === '1') { setSwipeHintVisible(false); return; }
       setSwipeHintVisible(true);
-      const timer = window.setTimeout(() => setSwipeHintVisible(false), 4400);
+      const timer = window.setTimeout(() => setSwipeHintVisible(false), 6000);
       return () => window.clearTimeout(timer);
     } catch { setSwipeHintVisible(true); }
   }, [selected?.id]);
@@ -1389,8 +1453,11 @@ export default function App() {
     // A leftward finger movement advances to the next name; right returns to the previous one.
     const isSwipeLeft = dx < 0;
     const nextId = selected.id + (isSwipeLeft ? 1 : -1);
-    if (nextId < 1 || nextId > 99) return;
+    const allowedRange = swipeRange ?? { min: 1, max: unlockedNameLimit };
+    if (nextId < allowedRange.min || nextId > allowedRange.max) return;
 
+    try { localStorage.setItem('99-names-swipe-hint-seen-v2', '1'); } catch { /* Hint can still be dismissed for this session. */ }
+    setSwipeHintVisible(false);
     setSwipeDirection(isSwipeLeft ? 1 : -1);
     setError('');
     setSelected(names.find(name => name.id === nextId) || null);
@@ -1406,9 +1473,9 @@ export default function App() {
     setStudyDays(old => ({ ...old, [localDayKey()]: old[localDayKey()] || 1 }));
     setReviewData(old => old[nameId] ? old : { ...old, [nameId]: { box: 0, dueAt: addDays(1), seen: 0, correct: 0, lastReviewedAt: null } });
     setNotice(tr('Имя отмечено как изученное. Первое повторение запланировано на завтра.'));
-    if (supabase && user) {
+    if (supabaseClient && user) {
       try {
-        const { error: saveError } = await supabase.from('user_progress').upsert({
+        const { error: saveError } = await supabaseClient.from('user_progress').upsert({
           user_id: user.id, name_id: nameId, status: 'learned', confidence: 3,
           times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(),
           next_review_at: new Date(Date.now() + 86400000).toISOString(), updated_at: new Date().toISOString()
@@ -1420,7 +1487,16 @@ export default function App() {
     setBusy(false);
   };
 
-  const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.')); };
+  const signOut = async () => {
+    if (!supabaseClient) return;
+    try {
+      const { error: signOutError } = await supabaseClient.auth.signOut();
+      if (signOutError) throw signOutError;
+      setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'));
+    } catch {
+      setError(tr('Не удалось выйти из аккаунта. Проверь подключение и попробуй ещё раз.'));
+    }
+  };
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => name.id <= unlockedNameLimit && !progress.includes(name.id));
   const accessibleNames = useMemo(() => names.filter(name => name.id <= unlockedNameLimit || progress.includes(name.id)), [names, unlockedNameLimit, progress]);
@@ -1430,17 +1506,7 @@ export default function App() {
   const currentStreak = useMemo(() => { let cursor = new Date(); if (!studyDays[localDayKey(cursor)]) cursor.setDate(cursor.getDate() - 1); let streak = 0; while (studyDays[localDayKey(cursor)] && streak < 90) { streak++; cursor.setDate(cursor.getDate() - 1); } return streak; }, [studyDays, todayKey]);
   const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
   const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
-  const dailyChallenge = useMemo(() => {
-    const seed = Number(todayKey.replace(/-/g, ''));
-    const rank = (id: number, salt: number) => (id * 9301 + seed * 49297 + salt * 233280) % 1000003;
-    const ordered = [...accessibleNames].sort((a, b) => rank(a.id, 17) - rank(b.id, 17));
-    return ordered.slice(0, 5).map((item, index) => ({
-      item,
-      options: [item, ...accessibleNames.filter(name => name.id !== item.id).sort((a, b) => rank(a.id, index * 31 + 7) - rank(b.id, index * 31 + 7)).slice(0, 3)].sort((a, b) => rank(a.id, index * 97 + 3) - rank(b.id, index * 97 + 3))
-    }));
-  }, [accessibleNames, todayKey]);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= clockNow).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress, clockNow]);
-  const challengeScore = useMemo(() => dailyChallenge.reduce((total, question, index) => total + (challengeAnswers[index] === question.item.id ? 1 : 0), 0), [dailyChallenge, challengeAnswers]);
   const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
@@ -1469,22 +1535,19 @@ export default function App() {
     return matches && tabMatches;
   }), [accessibleNames, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
-  const quizItem = accessibleNames[(quizIndex * 7 + 2) % accessibleNames.length] ?? accessibleNames[0];
-  const quizOptions = useMemo(() => {
-    if (!quizItem) return [];
-    const distractors = accessibleNames.filter(name => name.id !== quizItem.id);
-    const start = (quizIndex * 11) % Math.max(1, distractors.length);
-    const selectedDistractors = Array.from(
-      { length: Math.min(3, distractors.length) },
-      (_, index) => distractors[(start + index) % distractors.length]
-    );
-    return [quizItem, ...selectedDistractors].sort(
-      (a, b) => ((a.id * 13 + quizIndex) % 17) - ((b.id * 13 + quizIndex) % 17)
-    );
-  }, [quizItem, accessibleNames, quizIndex]);
+
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" aria-busy={initialLoading}>
+      {initialLoading && <div className={`site-preloader${preloaderLeaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
+        <div className="site-preloader__content">
+          <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
+          <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
+          <div className="site-preloader__spinner" aria-hidden="true"><span /></div>
+          <p className="site-preloader__message" key={loadingMessageIndex}>{loadingMessages[language][loadingMessageIndex]}</p>
+          <p className="site-preloader__note">{language === 'en' ? 'A free learning project' : language === 'ar' ? 'مشروع تعليمي مجاني' : language === 'ky' ? 'Акысыз билим берүү долбоору' : language === 'kk' ? 'Тегін білім беру жобасы' : 'Бесплатный образовательный проект'}</p>
+        </div>
+      </div>}
       <header className={`topbar${headerVisible ? '' : ' topbar-hidden'}`} aria-hidden={!headerVisible} inert={!headerVisible}>
         <a className="brand" href="#home" aria-label={tr("99 имён Аллаха — главная")}><span className="brand-mark">أ</span><span><b>{tr('99 имён Аллаха')}</b></span></a><button className="theme-toggle" onClick={() => setTheme(v=>v==='light'?'dark':'light')} aria-label={tr("Переключить тему")}>{theme==='light'?'☾':'☀'}</button><select className="language-select" aria-label="Language" value={language} onChange={e => setLanguage(e.target.value as 'ru'|'en'|'ar'|'ky'|'kk')}><option value="ru">Русский</option><option value="en">English</option><option value="ar">العربية</option><option value="ky">Кыргыз тили</option><option value="kk">Қазақша</option></select>
         {user ? <div className="signed-in"><span className="user-email">{user.email}</span><button className="login-button" onClick={signOut}><LogOut size={15}/> {tr('Выйти')}</button></div> :
@@ -1514,33 +1577,8 @@ export default function App() {
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? tr('Следующий шаг') : dueReviewIds.length ? tr('Время повторить') : tr('Ты прошёл весь список')}</small><b dir={language === 'ar' ? 'auto' : undefined}>{nextName ? `${language === 'ru' ? 'Продолжить' : language === 'en' ? 'Continue' : language === 'ar' ? 'متابعة' : language === 'ky' ? 'Улантуу' : 'Жалғастыру'}: ${nextName.translation}` : dueReviewIds.length ? tr('Закрепить изученное') : tr('Вернуться к каталогу')}</b></span><ArrowRight size={19}/></button>
       </section>
 
-      <GamifiedPath names={names} progress={progress} language={language} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
-      <section className="daily-challenge reveal" aria-label={tr("Ежедневное испытание")}>
-        <div className="challenge-top"><div><span className="muted-label">{tr('ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ')}</span><h2>{tr('Испытай свои знания')}</h2><p>{tr('Небольшая ежедневная проверка. Вопросы обновляются каждый день.')}</p></div><div className="challenge-top-actions"><div className="challenge-best"><span>{tr('РЕКОРД')}</span><b>{challengeBest}/5</b></div></div></div>
-        {challengeAnswers.length < 5 ? <div className="challenge-play">
-          <div className="challenge-progress"><span>{tr('ВОПРОС {current} ИЗ 5', {current: challengeAnswers.length + 1})}</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < challengeAnswers.length ? "done" : i === challengeAnswers.length ? "current" : ""}/>)}</div></div>
-          <div className="challenge-question"><span className="challenge-number">0{challengeAnswers.length + 1}</span><div className="challenge-arabic" lang="ar" dir="rtl">{dailyChallenge[challengeAnswers.length]?.item.arabic}</div><div className="challenge-transliteration">{dailyChallenge[challengeAnswers.length] ? shownTransliteration(dailyChallenge[challengeAnswers.length].item) : ""}</div><p>{tr('Прочитай транскрипцию и выбери правильное значение имени')}</p></div>
-          <div className="challenge-options">{(dailyChallenge[challengeAnswers.length]?.options || []).map(option => {
-            const correctId = dailyChallenge[challengeAnswers.length]?.item.id;
-            const answered = challengeCurrentAnswer !== null;
-            const isCorrect = option.id === correctId;
-            const isSelected = option.id === challengeCurrentAnswer;
-            return <button key={option.id} dir="auto" lang="ru" disabled={answered} className={answered && isCorrect ? 'is-correct' : answered && isSelected ? 'is-wrong' : ''} data-sound-special onClick={() => { if (answered) return; setChallengeCurrentAnswer(option.id); const correct = option.id === correctId;  if (correct) praiseFor('correct'); }}>{option.translation}</button>;
-          })}</div>
-          {challengeCurrentAnswer !== null && <div className={dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? "challenge-feedback correct" : "challenge-feedback wrong"}>
-            <b>{dailyChallenge[challengeAnswers.length]?.item.id === challengeCurrentAnswer ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
-            {dailyChallenge[challengeAnswers.length]?.options.find(option => option.id === dailyChallenge[challengeAnswers.length]?.item.id)?.translation}
-            <button onClick={() => { if (challengeCurrentAnswer === null) return; const selectedAnswer = challengeCurrentAnswer; setChallengeAnswers(old => [...old, selectedAnswer]); setChallengeCurrentAnswer(null); }}>{challengeAnswers.length === 4 ? tr('Завершить испытание') : tr('Следующий вопрос')} <ArrowRight size={15}/></button>
-          </div>}
-        </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{challengeScore === 5 ? "✦" : "✓"}</span>
-          <h3>{tr('Испытание завершено')}</h3><b>{tr("{count} из 5 правильных ответов",{count:challengeScore})}</b>
-          <p>{challengeScore === 5 ? tr('Прекрасный результат. Продолжай укреплять знания.') : tr('Хорошая работа. Вернись к именам, в которых сомневался.')}</p>
-          <button onClick={() => { setChallengeAnswers([]); setChallengeCurrentAnswer(null); }}>{tr('Пройти ещё раз')} <ArrowRight size={15}/></button>
-        </div>}
-        <div className="challenge-foot"><span>{tr('Твой лучший результат сохраняется на этом устройстве')}</span><span>{challengeAnswers.length}/5</span></div>
-      </section>
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
         {!catalogOpen && <button className="show-more-names catalog-toggle" onClick={() => setCatalogOpen(true)}>{tr('Открыть каталог имён')} <ArrowRight size={15}/></button>}
@@ -1558,33 +1596,9 @@ export default function App() {
             <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>{tr('Следующие имена закрыты')}</b><small>{tr('Пройди итоговый экзамен, чтобы открыть следующий этап')}</small></span><span className="locked-count">ещё {99 - unlockedNameLimit}</span>
           </button>}
         </div>}
-        {!supabase && <p className="setup-warning">{tr("Сервис аккаунтов пока не подключён к опубликованной версии сайта.")}</p>}
+        {!supabaseClient && !import.meta.env.VITE_SUPABASE_URL && <p className="setup-warning">{tr("Сервис аккаунтов пока не подключён к опубликованной версии сайта.")}</p>}
       </section>
 
-      <details className="compact-details reveal"><summary><span><b>{tr('Проверить знания')}</b><small>{tr('Короткий тест по именам')}</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
-        <div className="section-heading"><div><span className="muted-label">{tr('ЗАКРЕПЛЕНИЕ ЗНАНИЙ')}</span><h2>{tr('Проверь, что запомнил')}</h2></div><span className="section-total">{tr('Мини-тест')}</span></div>
-        {quizIndex < 5 && quizItem ? <div className="quiz-card">
-          <div className="challenge-progress"><span>{tr('ВОПРОС {current} ИЗ 5', {current: quizIndex + 1})}</span><div>{Array.from({length:5}, (_, i) => <i key={i} className={i < quizIndex ? "done" : i === quizIndex ? "current" : ""}/>)}</div></div>
-          <span className="muted-label">{tr('КАК ПЕРЕВОДИТСЯ ИМЯ?')}</span><div className="quiz-arabic" lang="ar" dir="rtl">{quizItem.arabic}</div><p className="quiz-translit">{shownTransliteration(quizItem)}</p>
-          <div className="quiz-options">{quizOptions.map(option => {
-            const answered = quizAnswer !== null;
-            const isCorrect = option.id === quizItem.id;
-            const isSelected = option.id === quizAnswer;
-            return <button key={option.id} dir="auto" lang="ru" disabled={answered} className={answered && isCorrect ? 'correct' : answered && isSelected ? 'incorrect' : ''} data-sound-special onClick={() => { if (answered) return; setQuizAnswer(option.id); const correct = option.id === quizItem.id;  if (correct) praiseFor('correct'); }}>{option.translation}</button>;
-          })}</div>
-          {quizAnswer !== null && <div className={quizAnswer === quizItem.id ? 'challenge-feedback correct' : 'challenge-feedback wrong'}>
-            <b>{quizAnswer === quizItem.id ? (language === 'kk' ? 'Дұрыс! Машаллах!' : language === 'ky' ? 'Туура! МашаАллах!' : language === 'en' ? 'Correct! MashaAllah!' : language === 'ar' ? 'صحيح! ما شاء الله!' : 'Верно! Машаллах!') : (language === 'kk' ? 'Дәл емес. Дұрыс жауап:' : language === 'ky' ? 'Туура эмес. Туура жооп:' : language === 'en' ? 'Not quite. Correct answer:' : language === 'ar' ? 'ليس تمامًا. الإجابة الصحيحة:' : 'Не совсем. Правильный ответ:')}</b>
-            {quizItem.translation}
-          </div>}
-          {quizAnswer !== null && <button className="quiz-next" onClick={() => { setQuizAnswers(old => [...old, quizAnswer]); setQuizIndex(i => i + 1); setQuizAnswer(null); }}>{quizIndex === 4 ? tr('Показать результат') : tr('Следующий вопрос')} <ArrowRight size={15}/></button>}
-        </div> : <div className="challenge-result">
-          <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "✦" : "✓"}</span>
-          <h3>{tr('Тест завершён')}</h3>
-          <b>{tr("{count} из 5 правильных ответов",{count:quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length})}</b>
-          <p>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? tr("Прекрасный результат. Продолжай укреплять знания.") : tr("Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.")}</p>
-          <button onClick={() => { setQuizIndex(0); setQuizAnswer(null); setQuizAnswers([]); }}>{tr("Пройти ещё раз")} <ArrowRight size={15}/></button>
-        </div>}
-      </section></details>
       <details className="compact-details reveal"><summary><span><b>{tr('Повторение и запоминание')}</b><small>{dueReviewIds.length ? dueReviewIds.length + ' ' + (language === 'en' ? 'Names due for review' : language === 'ar' ? 'أسماء بانتظار المراجعة' : language === 'ky' ? 'ысым кайталоону күтөт' : language === 'kk' ? 'есім қайталауды күтуде' : 'имён ждут повторения') : tr('Интервальные повторения помогут закрепить знания')}</small></span><ChevronRight size={18}/></summary><section className="review-system-section">
         <div className="review-system-intro"><span className="muted-label">{tr('ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ')}</span><h2>{tr('Запоминай надолго')}</h2><p>{tr('После изучения имя попадает в очередь повторения. Если вспомнил правильно — следующий интервал увеличивается. Если забыл — имя вернётся через 10 минут.')}</p></div>
         <div className="review-stats"><div><b>{dueReviewIds.length}</b><span>{tr('пора повторить')}</span></div><div><b>{Object.keys(reviewData).length}</b><span>{tr('в расписании')}</span></div><div><b>{Object.values(reviewData).reduce((sum,item)=>sum+item.correct,0)}</b><span>{tr('успешных повторений')}</span></div></div>
@@ -1652,7 +1666,7 @@ export default function App() {
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
         <p className="lesson-translit">{shownTransliteration(item)}</p>
         <h2>{tr('Вспомни значение этого имени')}</h2>
-        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')} <ArrowRight size={16}/></button> : <><div className="review-session-answer" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}><Check size={17}/> {tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
+        {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')}</button> : <><div className="review-session-answer" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}>{tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
         <p className="review-storage-note">{tr('Честно оцени своё воспоминание — так интервалы будут подбираться точнее.')}</p>
       </section></div> : null; })()}
 
