@@ -842,6 +842,126 @@ Object.assign(languageText.ar, {
   "Достоверный хадис о девяноста девяти именах и награде тому, кто их охватит (aḥṣāhā). Сам хадис не перечисляет единый список.": "حديث صحيح في الأسماء التسعة والتسعين وفضل من أحصاها. ولا يسرد الحديث نفسه قائمة موحدة."
 });
 
+Object.assign(languageText.en, {
+  "Сервис аккаунтов пока не подключён к опубликованной версии сайта.": "The account service is not connected to the published website yet.",
+  "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.": "Good effort. Review the Names you missed and try again.",
+  "Карточка PNG скачана. Прикрепи её к публикации в Threads.": "The PNG card has been downloaded. Attach it to your Threads post.",
+  "Не удалось поделиться. Попробуй ещё раз.": "Could not share. Please try again.",
+  "Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.": "Could not load account progress. Local data is safe; try refreshing the page.",
+  "Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.": "Could not connect to progress storage. Local data has not been deleted.",
+  "Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.": "Your progress is saved on this device, but could not be synced to your account.",
+  "Ссылка скопирована. Отправь её близким.": "Link copied. Share it with someone you know.",
+  "Скопируй адрес сайта из строки браузера и отправь его близким.": "Copy the website address from your browser and share it.",
+  "Не удалось открыть меню отправки. Скопируй адрес сайта вручную.": "Could not open the share menu. Copy the website address manually.",
+  "Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.": "Account access is not configured yet. The site administrator needs to finish the Supabase setup.",
+  "Аккаунт создан. Ты вошёл в систему.": "Account created. You are signed in.",
+  "Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.": "Almost done! Check your email and follow the confirmation link to activate your account.",
+  "Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.": "You are signed in. Your progress will be saved to your account.",
+  "Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.": "If this email is registered, a password reset link will be sent.",
+  "Не удалось выполнить запрос. Попробуй ещё раз.": "The request could not be completed. Please try again.",
+  "Имя отмечено как изученное. Первое повторение запланировано на завтра.": "Name marked as learned. The first review is scheduled for tomorrow.",
+  "Готово! Имя отмечено и сохранено в аккаунте.": "Done! The Name has been marked and saved to your account.",
+  "Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.": "Name saved on this device. Account sync is unavailable because the Names catalogue in the database is not populated yet.",
+  "Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.": "Name saved on this device. Cloud saving is temporarily unavailable.",
+  "Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.": "You have signed out. Progress on this device is saved.",
+  "Ничего страшного. Это имя вернётся через 10 минут.": "No problem. This Name will return in 10 minutes.",
+  "Отлично! Все доступные на сегодня повторения завершены.": "Excellent! You have completed all reviews due today.",
+  "Закрыть": "Close",
+  "Ежедневное испытание": "Daily challenge",
+  "Пройти ещё раз": "Try again",
+  "Поддержать проект": "Support the project"
+});
+
+Object.assign(languageText.ky, {
+  "Сервис аккаунтов пока не подключён к опубликованной версии сайта.": "Аккаунт кызматы сайттын жарыяланган версиясына азырынча туташтырыла элек.",
+  "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.": "Жакшы аракет. Ката кеткен ысымдарды кайталап, кайра сынап көр.",
+  "Карточка PNG скачана. Прикрепи её к публикации в Threads.": "PNG карточкасы жүктөлдү. Аны Threads билдирүүңө тирке.",
+  "Не удалось поделиться. Попробуй ещё раз.": "Бөлүшүү мүмкүн болгон жок. Кайра аракет кыл.",
+  "Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.": "Аккаунттагы жетишкендик жүктөлгөн жок. Жергиликтүү маалымат сакталды; баракты жаңыртып көр.",
+  "Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.": "Жетишкендик сактагычына туташуу мүмкүн болгон жок. Жергиликтүү маалымат өчүрүлгөн жок.",
+  "Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.": "Жетишкендик бул түзмөктө сакталды, бирок аккаунт менен шайкештештирүү мүмкүн болгон жок.",
+  "Ссылка скопирована. Отправь её близким.": "Шилтеме көчүрүлдү. Аны жакындарыңа жөнөт.",
+  "Скопируй адрес сайта из строки браузера и отправь его близким.": "Сайттын дарегин браузерден көчүрүп, жакындарыңа жөнөт.",
+  "Не удалось открыть меню отправки. Скопируй адрес сайта вручную.": "Бөлүшүү менюсу ачылган жок. Сайттын дарегин кол менен көчүр.",
+  "Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.": "Аккаунттар туташтырыла элек. Сайттын администратору Supabase жөндөөлөрүн бүтүрүшү керек.",
+  "Аккаунт создан. Ты вошёл в систему.": "Аккаунт түзүлдү. Сен системага кирдиң.",
+  "Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.": "Дээрлик даяр! Почтаңды текшерип, аккаунтту активдештирүү үчүн ырастоо шилтемесине өт.",
+  "Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.": "Сен ийгиликтүү кирдиң. Жетишкендигиң аккаунтта сакталат.",
+  "Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.": "Эгер бул почта катталган болсо, сырсөздү өзгөртүү шилтемеси жөнөтүлөт.",
+  "Не удалось выполнить запрос. Попробуй ещё раз.": "Сурам аткарылган жок. Кайра аракет кыл.",
+  "Имя отмечено как изученное. Первое повторение запланировано на завтра.": "Ысым үйрөнүлдү деп белгиленди. Биринчи кайталоо эртеңге белгиленди.",
+  "Готово! Имя отмечено и сохранено в аккаунте.": "Даяр! Ысым белгиленип, аккаунтка сакталды.",
+  "Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.": "Ысым бул түзмөккө сакталды. Базада ысымдардын тизмеси толтурула элек болгондуктан аккаунт менен шайкештештирүү жеткиликсиз.",
+  "Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.": "Ысым бул түзмөккө сакталды. Булутка сактоо убактылуу жеткиликсиз.",
+  "Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.": "Аккаунттан чыктың. Бул түзмөктөгү жетишкендигиң сакталды.",
+  "Ничего страшного. Это имя вернётся через 10 минут.": "Эч нерсе эмес. Бул ысым 10 мүнөттөн кийин кайра келет.",
+  "Отлично! Все доступные на сегодня повторения завершены.": "Мыкты! Бүгүнкү бардык кайталоолор аяктады.",
+  "Закрыть": "Жабуу",
+  "Ежедневное испытание": "Күнүмдүк сынак",
+  "Пройти ещё раз": "Кайра өтүү",
+  "Поддержать проект": "Долбоорду колдоо"
+});
+
+Object.assign(languageText.kk, {
+  "Сервис аккаунтов пока не подключён к опубликованной версии сайта.": "Аккаунт қызметі сайттың жарияланған нұсқасына әлі қосылмаған.",
+  "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.": "Жақсы жұмыс. Қателескен есімдеріңді қайталап, қайта сынап көр.",
+  "Карточка PNG скачана. Прикрепи её к публикации в Threads.": "PNG карточкасы жүктелді. Оны Threads жазбаңа тірке.",
+  "Не удалось поделиться. Попробуй ещё раз.": "Бөлісу мүмкін болмады. Қайта көр.",
+  "Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.": "Аккаунттағы жетістік жүктелмеді. Жергілікті деректер сақталды; бетті жаңартып көр.",
+  "Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.": "Жетістік қоймасына қосылу мүмкін болмады. Жергілікті деректер жойылған жоқ.",
+  "Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.": "Жетістігің осы құрылғыда сақталған, бірақ аккаунтпен синхрондау мүмкін болмады.",
+  "Ссылка скопирована. Отправь её близким.": "Сілтеме көшірілді. Оны жақындарыңа жібер.",
+  "Скопируй адрес сайта из строки браузера и отправь его близким.": "Сайт мекенжайын браузерден көшіріп, жақындарыңа жібер.",
+  "Не удалось открыть меню отправки. Скопируй адрес сайта вручную.": "Бөлісу мәзірі ашылмады. Сайт мекенжайын қолмен көшір.",
+  "Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.": "Аккаунттар әлі қосылмаған. Сайт әкімшісі Supabase баптауын аяқтауы керек.",
+  "Аккаунт создан. Ты вошёл в систему.": "Аккаунт жасалды. Жүйеге кірдің.",
+  "Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.": "Дайын деуге болады! Поштаңды тексеріп, аккаунтты белсендіру үшін растау сілтемесіне өт.",
+  "Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.": "Сәтті кірдің. Жетістігің аккаунтта сақталады.",
+  "Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.": "Егер бұл пошта тіркелген болса, құпиясөзді өзгерту сілтемесі жіберіледі.",
+  "Не удалось выполнить запрос. Попробуй ещё раз.": "Сұрауды орындау мүмкін болмады. Қайта көр.",
+  "Имя отмечено как изученное. Первое повторение запланировано на завтра.": "Есім үйренілді деп белгіленді. Алғашқы қайталау ертеңге жоспарланды.",
+  "Готово! Имя отмечено и сохранено в аккаунте.": "Дайын! Есім белгіленіп, аккаунтқа сақталды.",
+  "Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.": "Есім осы құрылғыда сақталды. Дерекқордағы есімдер тізімі әлі толтырылмағандықтан аккаунтпен синхрондау қолжетімсіз.",
+  "Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.": "Есім осы құрылғыда сақталды. Бұлтқа сақтау уақытша қолжетімсіз.",
+  "Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.": "Аккаунттан шықтың. Осы құрылғыдағы жетістігің сақталды.",
+  "Ничего страшного. Это имя вернётся через 10 минут.": "Ештеңе етпейді. Бұл есім 10 минуттан кейін қайта келеді.",
+  "Отлично! Все доступные на сегодня повторения завершены.": "Тамаша! Бүгінгі барлық қайталау аяқталды.",
+  "Закрыть": "Жабу",
+  "Ежедневное испытание": "Күнделікті сынақ",
+  "Пройти ещё раз": "Қайта өту",
+  "Поддержать проект": "Жобаны қолдау"
+});
+
+Object.assign(languageText.ar, {
+  "Сервис аккаунтов пока не подключён к опубликованной версии сайта.": "خدمة الحسابات غير متصلة بالنسخة المنشورة من الموقع بعد.",
+  "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.": "أحسنت. راجع الأسماء التي أخطأت فيها وحاول مرة أخرى.",
+  "Карточка PNG скачана. Прикрепи её к публикации в Threads.": "تم تنزيل بطاقة PNG. أرفقها بمنشورك على Threads.",
+  "Не удалось поделиться. Попробуй ещё раз.": "تعذرت المشاركة. حاول مرة أخرى.",
+  "Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.": "تعذر تحميل تقدم الحساب. بياناتك المحلية محفوظة؛ حاول تحديث الصفحة.",
+  "Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.": "تعذر الاتصال بمخزن التقدم. لم تُحذف بياناتك المحلية.",
+  "Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.": "تقدمك محفوظ على هذا الجهاز، لكن تعذرت مزامنته مع حسابك.",
+  "Ссылка скопирована. Отправь её близким.": "تم نسخ الرابط. شاركه مع المقرّبين.",
+  "Скопируй адрес сайта из строки браузера и отправь его близким.": "انسخ عنوان الموقع من المتصفح وشاركه مع المقرّبين.",
+  "Не удалось открыть меню отправки. Скопируй адрес сайта вручную.": "تعذر فتح قائمة المشاركة. انسخ عنوان الموقع يدويًا.",
+  "Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.": "لم يتم إعداد الحسابات بعد. على مسؤول الموقع إكمال إعداد Supabase.",
+  "Аккаунт создан. Ты вошёл в систему.": "تم إنشاء الحساب وتسجيل دخولك.",
+  "Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.": "شارفت العملية على الاكتمال! تحقق من بريدك واتبع رابط التأكيد لتفعيل الحساب.",
+  "Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.": "تم تسجيل دخولك بنجاح. سيُحفظ تقدمك في الحساب.",
+  "Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.": "إذا كان البريد مسجلًا، فسيُرسل إليه رابط إعادة تعيين كلمة المرور.",
+  "Не удалось выполнить запрос. Попробуй ещё раз.": "تعذر تنفيذ الطلب. حاول مرة أخرى.",
+  "Имя отмечено как изученное. Первое повторение запланировано на завтра.": "تم تحديد الاسم على أنه متعلَّم. المراجعة الأولى مقررة غدًا.",
+  "Готово! Имя отмечено и сохранено в аккаунте.": "تم! تم تحديد الاسم وحفظه في حسابك.",
+  "Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.": "حُفظ الاسم على هذا الجهاز. المزامنة مع الحساب غير متاحة لأن قائمة الأسماء في قاعدة البيانات لم تكتمل بعد.",
+  "Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.": "حُفظ الاسم على هذا الجهاز. الحفظ السحابي غير متاح مؤقتًا.",
+  "Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.": "تم تسجيل خروجك. تقدمك على هذا الجهاز محفوظ.",
+  "Ничего страшного. Это имя вернётся через 10 минут.": "لا بأس. سيعود هذا الاسم بعد عشر دقائق.",
+  "Отлично! Все доступные на сегодня повторения завершены.": "ممتاز! أنهيت جميع المراجعات المستحقة اليوم.",
+  "Закрыть": "إغلاق",
+  "Ежедневное испытание": "التحدي اليومي",
+  "Пройти ещё раз": "حاول مجددًا",
+  "Поддержать проект": "ادعم المشروع"
+});
+
 const russianTransliterations: Record<number, string> = {
   1:'Ар-Рахмаан', 2:'Ар-Рахиим', 3:'Аль-Малик', 4:'Аль-Куддус', 5:'Ас-Саляам',
   6:'Аль-Муъмин', 7:'Аль-Мухаймин', 8:'Аль-Азииз', 9:'Аль-Джаббаар', 10:'Аль-Мутакаббир',
@@ -1025,10 +1145,10 @@ export default function App() {
         downloadBlob(blob, file.name);
         if (navigator.share) await navigator.share({ title: name.translation, text, url: SITE_URL });
         else if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
-        setNotice('Карточка PNG скачана. Прикрепи её к публикации в Threads.');
+        setNotice(tr('Карточка PNG скачана. Прикрепи её к публикации в Threads.'));
       }
     } catch (e) {
-      if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось поделиться. Попробуй ещё раз.');
+      if (!(e instanceof Error && e.name === 'AbortError')) setNotice(tr('Не удалось поделиться. Попробуй ещё раз.'));
     }
   };
   useEffect(() => {
@@ -1075,14 +1195,14 @@ export default function App() {
     supabase.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }) => {
       if (!alive) return;
       if (loadError) {
-        setNotice('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.');
+        setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
         return;
       }
       const cloudIds = (data || []).filter((item: any) => item.status === 'learned').map((item: any) => Number(item.name_id)).filter((id: number) => Number.isInteger(id) && id >= 1 && id <= 99);
       setProgress(current => Array.from(new Set([...current, ...cloudIds])));
       setProgressLoadedFor(user.id);
     }, () => {
-      if (alive) setNotice('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.');
+      if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
   }, [user]);
@@ -1091,7 +1211,7 @@ export default function App() {
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
     void supabase.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
       .then(({ error: saveError }) => {
-        if (saveError) setNotice('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.');
+        if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
       });
   }, [user, progressLoadedFor, progress]);
 
@@ -1111,29 +1231,29 @@ export default function App() {
   const shareSite = async () => {
     try {
       if (navigator.share) await navigator.share({ title: '99 прекрасных имён Аллаха', text: 'Бесплатный сайт для изучения 99 прекрасных имён Аллаха.', url: SITE_URL });
-      else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(SITE_URL); setNotice('Ссылка скопирована. Отправь её близким.'); }
-      else setNotice('Скопируй адрес сайта из строки браузера и отправь его близким.');
-    } catch (e) { if (!(e instanceof Error && e.name === 'AbortError')) setNotice('Не удалось открыть меню отправки. Скопируй адрес сайта вручную.'); }
+      else if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(SITE_URL); setNotice(tr('Ссылка скопирована. Отправь её близким.')); }
+      else setNotice(tr('Скопируй адрес сайта из строки браузера и отправь его близким.'));
+    } catch (e) { if (!(e instanceof Error && e.name === 'AbortError')) setNotice(tr('Не удалось открыть меню отправки. Скопируй адрес сайта вручную.')); }
   };
 
   const submitAccount = async (event: FormEvent) => {
     event.preventDefault();
-    if (!supabase) { setError('Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.'); return; }
+    if (!supabase) { setError(tr('Подключение аккаунтов ещё не настроено. Администратору сайта нужно завершить настройку Supabase.')); return; }
     setBusy(true); setError(''); setMessage('');
     try {
       if (accountMode === 'signup') {
         const { data, error: authError } = await supabase.auth.signUp({ email: email.trim(), password });
         if (authError) throw authError;
-        if (data.session) { setMessage('Аккаунт создан. Ты вошёл в систему.'); setAccountOpen(false); }
-        else setMessage('Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.');
+        if (data.session) { setMessage(tr('Аккаунт создан. Ты вошёл в систему.')); setAccountOpen(false); }
+        else setMessage(tr('Почти готово! Проверь почту и перейди по ссылке подтверждения, чтобы активировать аккаунт.'));
       } else if (accountMode === 'login') {
         const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authError) throw authError;
-        setAccountOpen(false); setMessage('Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.');
+        setAccountOpen(false); setMessage(tr('Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.'));
       } else {
         const { error: authError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: SITE_URL });
         if (authError) throw authError;
-        setMessage('Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.');
+        setMessage(tr('Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.'));
       }
     } catch (e) { setError(e instanceof Error ? e.message : 'Не удалось выполнить запрос. Попробуй ещё раз.'); }
     finally { setBusy(false); }
@@ -1202,7 +1322,7 @@ export default function App() {
     setLearnedToday(old => Array.from(new Set([...old, nameId])));
     setStudyDays(old => ({ ...old, [localDayKey()]: old[localDayKey()] || 1 }));
     setReviewData(old => old[nameId] ? old : { ...old, [nameId]: { box: 0, dueAt: addDays(1), seen: 0, correct: 0, lastReviewedAt: null } });
-    setNotice('Имя отмечено как изученное. Первое повторение запланировано на завтра.');
+    setNotice(tr('Имя отмечено как изученное. Первое повторение запланировано на завтра.'));
     if (supabase && user) {
       try {
         const { error: saveError } = await supabase.from('user_progress').upsert({
@@ -1210,14 +1330,14 @@ export default function App() {
           times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(),
           next_review_at: new Date(Date.now() + 86400000).toISOString(), updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,name_id' });
-        if (!saveError) setNotice('Готово! Имя отмечено и сохранено в аккаунте.');
-        else setNotice('Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.');
-      } catch { setNotice('Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.'); }
+        if (!saveError) setNotice(tr('Готово! Имя отмечено и сохранено в аккаунте.'));
+        else setNotice(tr('Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.'));
+      } catch { setNotice(tr('Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.')); }
     }
     setBusy(false);
   };
 
-  const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'); };
+  const signOut = async () => { if (supabase) await supabase.auth.signOut(); setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.')); };
   const percent = Math.round((progress.length / 99) * 100);
   const nextName = names.find(name => name.id <= unlockedNameLimit && !progress.includes(name.id));
   const accessibleNames = useMemo(() => names.filter(name => name.id <= unlockedNameLimit || progress.includes(name.id)), [names, unlockedNameLimit, progress]);
@@ -1251,13 +1371,13 @@ export default function App() {
     const currentId = reviewSessionId;
     recordRecall(currentId, remembered);
     if (!remembered) {
-      setNotice('Ничего страшного. Это имя вернётся через 10 минут.');
+      setNotice(tr('Ничего страшного. Это имя вернётся через 10 минут.'));
       setReviewSessionId(null); setReviewAnswerShown(false);
       return;
     }
     const nextId = dueReviewIds.find(id => id !== currentId);
     if (nextId !== undefined) { setReviewSessionId(nextId); setReviewAnswerShown(false); }
-    else { setReviewSessionId(null); setReviewAnswerShown(false); setNotice('Отлично! Все доступные на сегодня повторения завершены.'); }
+    else { setReviewSessionId(null); setReviewAnswerShown(false); setNotice(tr('Отлично! Все доступные на сегодня повторения завершены.')); }
   };
   const displayedNames = useMemo(() => accessibleNames.filter(name => {
     const searchable = (name.id + ' ' + name.arabic + ' ' + name.transliteration + ' ' + shownTransliteration(name) + ' ' + name.translation).toLocaleLowerCase();
@@ -1355,7 +1475,7 @@ export default function App() {
             <span className="lock-circle"><LockKeyhole size={16}/></span><span><b>{tr('Следующие имена закрыты')}</b><small>{tr('Пройди итоговый экзамен, чтобы открыть следующий этап')}</small></span><span className="locked-count">ещё {99 - unlockedNameLimit}</span>
           </button>}
         </div>}
-        {!supabase && <p className="setup-warning">Сервис аккаунтов пока не подключён к опубликованной версии сайта.</p>}
+        {!supabase && <p className="setup-warning">{tr("Сервис аккаунтов пока не подключён к опубликованной версии сайта.")}</p>}
       </section>
 
       <details className="compact-details reveal"><summary><span><b>{tr('Проверить знания')}</b><small>{tr('Короткий тест по именам')}</small></span><ChevronRight size={18}/></summary><section className="practice-section" id="practice">
@@ -1378,7 +1498,7 @@ export default function App() {
           <span className="challenge-result-mark">{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "✦" : "✓"}</span>
           <h3>{tr('Тест завершён')}</h3>
           <b>{tr("{count} из 5 правильных ответов",{count:quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length})}</b>
-          <p>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? "Прекрасный результат. Продолжай укреплять знания." : "Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз."}</p>
+          <p>{quizAnswers.filter((answer, index) => answer === accessibleNames[(index * 7 + 2) % accessibleNames.length]?.id).length === 5 ? tr("Прекрасный результат. Продолжай укреплять знания.") : tr("Хорошая работа. Повтори имена, в которых ошибся, и попробуй ещё раз.")}</p>
           <button onClick={() => { setQuizIndex(0); setQuizAnswer(null); setQuizAnswers([]); }}>{tr("Пройти ещё раз")} <ArrowRight size={15}/></button>
         </div>}
       </section></details>
@@ -1417,7 +1537,7 @@ export default function App() {
       <footer><span>{tr("99 имён Аллаха · Учись с намерением и постоянством")}</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> {tr("Поделиться")}</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> {tr("Сохранить")}</button></div></footer>
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
-        <button className="modal-x" aria-label="Закрыть" onClick={closeWelcome}><X size={19}/></button>
+        <button className="modal-x" aria-label={tr("Закрыть")} onClick={closeWelcome}><X size={19}/></button>
         <div className="welcome-bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
         <span className="muted-label welcome-eyebrow">{tr("ДОБРО ПОЖАЛОВАТЬ")}</span>
         <h2 id="welcome-title">{tr("Ассаляму алейкум!")}</h2>
@@ -1425,7 +1545,7 @@ export default function App() {
         <p className="welcome-intention">{tr("Изучай постепенно, вдумывайся в смысл и старайся применять знания в жизни. Пусть это будет ради довольства Аллаха.")}</p>
         <div className="welcome-actions">
           <button className="welcome-continue" onClick={closeWelcome}>{tr("Перейти к изучению")} <ArrowRight size={16}/></button>
-          <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">Поддержать проект <span>♥</span></a>
+          <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">{tr("Поддержать проект")} <span>♥</span></a>
         </div>
       </section></div>}
 
@@ -1454,7 +1574,7 @@ export default function App() {
       </section></div> : null; })()}
 
       {accountOpen && <div className="modal-backdrop" onClick={() => setAccountOpen(false)}><section className="info-modal account-modal" role="dialog" aria-modal="true" aria-label={tr("Аккаунт")} onClick={e => e.stopPropagation()}>
-        <button className="modal-x" aria-label="Закрыть" onClick={() => setAccountOpen(false)}><X size={19}/></button><div className="info-modal-icon"><UserRound size={21}/></div>
+        <button className="modal-x" aria-label={tr("Закрыть")} onClick={() => setAccountOpen(false)}><X size={19}/></button><div className="info-modal-icon"><UserRound size={21}/></div>
         <h2>{accountMode === 'signup' ? tr('Бесплатная регистрация') : accountMode === 'login' ? tr('Войти в аккаунт') : tr('Восстановить пароль')}</h2>
         <p>{tr("Создай аккаунт по электронной почте. Обучение бесплатное, а прогресс будет связан с твоим аккаунтом.")}</p>
         <form onSubmit={submitAccount} className="account-form"><label htmlFor="account-email">{tr("Электронная почта")}</label><input id="account-email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com"/>
