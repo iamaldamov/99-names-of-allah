@@ -943,3 +943,10 @@ input, select, textarea, .account-form input {
 
 /* Small language notice for untranslated source explanations. */
 .content-language-note{margin:0 0 16px;color:var(--muted,#777);font-size:11px;line-height:1.55}
+
+
+/* Retire duplicated quizzes; learning checks now live inside each lesson and stage exam. */
+.daily-challenge,
+.compact-details:has(.practice-section){display:none!important}
+:root[data-theme="dark"] .daily-goal,
+:root[data-theme="dark"] .goal-track{background:#202f25;color:#e8eee9;border-color:#405747}
