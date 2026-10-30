@@ -4,6 +4,7 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { GamifiedPath } from './GamifiedPath';
+import { TurtleMascot } from './TurtleMascot';
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
@@ -1632,6 +1633,7 @@ export default function App() {
       {praise && <div className="praise-toast" role="status" aria-live="polite"><span>✦</span>{praise}<span>✦</span></div>}
       {notice && <p className="share-notice" role="status">{notice}</p>}
       <footer><span>{tr("99 имён Аллаха · Учись с намерением и постоянством")}</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> {tr("Поделиться")}</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> {tr("Сохранить")}</button></div></footer>
+      {!initialLoading && <TurtleMascot language={language} praise={praise} progress={progress.length} />}
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
         <button className="modal-x" aria-label={tr("Закрыть")} onClick={closeWelcome}><X size={19}/></button>
