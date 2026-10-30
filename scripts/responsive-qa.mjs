@@ -48,6 +48,11 @@ try {
     await examButton.click();
     const dialog = page.locator('.path-exam-modal');
     await dialog.waitFor({ state: 'visible' });
+    const examTransliteration = page.locator('.path-exam-translit');
+    await examTransliteration.waitFor({ state: 'visible' });
+    assert.ok((await examTransliteration.innerText()).trim().length > 0, 'Every exam question must show the Name transliteration');
+    assert.equal(await page.getByText('Испытай свои знания', { exact: true }).count(), 0, 'The old daily five-question quiz must not appear');
+    assert.equal(await page.getByText('ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ', { exact: true }).count(), 0, 'The old daily quiz heading must be removed');
     const modalLayout = await dialog.evaluate(element => {
       const rect = element.getBoundingClientRect();
       return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
