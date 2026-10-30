@@ -320,8 +320,8 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit 
                 <span className="muted-label">РЕЗУЛЬТАТ ЭКЗАМЕНА</span>
                 <h2 id="path-exam-title">{result >= PASS_SCORE ? 'Этап пройден!' : 'Попробуй ещё раз'}</h2>
                 <strong>{result} из 10</strong>
-                <p>{result >= PASS_SCORE ? 'Отличная работа. Следующий этап теперь открыт.' : 'Для открытия следующего этапа нужно набрать не менее 8 правильных ответов. Прогресс уроков сохранён.'}</p>
-                {result >= PASS_SCORE && <div className="path-unlocked-message"><Award size={18} /> Следующий этап открыт · +20 XP</div>}
+                <p>{result >= PASS_SCORE ? (examStage === 11 ? 'Ты завершил все 11 этапов обучения.' : 'Отличная работа. Следующий этап теперь открыт.') : 'Для открытия следующего этапа нужно набрать не менее 8 правильных ответов. Прогресс уроков сохранён.'}</p>
+                {result >= PASS_SCORE && <div className="path-unlocked-message"><Award size={18} /> {examStage === 11 ? 'Все этапы завершены · +20 XP' : 'Следующий этап открыт · +20 XP'}</div>}
                 <button className="path-exam-submit" type="button" onClick={result >= PASS_SCORE ? closeExam : () => startExam(examStage!)}>
                   {result >= PASS_SCORE ? 'Продолжить обучение' : 'Пересдать экзамен'} <ChevronRight size={17} />
                 </button>
