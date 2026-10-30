@@ -595,7 +595,7 @@ export default function App() {
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? "СЛЕДУЮЩИЙ ШАГ" : dueReviewIds.length ? "ВРЕМЯ ПОВТОРИТЬ" : "ТЫ ПРОШЁЛ ВЕСЬ СПИСОК"}</small><b>{nextName ? `Продолжить: ${nextName.translation}` : dueReviewIds.length ? "Закрепить изученное" : "Вернуться к каталогу"}</b></span><ArrowRight size={19}/></button>
       </section>
 
-      <GamifiedPath names={names} progress={progress} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} language={language} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="daily-challenge reveal" aria-label="Ежедневное испытание">
         <div className="challenge-top"><div><span className="muted-label">ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ</span><h2>Испытай свои знания</h2><p>Небольшая ежедневная проверка. Вопросы обновляются каждый день.</p></div><div className="challenge-top-actions"><div className="challenge-best"><span>РЕКОРД</span><b>{challengeBest}/5</b></div></div></div>
