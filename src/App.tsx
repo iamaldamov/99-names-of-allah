@@ -1463,7 +1463,7 @@ export default function App() {
         <div className="daily-goal"><div><b>{tr('Ежедневная цель')}</b><small>{tr("{count} из {goal} имён сегодня",{count:learnedToday.length,goal:dailyGoal})}</small></div><select aria-label={tr("Ежедневная цель")} value={dailyGoal} onChange={e=>setDailyGoal(Number(e.target.value))}><option value={1}>{tr("1 имя")}</option><option value={3}>{tr("3 имени")}</option><option value={5}>{tr("5 имён")}</option></select><div className="goal-track"><span style={{width:Math.min(100,learnedToday.length/dailyGoal*100)+'%'}}/></div></div>
       </section>
 
-      <GamifiedPath names={names} progress={progress} language={language} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} language={language} user={user} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
