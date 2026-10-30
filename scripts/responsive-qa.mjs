@@ -31,7 +31,9 @@ try {
     });
     await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('.learning-path').waitFor({ state: 'visible' });
-    assert.equal(await page.locator('.path-stage-card').count(), 11, 'The learning path should show 11 stages');
+    assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
+    assert.equal(await page.locator('.daily-challenge').count(), 0, 'The legacy daily quiz must be removed');
+    assert.equal(await page.locator('.compact-details:has(.practice-section)').count(), 0, 'The duplicate mini quiz must be removed');
 
     const initialLayout = await page.evaluate(() => ({
       viewport: window.innerWidth,
@@ -59,6 +61,15 @@ try {
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
     assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing the exam should restore background scrolling');
+
+    await page.locator('.theme-toggle').click();
+    await examButton.click();
+    await dialog.waitFor({ state: 'visible' });
+    const darkSurface = await dialog.evaluate(element => getComputedStyle(element).backgroundColor);
+    assert.notEqual(darkSurface, 'rgb(255, 255, 255)', `Exam modal must not stay white in dark mode: ${darkSurface}`);
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({ state: 'hidden' });
+    await page.locator('.theme-toggle').click();
 
     if (size.width === 390) {
       await page.locator('.catalog-toggle').click();
