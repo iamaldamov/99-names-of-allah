@@ -941,7 +941,7 @@ input, select, textarea, .account-form input {
   animation: preloader-appear .3s ease both;
 }
 .site-preloader.is-leaving { animation: preloader-exit .28s ease forwards; pointer-events: none; }
-.site-preloader__content { width: min(100%, 340px); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.site-preloader__content { width: min(100%, 520px); display: flex; flex-direction: column; align-items: center; text-align: center; }
 .site-preloader__symbol {
   position: relative;
   width: 62px;
@@ -973,8 +973,9 @@ input, select, textarea, .account-form input {
   border-radius: 50%;
   animation: preloader-spin .85s linear infinite;
 }
-.site-preloader__message { min-height: 24px; margin: 0; color: var(--ink, #26342e); font-size: 13px; line-height: 1.6; animation: preloader-message .35s ease both; }
-.site-preloader__note { margin: 9px 0 0; color: var(--muted, #89938b); font-size: 10px; letter-spacing: .04em; }
+.site-preloader__message { min-height: 54px; display: grid; place-items: center; margin: 0; padding: 0 8px; color: var(--ink, #26342e); font-size: clamp(15px, 2.3vw, 17px); font-weight: 600; line-height: 1.65; text-wrap: balance; animation: preloader-message .35s ease both; }
+.site-preloader__source { min-height: 16px; margin: 7px 0 0; color: var(--muted, #89938b); font-size: 11px; line-height: 1.5; letter-spacing: .015em; }
+.site-preloader__note { margin: 14px 0 0; color: var(--muted, #89938b); font-size: 10px; letter-spacing: .04em; }
 @keyframes preloader-spin { to { transform: rotate(360deg); } }
 @keyframes preloader-orbit { 0%,100% { transform: scale(.96); opacity: .55; } 50% { transform: scale(1.04); opacity: 1; } }
 @keyframes preloader-appear { from { opacity: 0; } to { opacity: 1; } }
@@ -983,6 +984,7 @@ input, select, textarea, .account-form input {
 :root[data-theme="dark"] .site-preloader { background: #111b15; color: #e8eee9; }
 :root[data-theme="dark"] .site-preloader__symbol { background: #24382b; color: #c8dfce; }
 :root[data-theme="dark"] .site-preloader__message { color: #e8eee9; }
+:root[data-theme="dark"] .site-preloader__source { color: #a8b8ab; }
 :root[data-theme="dark"] .site-preloader__note { color: #a8b8ab; }
 :root[data-theme="dark"] .site-preloader__spinner { border-color: rgba(200, 223, 206, .18); border-top-color: #b9d8c1; }
 
