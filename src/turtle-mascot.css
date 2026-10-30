@@ -1,0 +1,159 @@
+.turtle-mascot {
+  position: fixed;
+  z-index: 35;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  width: 148px;
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+  direction: ltr;
+}
+.turtle-mascot__character {
+  position: relative;
+  width: 148px;
+  height: 150px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.turtle-mascot__art {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 8px 8px rgba(31, 54, 39, .15));
+  transform-origin: 50% 76%;
+  animation: turtle-float 4s ease-in-out infinite;
+}
+.turtle-mascot__glow {
+  position: absolute;
+  z-index: 0;
+  width: 74%;
+  height: 25%;
+  left: 13%;
+  bottom: 9%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(115, 163, 111, .2), transparent 72%);
+  pointer-events: none;
+}
+.turtle-mascot__head {
+  transform-box: fill-box;
+  transform-origin: 50% 92%;
+  animation: turtle-look 6.5s ease-in-out infinite;
+}
+.turtle-mascot__eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: turtle-blink 5.8s infinite;
+}
+.turtle-mascot__front-feet {
+  transform-box: fill-box;
+  transform-origin: 50% 15%;
+  animation: turtle-step 3.8s ease-in-out infinite;
+}
+.turtle-mascot__back-feet { animation: turtle-back-step 3.8s ease-in-out infinite; }
+.turtle-mascot__shell { transform-box: fill-box; transform-origin: 50% 100%; animation: turtle-shell-breathe 4s ease-in-out infinite; }
+.turtle-mascot__tail { transform-box: fill-box; transform-origin: 50% 0; animation: turtle-tail 3.8s ease-in-out infinite; }
+.turtle-mascot__sparkles { opacity: .75; animation: turtle-sparkle 3.2s ease-in-out infinite; }
+.turtle-mascot__bubble {
+  position: absolute;
+  right: 2px;
+  bottom: 132px;
+  z-index: 2;
+  width: min(250px, calc(100vw - 34px));
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 13px;
+  border: 1px solid color-mix(in srgb, var(--accent, #477f61) 20%, var(--line, #e2e8df));
+  border-radius: 16px 16px 5px 16px;
+  background: var(--paper, #fff);
+  color: var(--ink, #26372e);
+  box-shadow: 0 12px 34px rgba(24, 43, 30, .15);
+  pointer-events: auto;
+  animation: turtle-bubble-in .28s ease both;
+}
+.turtle-mascot__bubble::after {
+  content: "";
+  position: absolute;
+  right: 24px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  border-right: 1px solid color-mix(in srgb, var(--accent, #477f61) 20%, var(--line, #e2e8df));
+  border-bottom: 1px solid color-mix(in srgb, var(--accent, #477f61) 20%, var(--line, #e2e8df));
+  background: var(--paper, #fff);
+  transform: rotate(45deg);
+}
+.turtle-mascot__bubble p { flex: 1; margin: 0; font-size: 12px; line-height: 1.55; }
+.turtle-mascot__bubble button {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  margin: -4px -5px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink, #26372e) 7%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+.turtle-mascot__character:focus-visible,
+.turtle-mascot__bubble button:focus-visible {
+  outline: 3px solid var(--accent, #477f61);
+  outline-offset: 4px;
+}
+.turtle-mascot.is-celebrating .turtle-mascot__art { animation: turtle-celebrate .75s ease-in-out 2; }
+.turtle-mascot.is-celebrating .turtle-mascot__sparkles { opacity: 1; animation-duration: .6s; }
+html[data-theme="dark"] .turtle-mascot__bubble {
+  background: #1b2a20;
+  color: #e8eee9;
+  border-color: #405747;
+}
+html[data-theme="dark"] .turtle-mascot__bubble::after {
+  background: #1b2a20;
+  border-color: #405747;
+}
+html[dir="rtl"] .turtle-mascot { right: auto; left: max(18px, env(safe-area-inset-left)); }
+html[dir="rtl"] .turtle-mascot__bubble { right: auto; left: 2px; border-radius: 16px 16px 16px 5px; }
+html[dir="rtl"] .turtle-mascot__bubble::after { right: auto; left: 24px; }
+@keyframes turtle-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
+@keyframes turtle-look { 0%,35%,100% { transform: rotate(0); } 42% { transform: rotate(-4deg); } 52% { transform: rotate(3deg); } 60% { transform: rotate(0); } }
+@keyframes turtle-blink { 0%,43%,47%,100% { transform: scaleY(1); } 45% { transform: scaleY(.08); } }
+@keyframes turtle-step { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-3deg); } }
+@keyframes turtle-back-step { 0%,100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+@keyframes turtle-shell-breathe { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.012); } }
+@keyframes turtle-tail { 0%,100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
+@keyframes turtle-sparkle { 0%,100% { opacity: .35; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes turtle-bubble-in { from { opacity: 0; transform: translateY(7px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes turtle-celebrate { 0%,100% { transform: translateY(0) rotate(0); } 35% { transform: translateY(-13px) rotate(-7deg); } 70% { transform: translateY(-5px) rotate(7deg); } }
+@media(max-width: 700px) {
+  .turtle-mascot { right: max(8px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); width: 108px; }
+  .turtle-mascot__character { width: 108px; height: 112px; }
+  .turtle-mascot__bubble { right: 0; bottom: 100px; width: min(225px, calc(100vw - 24px)); padding: 10px 11px; }
+  html[dir="rtl"] .turtle-mascot { right: auto; left: max(8px, env(safe-area-inset-left)); }
+}
+@media(max-width: 380px) {
+  .turtle-mascot { width: 92px; }
+  .turtle-mascot__character { width: 92px; height: 96px; }
+  .turtle-mascot__bubble { bottom: 88px; width: min(210px, calc(100vw - 20px)); }
+}
+@media(prefers-reduced-motion: reduce) {
+  .turtle-mascot *,
+  .turtle-mascot *::before,
+  .turtle-mascot *::after { animation: none !important; transition: none !important; }
+}
