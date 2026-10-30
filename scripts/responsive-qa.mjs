@@ -31,7 +31,7 @@ try {
     });
     await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('.learning-path').waitFor({ state: 'visible' });
-    assert.equal(await page.locator('.path-stage-card').count(), 11, 'The learning path should show 11 stages');
+    assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
 
     const initialLayout = await page.evaluate(() => ({
       viewport: window.innerWidth,
