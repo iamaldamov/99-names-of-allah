@@ -73,8 +73,26 @@ try {
     await page.locator('.theme-toggle').click();
     await examButton.click();
     await dialog.waitFor({ state: 'visible' });
-    const darkSurface = await dialog.evaluate(element => getComputedStyle(element).backgroundColor);
-    assert.notEqual(darkSurface, 'rgb(255, 255, 255)', `Exam modal must not stay white in dark mode: ${darkSurface}`);
+    const darkStyles = await dialog.evaluate(element => ({
+      background: getComputedStyle(element).backgroundColor,
+      color: getComputedStyle(element).color,
+    }));
+    assert.notEqual(darkStyles.background, 'rgb(255, 255, 255)', `Exam modal must not stay white in dark mode: ${darkStyles.background}`);
+    assert.equal(darkStyles.background, 'rgb(24, 35, 29)', 'Exam modal should use the defined dark surface');
+    assert.notEqual(darkStyles.color, 'rgb(0, 0, 0)', 'Exam text must remain readable in dark mode');
+    const darkControls = await page.locator('.path-exam-close, .path-exam-options button').evaluateAll(elements =>
+      elements.map(element => ({ background: getComputedStyle(element).backgroundColor, color: getComputedStyle(element).color }))
+    );
+    assert.ok(darkControls.length >= 5, 'The exam should show its close control and four answer options');
+    assert.ok(darkControls.every(style => style.background !== 'rgb(255, 255, 255)'), 'No exam control may remain white in dark mode');
+    await page.locator('.path-exam-options button').first().click();
+    await page.locator('.path-exam-submit').click();
+    const darkFeedback = await page.locator('.path-exam-feedback').evaluate(element => ({
+      background: getComputedStyle(element).backgroundColor,
+      color: getComputedStyle(element).color,
+    }));
+    assert.notEqual(darkFeedback.background, 'rgb(255, 255, 255)', 'Answer feedback must follow dark mode');
+    assert.notEqual(darkFeedback.color, 'rgb(0, 0, 0)', 'Answer feedback text must remain readable in dark mode');
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
     await page.locator('.theme-toggle').click();
