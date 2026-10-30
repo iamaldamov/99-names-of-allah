@@ -49,10 +49,11 @@ function shuffled<T,>(items: T[]): T[] {
   return result;
 }
 
-export function GamifiedPath({ names, progress, onOpenName }: {
+export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit }: {
   names: LearningName[];
   progress: number[];
   onOpenName: (name: LearningName) => void;
+  onUnlockedNameLimit: (limit: number) => void;
 }) {
   const [pathState, setPathState] = useState<PathState>(readPathState);
   const [examStage, setExamStage] = useState<number | null>(null);
@@ -67,6 +68,9 @@ export function GamifiedPath({ names, progress, onOpenName }: {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pathState)); } catch { /* Local progress remains usable for this session. */ }
   }, [pathState]);
 
+  const unlockedCount = Math.min(11, pathState.passedStages.length + 1);
+  useEffect(() => { onUnlockedNameLimit(unlockedCount * STAGE_SIZE); }, [unlockedCount, onUnlockedNameLimit]);
+
   const stages = useMemo(() => Array.from({ length: 11 }, (_, index) => {
     const id = index + 1;
     const stageNames = names.filter(name => name.id > index * STAGE_SIZE && name.id <= (index + 1) * STAGE_SIZE);
@@ -77,7 +81,6 @@ export function GamifiedPath({ names, progress, onOpenName }: {
   const completedLessons = stages.reduce((total, stage) =>
     total + stage.lessons.filter(lesson => lesson.length === LESSON_SIZE && lesson.every(name => progress.includes(name.id))).length, 0);
   const xp = completedLessons * 5 + pathState.passedStages.length * 20;
-  const unlockedCount = Math.min(11, pathState.passedStages.length + 1);
   const activeStage = stages.find(stage => stage.id === unlockedCount) ?? stages[0];
   const currentQuestion = questions[questionIndex];
   const currentCorrect = currentQuestion?.options.find(option => option.id === currentQuestion.nameId);
