@@ -60,6 +60,19 @@ try {
     await dialog.waitFor({ state: 'hidden' });
     assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing the exam should restore background scrolling');
 
+    if (size.width === 390) {
+      await page.locator('.catalog-toggle').click();
+      await page.locator('.name-row').first().click();
+      const lessonDialog = page.locator('.lesson-modal:not(.review-session-modal)');
+      await lessonDialog.waitFor({ state: 'visible' });
+      assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Opening a Name card should lock background scrolling');
+      await page.keyboard.press('Shift+Tab');
+      assert.equal(await lessonDialog.evaluate(element => element.contains(document.activeElement)), true, 'Name card keyboard focus must remain inside the dialog');
+      await page.keyboard.press('Escape');
+      await lessonDialog.waitFor({ state: 'hidden' });
+      assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing a Name card should restore background scrolling');
+    }
+
     if (size.width <= 768) {
       await page.locator('.language-select').selectOption('ar');
       await page.waitForFunction(() => document.documentElement.dir === 'rtl');
