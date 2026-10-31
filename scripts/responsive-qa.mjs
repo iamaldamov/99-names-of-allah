@@ -82,7 +82,8 @@ try {
     await dialog.waitFor({ state: 'visible' });
     const examMascot = page.locator('.path-exam-modal .duck-character-emoji');
     await examMascot.waitFor({ state: 'visible' });
-    assert.equal(await examMascot.evaluate(element => getComputedStyle(element).animationName), 'none', 'The exam chick mascot must not bob or hop');
+    const examMascotMotion = await page.locator('.path-exam-modal .duck-character-emoji, .path-exam-modal .duck-bubble').evaluateAll(elements => elements.map(element => getComputedStyle(element).animationName));
+    assert.ok(examMascotMotion.length >= 2 && examMascotMotion.every(name => name === 'none'), `The exam chick and speech bubble must stay still: ${examMascotMotion}`);
     const examTransliteration = page.locator('.path-exam-translit');
     await examTransliteration.waitFor({ state: 'visible' });
     assert.ok((await examTransliteration.innerText()).trim().length > 0, 'Every exam question must show the Name transliteration');
@@ -121,7 +122,8 @@ try {
     assert.ok(darkControls.length >= 5, 'The exam should show its close control and four answer options');
     assert.ok(darkControls.every(style => style.background !== 'rgb(255, 255, 255)'), 'No exam control may remain white in dark mode');
     await page.locator('.path-exam-options button').first().click();
-    assert.equal(await examMascot.evaluate(element => getComputedStyle(element).animationName), 'none', 'The exam chick must stay still after an answer changes its mood');
+    const changedMoodAnimation = await examMascot.evaluate(element => getComputedStyle(element).animationName);
+    assert.equal(changedMoodAnimation, 'none', 'The exam chick must stay still after an answer changes its mood');
     await page.locator('.path-exam-submit').click();
     const darkFeedback = await page.locator('.path-exam-feedback').evaluate(element => ({
       background: getComputedStyle(element).backgroundColor,
