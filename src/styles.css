@@ -1019,3 +1019,18 @@ input, select, textarea, .account-form input {
 @keyframes duck-bob { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(-7px) rotate(1deg); } }
 @media(max-width:760px) { .hero { padding-right:0; } .duck-mascot { position:relative; inset:auto; width:155px; margin:24px auto 0; } .duck-mascot-art { max-height:145px; } .duck-speech { font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .duck-mascot-art { animation:none; } }
+
+
+/* Subtle character details: blink, wing flutter and a gentle tail sway. */
+.duck-mascot-wing{transform-box:fill-box;transform-origin:80% 55%;animation:duck-wing-wave 4.8s ease-in-out infinite}
+.duck-mascot-tail{transform-box:fill-box;transform-origin:15% 55%;animation:duck-tail-sway 3.8s ease-in-out infinite}
+.duck-mascot-eye{transform-box:fill-box;transform-origin:center;animation:duck-blink 5.2s ease-in-out infinite}
+.duck-mascot-eye:nth-of-type(2){animation-delay:.08s}
+.duck-speech{animation:duck-speech-in .55s cubic-bezier(.2,.75,.25,1) both}
+@keyframes duck-wing-wave{0%,78%,100%{transform:rotate(0)}84%{transform:rotate(-9deg)}90%{transform:rotate(5deg)}96%{transform:rotate(0)}}
+@keyframes duck-tail-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}
+@keyframes duck-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}}
+@keyframes duck-speech-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  .duck-mascot-art,.duck-mascot-wing,.duck-mascot-tail,.duck-mascot-eye,.duck-speech{animation:none!important}
+}
