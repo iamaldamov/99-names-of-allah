@@ -360,10 +360,11 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
     setResult(null);
   };
 
-  const submitAnswer = () => {
-    if (answer === null || !currentQuestion || checked) return;
+  const selectAnswer = (optionId: number) => {
+    if (!currentQuestion || checked) return;
+    setAnswer(optionId);
     setChecked(true);
-    setDuckMood(answer === currentQuestion.nameId ? 'correct' : 'wrong');
+    setDuckMood(optionId === currentQuestion.nameId ? 'correct' : 'wrong');
   };
 
   const nextQuestion = () => {
@@ -547,7 +548,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                           key={option.id}
                           disabled={checked}
                           className={checked && option.id === currentQuestion.nameId ? 'is-correct' : checked && option.id === answer ? 'is-wrong' : answer === option.id ? 'is-selected' : ''}
-                          onClick={() => setAnswer(option.id)}
+                          onClick={() => selectAnswer(option.id)}
                         >
                           <span dir="auto" lang="ru">{option.translation}</span>
                           {checked && option.id === currentQuestion.nameId && <Check size={17} />}
@@ -559,10 +560,12 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                         {answer === currentQuestion.nameId ? t('Верно! Продолжай.') : t('Правильный ответ: {answer}.', {answer: currentCorrect?.translation ?? 'см. карточку имени'})}
                       </p>
                     )}
-                    <button className="path-exam-submit" type="button" disabled={answer === null} onClick={checked ? nextQuestion : submitAnswer}>
-                      {checked ? (questionIndex === 9 ? t('Завершить экзамен') : t('Следующий вопрос')) : t('Проверить ответ')}
-                      <ChevronRight size={17} />
-                    </button>
+                    {checked && (
+                      <button className="path-exam-submit" type="button" onClick={nextQuestion}>
+                        {questionIndex === 9 ? t('Завершить экзамен') : t('Следующий вопрос')}
+                        <ChevronRight size={17} />
+                      </button>
+                    )}
                   </>
                 )}
               </>
