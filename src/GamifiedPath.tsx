@@ -2,6 +2,30 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Award, BookOpen, Check, ChevronRight, LockKeyhole, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
 import './gamified-path.css';
 
+// The mascot is drawn with inline SVG and animated with CSS: no image assets or external requests.
+type DuckMood = 'idle' | 'correct' | 'wrong' | 'success' | 'encourage';
+function DuckMascot({ mood, language, message }: { mood: DuckMood; language: UiLanguage; message: string }) {
+  const label = language === 'ar' ? 'رفيق التعلّم' : language === 'en' ? 'Your learning buddy' : language === 'ky' ? 'Үйрөнүү досуң' : language === 'kk' ? 'Оқу досың' : 'Твой помощник в обучении';
+  return (
+    <div className={`duck-companion duck-${mood}`} role="status" aria-live="polite" aria-label={label}>
+      <div className="duck-bubble">{message}</div>
+      <svg className="duck-character" viewBox="0 0 132 126" aria-hidden="true" focusable="false">
+        <ellipse className="duck-shadow" cx="66" cy="116" rx="35" ry="6" />
+        <path className="duck-body" d="M29 75c0-24 16-43 38-43 24 0 39 18 39 43 0 20-16 34-39 34S29 96 29 75Z" />
+        <path className="duck-wing" d="M34 76c-10 2-16 12-12 21 7 8 21 3 27-7" />
+        <path className="duck-wing duck-wing-right" d="M98 76c10 2 16 12 12 21-7 8-21 3-27-7" />
+        <path className="duck-beak" d="M52 64c5-5 23-5 29 0 2 3-2 8-14 9-12-1-17-6-15-9Z" />
+        <ellipse className="duck-eye" cx="51" cy="53" rx="4" ry="5" /><ellipse className="duck-eye" cx="83" cy="53" rx="4" ry="5" />
+        <circle className="duck-cheek" cx="40" cy="65" r="5" /><circle className="duck-cheek" cx="94" cy="65" r="5" />
+        <path className="duck-foot" d="M48 105l-4 7m4-7 5 7m29-7-4 7m4-7 5 7" />
+        <path className="duck-tuft" d="M59 31c-4-9 1-13 7-8 2-8 10-7 10 1" />
+        <path className="duck-smile" d="M59 76c4 4 10 4 14 0" />
+        <path className="duck-star" d="M111 28l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" />
+      </svg>
+    </div>
+  );
+}
+
 type LearningName = {
   id: number;
   arabic: string;
@@ -291,6 +315,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState(0);
   const [result, setResult] = useState<number | null>(null);
+  const [duckMood, setDuckMood] = useState<DuckMood>('idle');
   const examDialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -338,6 +363,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   const submitAnswer = () => {
     if (answer === null || !currentQuestion || checked) return;
     setChecked(true);
+    setDuckMood(answer === currentQuestion.nameId ? 'correct' : 'wrong');
   };
 
   const nextQuestion = () => {
@@ -346,6 +372,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
     setScore(nextScore);
     if (questionIndex === questions.length - 1) {
       setResult(nextScore);
+      setDuckMood(nextScore >= PASS_SCORE ? 'success' : 'encourage');
       if (examStage !== null) {
         setPathState(old => ({
           passedStages: nextScore >= PASS_SCORE && !old.passedStages.includes(examStage)
@@ -359,12 +386,14 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
     setQuestionIndex(index => index + 1);
     setAnswer(null);
     setChecked(false);
+    setDuckMood('idle');
   };
 
   const closeExam = () => {
     setExamStage(null);
     setQuestions([]);
     setResult(null);
+    setDuckMood('idle');
   };
 
   useEffect(() => {
@@ -492,6 +521,19 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                 <h2 id="path-exam-title">{t('Проверь, что запомнил')}</h2>
                 <p className="path-exam-intro">{t('10 вопросов по изученным именам. Для открытия следующего этапа нужно ответить правильно минимум на 8.')}</p>
                 <div className="path-exam-progress"><span style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }} /></div>
+                <DuckMascot
+                  mood={duckMood}
+                  language={language}
+                  message={language === 'en'
+                    ? (duckMood === 'correct' ? 'Brilliant! You got it right!' : duckMood === 'wrong' ? 'That’s okay! Mistakes help you learn. Keep going!' : 'Let’s learn together, one question at a time.')
+                    : language === 'ky'
+                      ? (duckMood === 'correct' ? 'Азаматсың! Туура жооп!' : duckMood === 'wrong' ? 'Эч нерсе эмес! Ката аркылуу үйрөнөбүз. Уланта бер!' : 'Кел, чогуу үйрөнөлү!')
+                      : language === 'kk'
+                        ? (duckMood === 'correct' ? 'Жарайсың! Дұрыс жауап!' : duckMood === 'wrong' ? 'Ештеңе етпейді! Қателіктен үйренеміз. Жалғастыр!' : 'Бірге үйренейік!')
+                        : language === 'ar'
+                          ? (duckMood === 'correct' ? 'أحسنت! إجابة صحيحة!' : duckMood === 'wrong' ? 'لا بأس! نتعلم من الأخطاء. واصل!' : 'لنتعلم معًا خطوة بخطوة.')
+                          : (duckMood === 'correct' ? 'МашаАллах! Правильно! Так держать!' : duckMood === 'wrong' ? 'Ничего страшного! Ошибки помогают учиться. Не сдавайся!' : 'Давай учиться вместе! Шаг за шагом.') }
+                />
                 <div className="path-exam-meta"><span>{t('ВОПРОС {current} ИЗ 10', {current: questionIndex + 1})}</span><span>{t('{count} правильных', {count: score})}</span></div>
                 {currentQuestion && (
                   <>
@@ -526,6 +568,15 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
               </>
             ) : (
               <div className="path-exam-result">
+                <DuckMascot
+                  mood={result >= PASS_SCORE ? 'success' : 'encourage'}
+                  language={language}
+                  message={language === 'en' ? (result >= PASS_SCORE ? 'You did it! I’m proud of your effort!' : 'You made progress. Review and try again!')
+                    : language === 'ky' ? (result >= PASS_SCORE ? 'Азаматсың! Эмгегиңе кубанычтамын!' : 'Сен алдыга жылдың. Кайталап, кайра аракет кыл!')
+                    : language === 'kk' ? (result >= PASS_SCORE ? 'Жарайсың! Еңбегіңе қуаныштымын!' : 'Сен алға жылжыдың. Қайталап, қайта көр!')
+                    : language === 'ar' ? (result >= PASS_SCORE ? 'أحسنت! أنا سعيد بجهدك!' : 'لقد تقدّمت. راجع وحاول مرة أخرى!')
+                    : (result >= PASS_SCORE ? 'Ура! Ты справился! Я тобой горжусь!' : 'Ты уже продвинулся. Повтори и попробуй снова!')}
+                />
                 <div className="path-result-icon">{result >= PASS_SCORE ? <Trophy size={30} /> : <RotateCcw size={28} />}</div>
                 <span className="muted-label">{t('РЕЗУЛЬТАТ ЭКЗАМЕНА')}</span>
                 <h2 id="path-exam-title">{result >= PASS_SCORE ? t('Этап пройден!') : t('Попробуй ещё раз')}</h2>
