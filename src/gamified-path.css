@@ -207,7 +207,7 @@ html[data-theme="dark"] .duck-companion{background:#202f25;border-color:#405747}
 html[data-theme="dark"] .duck-bubble{background:#293a30;color:#e8eee9}
 @media(max-width:480px){.duck-companion{gap:7px;min-height:98px;padding:7px 9px}.duck-character-emoji{width:88px;flex-basis:88px;font-size:72px}.duck-bubble{font-size:11px;padding:9px 10px}}
  
-/* Replace the unclear loading monogram with the friendly duck guide. */
+/* Size the static chick in the loading screen. */
 .site-preloader .duck-mascot {
   position:relative;
   inset:auto;
@@ -215,7 +215,6 @@ html[data-theme="dark"] .duck-bubble{background:#293a30;color:#e8eee9}
   margin:0 auto 7px;
   pointer-events:none;
 }
-.site-preloader .duck-mascot-art { max-height:132px; }
 .site-preloader .duck-speech { font-size:11px; }
 @media(max-width:480px) {
   .site-preloader .duck-mascot { width:132px; margin-bottom:5px; }
