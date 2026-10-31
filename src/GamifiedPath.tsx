@@ -9,17 +9,7 @@ function DuckMascot({ mood, language, message }: { mood: DuckMood; language: UiL
   return (
     <div className={`duck-companion duck-${mood}`} role="status" aria-live="polite" aria-label={label}>
       <div className="duck-bubble">{message}</div>
-      <svg className="duck-character" viewBox="0 0 132 126" aria-hidden="true" focusable="false">
-        <ellipse className="duck-shadow" cx="66" cy="116" rx="35" ry="6" />
-        <path className="duck-body" d="M17 91c0-25 20-42 49-42 30 0 50 18 50 43 0 21-19 33-50 33S17 113 17 91Z" />
-        <path className="duck-wing" d="M34 83c-11 1-17 11-13 20 8 8 22 3 28-7Z" />
-        <path className="duck-head" d="M31 48c0-23 15-38 35-38s35 15 35 38c0 21-15 35-35 35S31 69 31 48Z" />
-        <path className="duck-tuft" d="M53 13c-4-9 1-13 7-8 2-8 10-7 10 1" />
-        <ellipse className="duck-eye" cx="53" cy="43" rx="4.2" ry="5.5" /><ellipse className="duck-eye" cx="79" cy="43" rx="4.2" ry="5.5" />
-        <circle className="duck-cheek" cx="41" cy="57" r="5" /><circle className="duck-cheek" cx="91" cy="57" r="5" />
-        <path className="duck-beak" d="M52 57q14-7 28 0 5 4 0 9-14 8-28 0-5-5 0-9Z" />
-        <path className="duck-foot" d="M47 119l-4 6m4-6 5 6m27-6-4 6m4-6 5 6" />
-      </svg>
+      <span className="duck-character duck-character-emoji" role="img" aria-label={label}>🐥</span>
     </div>
   );
 }
