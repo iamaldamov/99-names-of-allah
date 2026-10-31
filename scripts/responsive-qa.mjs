@@ -142,10 +142,8 @@ try {
         await page.locator('.path-exam-options button').first().click();
         await page.locator('.path-exam-submit').click();
         if (question < 9) {
-          await page.locator('.path-exam-submit').click();
           await page.getByText(`ВОПРОС ${question + 2} ИЗ 10`, { exact: true }).waitFor({ state: 'visible' });
         } else {
-          await page.locator('.path-exam-submit').click();
           await page.getByText('РЕЗУЛЬТАТ ЭКЗАМЕНА', { exact: true }).waitFor({ state: 'visible' });
         }
       }
