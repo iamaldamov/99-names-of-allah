@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Award, BookOpen, Check, ChevronRight, LockKeyhole, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
 import './gamified-path.css';
 
-// The mascot is drawn with inline SVG and animated with CSS: no image assets or external requests.
+// The mascot is a static chick emoji; it has no movement or external image assets.
 type DuckMood = 'idle' | 'correct' | 'wrong' | 'success' | 'encourage';
 function DuckMascot({ mood, language, message }: { mood: DuckMood; language: UiLanguage; message: string }) {
   const label = language === 'ar' ? 'رفيق التعلّم' : language === 'en' ? 'Your learning buddy' : language === 'ky' ? 'Үйрөнүү досуң' : language === 'kk' ? 'Оқу досың' : 'Твой помощник в обучении';
