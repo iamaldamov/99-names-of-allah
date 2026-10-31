@@ -1603,7 +1603,7 @@ export default function App() {
     <main className="app-shell" aria-busy={initialLoading}>
       {initialLoading && <div className={`site-preloader${preloaderLeaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
         <div className="site-preloader__content">
-          <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
+          <DuckMascot language={language} />
           <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
           <div className="site-preloader__spinner" aria-hidden="true"><span /></div>
           <p className="site-preloader__message" key={loadingMessageIndex}>{loadingMessages[language][loadingMessageIndex]}</p>
