@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test:responsive": "node scripts/responsive-qa.mjs"
+    "test:responsive": "node scripts/responsive-qa.mjs",
+    "test:localization": "node scripts/localization-qa.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

@@ -8,6 +8,7 @@ on:
     branches:
       - feature/gamified-learning-path-clean
       - refine/minimal-learning-interface
+      - fix/simple-duck-mascot-and-qa
   workflow_dispatch:
 
 permissions:
@@ -28,6 +29,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Run production build
         run: npm run build
+      - name: Check translation coverage
+        run: npm run test:localization
       - name: Install Chromium for responsive checks
         run: npx playwright install --with-deps chromium
       - name: Start production preview

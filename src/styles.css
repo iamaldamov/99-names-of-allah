@@ -1008,3 +1008,14 @@ input, select, textarea, .account-form input {
   .site-preloader, .site-preloader__symbol i, .site-preloader__symbol b,
   .site-preloader__spinner, .site-preloader__message { animation: none !important; }
 }
+
+
+/* Friendly duck companion: a small guide, never a competing hero image. */
+.hero { padding-right: min(27vw, 300px); }
+.duck-mascot { position:absolute; top:48px; right:clamp(10px,4vw,56px); width:clamp(170px,22vw,250px); display:grid; justify-items:center; gap:0; pointer-events:none; }
+.duck-mascot-art { display:block; width:100%; max-height:205px; overflow:visible; filter:drop-shadow(0 8px 10px rgba(65,90,65,.08)); animation:duck-bob 3.8s ease-in-out infinite; transform-origin:50% 90%; }
+.duck-speech { position:relative; z-index:1; max-width:100%; padding:9px 13px; border:1px solid #e5ecdf; border-radius:17px 17px 17px 5px; background:var(--paper,#fff); color:var(--ink,#26342e); box-shadow:0 5px 18px rgba(38,52,46,.06); font-size:11px; line-height:1.45; text-align:center; }
+:root[data-theme="dark"] .duck-speech { border-color:#405747; background:#202f25; color:#e8eee9; }
+@keyframes duck-bob { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(-7px) rotate(1deg); } }
+@media(max-width:760px) { .hero { padding-right:0; } .duck-mascot { position:relative; inset:auto; width:155px; margin:24px auto 0; } .duck-mascot-art { max-height:145px; } .duck-speech { font-size:10px; } }
+@media(prefers-reduced-motion:reduce) { .duck-mascot-art { animation:none; } }
