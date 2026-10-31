@@ -124,13 +124,13 @@ try {
     await page.locator('.path-exam-options button').first().click();
     const changedMoodAnimation = await examMascot.evaluate(element => getComputedStyle(element).animationName);
     assert.equal(changedMoodAnimation, 'none', 'The exam chick must stay still after an answer changes its mood');
-    await page.locator('.path-exam-submit').click();
     const darkFeedback = await page.locator('.path-exam-feedback').evaluate(element => ({
       background: getComputedStyle(element).backgroundColor,
       color: getComputedStyle(element).color,
     }));
     assert.notEqual(darkFeedback.background, 'rgb(255, 255, 255)', 'Answer feedback must follow dark mode');
     assert.notEqual(darkFeedback.color, 'rgb(0, 0, 0)', 'Answer feedback text must remain readable in dark mode');
+    await page.locator('.path-exam-submit').click();
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
     await page.locator('.theme-toggle').click();
