@@ -9,7 +9,7 @@ function DuckMascot({ mood, language, message }: { mood: DuckMood; language: UiL
   return (
     <div className={`duck-companion duck-${mood}`} role="status" aria-live="polite" aria-label={label}>
       <div className="duck-bubble">{message}</div>
-      <span className="duck-character duck-character-emoji" role="img" aria-label={label}>🐥</span>
+      <span className="duck-character-emoji" role="img" aria-label={label}>🐥</span>
     </div>
   );
 }
