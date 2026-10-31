@@ -1,0 +1,11 @@
+/* Static duckling: no bobbing, bouncing, blinking or wing movement. */
+.duck-mascot-art,
+.duck-mascot-wing,
+.duck-mascot-tail,
+.duck-mascot-eye,
+.duck-speech {
+  animation: none !important;
+}
+.duck-mascot-art {
+  transform: none !important;
+}
