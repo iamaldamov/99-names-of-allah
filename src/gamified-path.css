@@ -245,3 +245,32 @@ html[data-theme="dark"] .duck-bubble{background:#293a30;color:#e8eee9}
   .site-preloader .duck-mascot { width:132px; margin-bottom:5px; }
   .site-preloader .duck-mascot-art { max-height:116px; }
 }
+
+
+/* High-contrast points counter in dark mode. */
+html[data-theme="dark"] .path-xp,
+:root[data-theme="dark"] .path-xp {
+  background: #2b3829 !important;
+  color: #f0cf78 !important;
+}
+html[data-theme="dark"] .path-xp b,
+:root[data-theme="dark"] .path-xp b {
+  color: #fff4d6 !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.28);
+}
+html[data-theme="dark"] .path-xp small,
+:root[data-theme="dark"] .path-xp small {
+  color: #d7dfd3 !important;
+}
+
+/* A still, clearly recognizable duckling in the lesson exam. */
+.duck-head { fill: #ffe47b; stroke: #d4b33f; stroke-width: 1.5; }
+.duck-character,.duck-shadow,.duck-wing,.duck-star,.duck-bubble {
+  animation: none !important;
+  transform: none !important;
+}
+.duck-wing { fill: #efcd50; }
+.duck-beak { fill: #ef9840; stroke: #d77e32; stroke-width: 1.2; }
+.duck-foot { fill: none; stroke: #df8d3c; stroke-width: 3.2; stroke-linecap: round; }
+.duck-star { display: none; }
