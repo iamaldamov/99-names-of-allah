@@ -1,7 +1,7 @@
 type DuckLanguage = 'ru' | 'en' | 'ar' | 'ky' | 'kk';
 
 const greetings: Record<DuckLanguage, string> = {
-  ru: 'Привет! Давай учиться понемногу 🦆',
+  ru: 'Бисмиллях. Давай изучать прекрасные имена Аллаха.',
   en: "Hi! Let's learn one little step at a time.",
   ar: 'مرحبًا! لنتعلّم خطوةً صغيرة كل يوم.',
   ky: 'Салам! Кел, күн сайын аз-аздан үйрөнөлү.',
