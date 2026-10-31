@@ -22,24 +22,33 @@ export function DuckMascot({ language }: { language: DuckLanguage }) {
       <div className="duck-speech" lang={language} dir={language === 'ar' ? 'rtl' : 'auto'}>{greetings[language]}</div>
       <svg className="duck-mascot-art" viewBox="0 0 220 190" role="img" aria-labelledby="duck-title">
         <title id="duck-title">{duckTitles[language]}</title>
-        <ellipse cx="110" cy="169" rx="62" ry="9" fill="#dce8d9" />
-        {/* A single rounded silhouette makes the head and body read as one little duck. */}
-        <path d="M48 128c-8-17-5-39 7-54 10-13 25-20 43-21 5-20 21-34 42-34 24 0 42 19 42 43 0 7-2 13-5 19 13 12 20 29 17 47-4 25-26 39-69 39-39 0-65-12-77-39Z" fill="#ffda68" stroke="#d5a13c" strokeWidth="3.5" strokeLinejoin="round" />
-        <path className="duck-mascot-wing duck-mascot-wing--left" d="M58 104c-15-8-28-2-31 13 11-2 20 3 28 14 8-8 9-18 3-27Z" fill="#f2c04e" stroke="#d5a13c" strokeWidth="3" strokeLinejoin="round" />
-        <path className="duck-mascot-tail" d="M183 111c13-10 23-8 29 0-8 10-18 13-29 9" fill="#f6c653" stroke="#d5a13c" strokeWidth="3" strokeLinejoin="round" />
-        <path d="M83 160c-2 5-7 8-14 9m64-9c2 5 7 8 14 9" fill="none" stroke="#d98b35" strokeWidth="5" strokeLinecap="round" />
-        <path d="M90 22c-1-8 3-13 9-16m18 13c4-8 10-10 16-8" fill="none" stroke="#d5a13c" strokeWidth="3" strokeLinecap="round" />
-        <ellipse cx="94" cy="75" rx="10" ry="12" fill="#fff" />
-        <ellipse cx="139" cy="75" rx="10" ry="12" fill="#fff" />
-        <ellipse className="duck-mascot-eye" cx="97" cy="77" rx="4.5" ry="6" fill="#3e382f" />
-        <ellipse className="duck-mascot-eye" cx="136" cy="77" rx="4.5" ry="6" fill="#3e382f" />
-        <circle cx="99" cy="74" r="1.8" fill="#fff" />
-        <circle cx="138" cy="74" r="1.8" fill="#fff" />
-        <ellipse cx="79" cy="94" rx="8" ry="5" fill="#f3a18d" opacity=".65" />
-        <ellipse cx="154" cy="94" rx="8" ry="5" fill="#f3a18d" opacity=".65" />
-        {/* Broad, flat orange bill: the clearest visual cue that this is a duck. */}
-        <path className="duck-mascot-beak" d="M101 91c7-5 24-5 32 0 7 4 7 10 0 14-9 5-24 5-32 0-7-4-7-10 0-14Z" fill="#ee963e" stroke="#d47c2e" strokeWidth="2.5" />
-        <path d="M107 96c6 2 15 2 21 0" fill="none" stroke="#ffd08a" strokeWidth="2" strokeLinecap="round" />
+        <ellipse cx="108" cy="169" rx="65" ry="8" fill="#dce8d9" />
+        {/* Plump little duck body */}
+        <ellipse cx="105" cy="128" rx="68" ry="39" fill="#ffda70" stroke="#d7a545" strokeWidth="3" />
+        <path className="duck-mascot-tail" d="M163 117c17-12 29-8 34 2-10 10-21 12-34 7" fill="#f8cd60" stroke="#d7a545" strokeWidth="3" strokeLinejoin="round" />
+        {/* Far wing */}
+        <path d="M66 119c-1-17 13-27 29-22 13 4 19 17 14 29-10 13-28 15-43-7Z" fill="#f5c957" stroke="#d7a545" strokeWidth="2.5" />
+        {/* Neck and round head */}
+        <path d="M103 111c-10-14-15-27-12-42l43-2c-2 21 5 31 19 42Z" fill="#ffdc72" />
+        <circle cx="119" cy="59" r="43" fill="#ffdc72" stroke="#d7a545" strokeWidth="3" />
+        {/* Three soft feathers */}
+        <path d="M94 22c-8-12-3-19 6-20 7 7 7 13 2 22m10-23c-1-13 7-17 15-12 3 9 0 15-7 19" fill="#ffdc72" stroke="#d7a545" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Little wing waving */}
+        <path className="duck-mascot-wing duck-mascot-wing--left" d="M55 116c-18-7-29 2-26 17 13-3 24 3 34 13 8-10 5-23-8-30Z" fill="#f5c957" stroke="#d7a545" strokeWidth="3" strokeLinejoin="round" />
+        {/* Eyes, looking happily forward */}
+        <ellipse cx="108" cy="61" rx="8" ry="10" fill="#fff" />
+        <ellipse cx="139" cy="61" rx="8" ry="10" fill="#fff" />
+        <ellipse className="duck-mascot-eye" cx="110" cy="63" rx="4" ry="6" fill="#40382f" />
+        <ellipse className="duck-mascot-eye" cx="137" cy="63" rx="4" ry="6" fill="#40382f" />
+        <circle cx="111.5" cy="60.5" r="1.7" fill="#fff" />
+        <circle cx="138.5" cy="60.5" r="1.7" fill="#fff" />
+        <ellipse cx="96" cy="80" rx="7" ry="4.5" fill="#f2a18d" opacity=".65" />
+        <ellipse cx="150" cy="80" rx="7" ry="4.5" fill="#f2a18d" opacity=".65" />
+        {/* Distinct duck bill, projecting from the face */}
+        <path className="duck-mascot-beak" d="M151 69c13-5 29-3 35 3 3 4-1 9-8 11-10 3-21 1-29-4Z" fill="#f39a3f" stroke="#d47c2e" strokeWidth="2.5" strokeLinejoin="round" />
+        <path d="M159 74c7 1 14 1 20-1" fill="none" stroke="#ffd08a" strokeWidth="2" strokeLinecap="round" />
+        {/* Feet */}
+        <path d="M78 158c-5 2-9 6-10 10 8 3 17 2 24-2m25-7c-4 3-6 7-6 10 8 3 17 2 24-2" fill="none" stroke="#e9913b" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </aside>
   );
