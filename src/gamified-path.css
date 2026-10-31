@@ -196,3 +196,37 @@ html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-fee
   background: #402525 !important;
   color: #f2ceca !important;
 }
+
+
+/* Animated duck companion: pure inline SVG, lightweight CSS motion, no image downloads. */
+.duck-companion{display:flex;align-items:center;justify-content:center;gap:15px;min-height:116px;margin:14px auto 18px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--accent,#3b8064) 16%,transparent);border-radius:18px;background:color-mix(in srgb,var(--accent,#3b8064) 5%,var(--paper,#fff));}
+.duck-bubble{position:relative;max-width:260px;padding:11px 14px;border-radius:15px 15px 15px 5px;background:var(--paper,#fff);color:var(--ink,#26372e);font-size:12px;line-height:1.55;box-shadow:0 5px 18px rgba(25,45,32,.07);animation:duck-bubble-in .32s ease both;}
+.duck-character{width:108px;height:104px;flex:0 0 108px;overflow:visible;animation:duck-float 3.2s ease-in-out infinite;transform-origin:50% 90%}
+.duck-body{fill:#f6d95d;stroke:#d4b33f;stroke-width:1.5}
+.duck-wing{fill:#f0cd4d;stroke:#d4b33f;stroke-width:1.4;transform-origin:39px 82px;animation:duck-wing-flap 2.6s ease-in-out infinite}
+.duck-wing-right{transform-origin:93px 82px;animation-delay:.12s}
+.duck-beak{fill:#ed9945;stroke:#d77e32;stroke-width:1.2}
+.duck-eye{fill:#26342e}
+.duck-cheek{fill:#efa0a0;opacity:.72}
+.duck-foot{fill:none;stroke:#dc8c3d;stroke-width:3;stroke-linecap:round}
+.duck-tuft{fill:none;stroke:#d4b33f;stroke-width:3;stroke-linecap:round}
+.duck-smile{fill:none;stroke:#8c6828;stroke-width:1.7;stroke-linecap:round}
+.duck-shadow{fill:rgba(35,55,40,.10);animation:duck-shadow 3.2s ease-in-out infinite}
+.duck-star{fill:#d4a63d;opacity:0;transform-origin:111px 36px}
+.duck-correct .duck-character,.duck-success .duck-character{animation:duck-happy-hop .72s ease-in-out 2}
+.duck-correct .duck-wing,.duck-success .duck-wing{animation:duck-cheer .55s ease-in-out 3}
+.duck-correct .duck-star,.duck-success .duck-star{animation:duck-twinkle .9s ease-in-out 2}
+.duck-wrong .duck-character,.duck-encourage .duck-character{animation:duck-kind-nod .55s ease-in-out 2}
+.duck-wrong .duck-bubble,.duck-encourage .duck-bubble{border:1px solid rgba(194,157,83,.3)}
+@keyframes duck-float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1deg)}}
+@keyframes duck-shadow{0%,100%{transform:scaleX(1);opacity:.9}50%{transform:scaleX(.82);opacity:.55}}
+@keyframes duck-wing-flap{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg)}}
+@keyframes duck-happy-hop{0%,100%{transform:translateY(0) rotate(0)}35%{transform:translateY(-13px) rotate(-5deg)}65%{transform:translateY(-6px) rotate(5deg)}}
+@keyframes duck-cheer{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+@keyframes duck-kind-nod{0%,100%{transform:rotate(0)}35%{transform:rotate(-5deg) translateY(-2px)}70%{transform:rotate(4deg)}}
+@keyframes duck-twinkle{0%,100%{opacity:0;transform:scale(.5) rotate(-20deg)}45%{opacity:1;transform:scale(1.2) rotate(15deg)}}
+@keyframes duck-bubble-in{from{opacity:0;transform:translateY(5px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+html[data-theme="dark"] .duck-companion{background:#202f25;border-color:#405747}
+html[data-theme="dark"] .duck-bubble{background:#293a30;color:#e8eee9}
+@media(max-width:480px){.duck-companion{gap:7px;min-height:98px;padding:7px 9px}.duck-character{width:88px;height:88px;flex-basis:88px}.duck-bubble{font-size:11px;padding:9px 10px}}
+@media(prefers-reduced-motion:reduce){.duck-character,.duck-shadow,.duck-wing,.duck-star,.duck-bubble{animation:none!important}}
