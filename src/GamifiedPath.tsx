@@ -11,16 +11,14 @@ function DuckMascot({ mood, language, message }: { mood: DuckMood; language: UiL
       <div className="duck-bubble">{message}</div>
       <svg className="duck-character" viewBox="0 0 132 126" aria-hidden="true" focusable="false">
         <ellipse className="duck-shadow" cx="66" cy="116" rx="35" ry="6" />
-        <path className="duck-body" d="M29 75c0-24 16-43 38-43 24 0 39 18 39 43 0 20-16 34-39 34S29 96 29 75Z" />
-        <path className="duck-wing" d="M34 76c-10 2-16 12-12 21 7 8 21 3 27-7" />
-        <path className="duck-wing duck-wing-right" d="M98 76c10 2 16 12 12 21-7 8-21 3-27-7" />
-        <path className="duck-beak" d="M52 64c5-5 23-5 29 0 2 3-2 8-14 9-12-1-17-6-15-9Z" />
-        <ellipse className="duck-eye" cx="51" cy="53" rx="4" ry="5" /><ellipse className="duck-eye" cx="83" cy="53" rx="4" ry="5" />
-        <circle className="duck-cheek" cx="40" cy="65" r="5" /><circle className="duck-cheek" cx="94" cy="65" r="5" />
-        <path className="duck-foot" d="M48 105l-4 7m4-7 5 7m29-7-4 7m4-7 5 7" />
-        <path className="duck-tuft" d="M59 31c-4-9 1-13 7-8 2-8 10-7 10 1" />
-        <path className="duck-smile" d="M59 76c4 4 10 4 14 0" />
-        <path className="duck-star" d="M111 28l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" />
+        <path className="duck-body" d="M17 91c0-25 20-42 49-42 30 0 50 18 50 43 0 21-19 33-50 33S17 113 17 91Z" />
+        <path className="duck-wing" d="M34 83c-11 1-17 11-13 20 8 8 22 3 28-7Z" />
+        <path className="duck-head" d="M31 48c0-23 15-38 35-38s35 15 35 38c0 21-15 35-35 35S31 69 31 48Z" />
+        <path className="duck-tuft" d="M53 13c-4-9 1-13 7-8 2-8 10-7 10 1" />
+        <ellipse className="duck-eye" cx="53" cy="43" rx="4.2" ry="5.5" /><ellipse className="duck-eye" cx="79" cy="43" rx="4.2" ry="5.5" />
+        <circle className="duck-cheek" cx="41" cy="57" r="5" /><circle className="duck-cheek" cx="91" cy="57" r="5" />
+        <path className="duck-beak" d="M52 57q14-7 28 0 5 4 0 9-14 8-28 0-5-5 0-9Z" />
+        <path className="duck-foot" d="M47 119l-4 6m4-6 5 6m27-6-4 6m4-6 5 6" />
       </svg>
     </div>
   );
