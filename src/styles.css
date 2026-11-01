@@ -404,8 +404,7 @@ body{font-size:var(--reading-size);line-height:1.75}
 .lesson-modal > .lesson-meaning { animation: textEnter .65s .29s both; }
 .lesson-modal > .primary-button,
 .lesson-modal > .already-learned { animation: textEnter .55s .34s both; }
-:root[data-theme="dark"] .lesson-quick-actions.compact-icon-actions button,
-:root[data-theme="dark"] .recall-compact button {
+:root[data-theme="dark"] .lesson-quick-actions.compact-icon-actions button {
   background: #1b2a21;
   border-color: #405747;
   color: #c4d2c7;
@@ -620,7 +619,7 @@ html{scroll-padding-top:18px}
 }
 .name-row,.review-queue-row,.journey-continue,.filter-tabs button,
 .quiz-options button,.challenge-options button,.lesson-nav-button,
-.lesson-quick-actions button,.recall-compact button,.compact-details>summary {
+.lesson-quick-actions button,.compact-details>summary {
   transition: background-color .22s ease, border-color .22s ease, color .22s ease,
     box-shadow .22s ease, transform .22s cubic-bezier(.2,.7,.2,1);
 }
