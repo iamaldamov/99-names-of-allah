@@ -1718,7 +1718,7 @@ export default function App() {
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">{tr('ЗНАЧЕНИЕ ИМЕНИ')}</span><p className="lesson-description text-enter" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}>{selected.explanation}</p></div>
         {error && <p className="form-error" role="alert">{error}</p>}
-        {progress.includes(selected.id) ? <><p className="already-learned"><Check size={16}/> {tr('Изучено')}</p>{dueReviewIds.includes(selected.id) && <div className="recall-compact"><button aria-label={tr("Вспомнил")} title={tr("Вспомнил")} data-feedback onClick={()=>{recordRecall(selected.id,true);setNotice(tr('Повторение отмечено. Следующее — через {days} дн.',{days:REVIEW_INTERVALS[Math.min(REVIEW_INTERVALS.length-1,(reviewData[selected.id]?.box ?? 0)+1)]}));setSelected(null);}}><Check size={16}/></button><button aria-label={tr("Повторить позже")} title={tr("Повторить позже")} data-feedback onClick={()=>{recordRecall(selected.id,false);setNotice(tr('Имя вернётся на повторение через 10 минут.'));setSelected(null);}}><ArrowRight size={16}/></button></div>}</> : <button className="primary-button full" data-feedback disabled={busy} onClick={markLearned}>{busy ? tr('Сохраняем…') : tr('Изучил')} <Check size={17}/></button>}
+        {progress.includes(selected.id) ? <p className="already-learned"><Check size={16}/> {tr('Изучено')}</p> : <button className="primary-button full" data-feedback disabled={busy} onClick={markLearned}>{busy ? tr('Сохраняем…') : tr('Изучил')} <Check size={17}/></button>}
 
       </section></div>}
 
