@@ -163,6 +163,13 @@ try {
       await page.locator('.name-row').first().click();
       const lessonDialog = page.locator('.lesson-modal:not(.review-session-modal)');
       await lessonDialog.waitFor({ state: 'visible' });
+      const lessonHeaderGap = await lessonDialog.evaluate(element => {
+        const close = element.querySelector('.close-button')?.getBoundingClientRect();
+        const topline = element.querySelector('.lesson-topline')?.getBoundingClientRect();
+        return close && topline ? topline.top - close.bottom : Number.POSITIVE_INFINITY;
+      });
+      assert.ok(lessonHeaderGap <= 24, `The lesson card must not leave a large blank gap below Close: ${lessonHeaderGap}px`);
+      assert.equal(await lessonDialog.locator('.recall-compact').count(), 0, 'Redundant check/arrow controls must not appear at the bottom of a Name card');
       assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Opening a Name card should lock background scrolling');
       await page.keyboard.press('Shift+Tab');
       assert.equal(await lessonDialog.evaluate(element => element.contains(document.activeElement)), true, 'Name card keyboard focus must remain inside the dialog');
