@@ -31,6 +31,8 @@ jobs:
         run: npm run build
       - name: Check translation coverage
         run: npm run test:localization
+      - name: Check account recovery flow
+        run: npm run test:auth
       - name: Install Chromium for responsive checks
         run: npx playwright install --with-deps chromium
       - name: Start production preview
