@@ -886,7 +886,12 @@ Object.assign(languageText.en, {
   "Закрыть": "Close",
   "Ежедневное испытание": "Daily challenge",
   "Пройти ещё раз": "Try again",
-  "Поддержать проект": "Support the project"
+  "Поддержать проект": "Support the project",
+  "Установить новый пароль": "Set a new password",
+  "Ссылка подтверждена. Укажи новый пароль для аккаунта.": "Link verified. Enter a new password for your account.",
+  "Новый пароль": "New password",
+  "Сохранить новый пароль": "Save new password",
+  "Новый пароль сохранён. Ты вошёл в аккаунт.": "Your new password has been saved. You are signed in."
 });
 
 Object.assign(languageText.ky, {
@@ -916,7 +921,12 @@ Object.assign(languageText.ky, {
   "Закрыть": "Жабуу",
   "Ежедневное испытание": "Күнүмдүк сынак",
   "Пройти ещё раз": "Кайра өтүү",
-  "Поддержать проект": "Долбоорду колдоо"
+  "Поддержать проект": "Долбоорду колдоо",
+  "Установить новый пароль": "Жаңы сырсөздү орнотуу",
+  "Ссылка подтверждена. Укажи новый пароль для аккаунта.": "Шилтеме ырасталды. Аккаунтуң үчүн жаңы сырсөз киргиз.",
+  "Новый пароль": "Жаңы сырсөз",
+  "Сохранить новый пароль": "Жаңы сырсөздү сактоо",
+  "Новый пароль сохранён. Ты вошёл в аккаунт.": "Жаңы сырсөз сакталды. Аккаунтуңа кирдиң."
 });
 
 Object.assign(languageText.kk, {
@@ -946,7 +956,12 @@ Object.assign(languageText.kk, {
   "Закрыть": "Жабу",
   "Ежедневное испытание": "Күнделікті сынақ",
   "Пройти ещё раз": "Қайта өту",
-  "Поддержать проект": "Жобаны қолдау"
+  "Поддержать проект": "Жобаны қолдау",
+  "Установить новый пароль": "Жаңа құпиясөз орнату",
+  "Ссылка подтверждена. Укажи новый пароль для аккаунта.": "Сілтеме расталды. Аккаунтыңа жаңа құпиясөз енгіз.",
+  "Новый пароль": "Жаңа құпиясөз",
+  "Сохранить новый пароль": "Жаңа құпиясөзді сақтау",
+  "Новый пароль сохранён. Ты вошёл в аккаунт.": "Жаңа құпиясөз сақталды. Аккаунтыңа кірдің."
 });
 
 Object.assign(languageText.ar, {
@@ -976,7 +991,12 @@ Object.assign(languageText.ar, {
   "Закрыть": "إغلاق",
   "Ежедневное испытание": "التحدي اليومي",
   "Пройти ещё раз": "حاول مجددًا",
-  "Поддержать проект": "ادعم المشروع"
+  "Поддержать проект": "ادعم المشروع",
+  "Установить новый пароль": "تعيين كلمة مرور جديدة",
+  "Ссылка подтверждена. Укажи новый пароль для аккаунта.": "تم التحقق من الرابط. أدخل كلمة مرور جديدة لحسابك.",
+  "Новый пароль": "كلمة المرور الجديدة",
+  "Сохранить новый пароль": "حفظ كلمة المرور الجديدة",
+  "Новый пароль сохранён. Ты вошёл в аккаунт.": "تم حفظ كلمة المرور الجديدة. لقد سجلت الدخول."
 });
 
 Object.assign(languageText.ky, {"99 имён Аллаха — главная":"Аллахтын 99 ысымы — башкы бет","Переводы значений и объяснения имён пока доступны на русском языке.":"Ысымдардын маанилеринин котормосу жана түшүндүрмөлөрү азырынча орус тилинде гана жеткиликтүү."});
@@ -1224,7 +1244,7 @@ export default function App() {
   const [swipeRange, setSwipeRange] = useState<{ min: number; max: number } | null>(null);
   const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset'>('signup');
+  const [accountMode, setAccountMode] = useState<'login' | 'signup' | 'reset' | 'update'>('signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -1377,8 +1397,16 @@ export default function App() {
     }).catch(() => {
       if (alive) setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
     });
-    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: User | null } | null) => {
-      if (alive) setUser(session?.user ?? null);
+    const { data: listener } = supabaseClient.auth.onAuthStateChange((event: string, session: { user: User | null } | null) => {
+      if (!alive) return;
+      setUser(session?.user ?? null);
+      if (event === 'PASSWORD_RECOVERY') {
+        setAccountMode('update');
+        setPassword('');
+        setError('');
+        setMessage('');
+        setAccountOpen(true);
+      }
     });
     return () => { alive = false; listener.subscription.unsubscribe(); };
   }, [supabaseClient]);
@@ -1449,12 +1477,18 @@ export default function App() {
         const { error: authError } = await supabaseClient.auth.signInWithPassword({ email: email.trim(), password });
         if (authError) throw authError;
         setAccountOpen(false); setMessage(tr('Ты успешно вошёл. Прогресс будет сохраняться в аккаунте.'));
-      } else {
+      } else if (accountMode === 'reset') {
         const { error: authError } = await supabaseClient.auth.resetPasswordForEmail(email.trim(), { redirectTo: SITE_URL });
         if (authError) throw authError;
         setMessage(tr('Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.'));
+      } else {
+        const { error: authError } = await supabaseClient.auth.updateUser({ password });
+        if (authError) throw authError;
+        setAccountOpen(false);
+        setPassword('');
+        setNotice(tr('Новый пароль сохранён. Ты вошёл в аккаунт.'));
       }
-    } catch (e) { setError(e instanceof Error ? e.message : 'Не удалось выполнить запрос. Попробуй ещё раз.'); }
+    } catch { setError(tr('Не удалось выполнить запрос. Попробуй ещё раз.')); }
     finally { setBusy(false); }
   };
 
@@ -1735,14 +1769,14 @@ export default function App() {
 
       {accountOpen && <div className="modal-backdrop" onClick={() => setAccountOpen(false)}><section className="info-modal account-modal" role="dialog" aria-modal="true" aria-label={tr("Аккаунт")} onClick={e => e.stopPropagation()}>
         <button className="modal-x" aria-label={tr("Закрыть")} onClick={() => setAccountOpen(false)}><X size={19}/></button><div className="info-modal-icon"><UserRound size={21}/></div>
-        <h2>{accountMode === 'signup' ? tr('Бесплатная регистрация') : accountMode === 'login' ? tr('Войти в аккаунт') : tr('Восстановить пароль')}</h2>
-        <p>{tr("Создай аккаунт по электронной почте. Обучение бесплатное, а прогресс будет связан с твоим аккаунтом.")}</p>
-        <form onSubmit={submitAccount} className="account-form"><label htmlFor="account-email">{tr("Электронная почта")}</label><input id="account-email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com"/>
-          {accountMode !== 'reset' && <><label htmlFor="account-password">{tr("Пароль (не менее 6 символов)")}</label><input id="account-password" type="password" minLength={6} autoComplete={accountMode === 'signup' ? 'new-password' : 'current-password'} required value={password} onChange={e => setPassword(e.target.value)} placeholder={tr("Не менее 6 символов")}/></>}
+        <h2>{accountMode === 'signup' ? tr('Бесплатная регистрация') : accountMode === 'login' ? tr('Войти в аккаунт') : accountMode === 'reset' ? tr('Восстановить пароль') : tr('Установить новый пароль')}</h2>
+        <p>{accountMode === 'update' ? tr('Ссылка подтверждена. Укажи новый пароль для аккаунта.') : tr("Создай аккаунт по электронной почте. Обучение бесплатное, а прогресс будет связан с твоим аккаунтом.")}</p>
+        <form onSubmit={submitAccount} className="account-form">{accountMode !== 'update' && <><label htmlFor="account-email">{tr("Электронная почта")}</label><input id="account-email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com"/> </>}
+          {accountMode !== 'reset' && <><label htmlFor="account-password">{tr(accountMode === 'update' ? 'Новый пароль' : 'Пароль (не менее 6 символов)')}</label><input id="account-password" type="password" minLength={6} autoComplete={accountMode === 'signup' || accountMode === 'update' ? 'new-password' : 'current-password'} required value={password} onChange={e => setPassword(e.target.value)} placeholder={tr("Не менее 6 символов")}/></>}
           {error && <p className="form-error" role="alert">{error}</p>}{message && <p className="form-message" role="status">{message}</p>}
-          <button className="primary-button full" disabled={busy}>{busy ? tr('Подожди…') : accountMode === 'signup' ? tr('Создать бесплатный аккаунт') : accountMode === 'login' ? tr('Войти') : tr('Отправить ссылку')} <ArrowRight size={16}/></button>
+          <button className="primary-button full" disabled={busy}>{busy ? tr('Подожди…') : accountMode === 'signup' ? tr('Создать бесплатный аккаунт') : accountMode === 'login' ? tr('Войти') : accountMode === 'update' ? tr('Сохранить новый пароль') : tr('Отправить ссылку')} <ArrowRight size={16}/></button>
         </form>
-        <div className="account-switch">{accountMode !== 'login' && <button onClick={() => {setAccountMode('login');setError('');setMessage('');}}>{tr('Уже есть аккаунт? Войти')}</button>}{accountMode !== 'signup' && <button onClick={() => {setAccountMode('signup');setError('');setMessage('');}}>{tr('Создать аккаунт')}</button>}{accountMode === 'login' && <button onClick={() => {setAccountMode('reset');setError('');setMessage('');}}>{tr('Забыли пароль?')}</button>}</div>
+        {accountMode !== 'update' && <div className="account-switch">{accountMode !== 'login' && <button onClick={() => {setAccountMode('login');setError('');setMessage('');}}>{tr('Уже есть аккаунт? Войти')}</button>}{accountMode !== 'signup' && <button onClick={() => {setAccountMode('signup');setError('');setMessage('');}}>{tr('Создать аккаунт')}</button>}{accountMode === 'login' && <button onClick={() => {setAccountMode('reset');setError('');setMessage('');}}>{tr('Забыли пароль?')}</button>}</div>}
         <p className="privacy-note"><Mail size={14}/> {tr("Почта нужна для входа и восстановления доступа. Номер телефона не требуется.")}</p>
       </section></div>}
 
