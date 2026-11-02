@@ -201,6 +201,8 @@ try {
     }
 
     if (size.width === 390) {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.locator('.topbar .login-button').waitFor({ state: 'visible' });
       await page.locator('.topbar .login-button').click();
       const accountDialog = page.locator('.account-modal');
       await accountDialog.waitFor({ state: 'visible' });
