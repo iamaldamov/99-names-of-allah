@@ -200,6 +200,27 @@ try {
       await lessonDialog.waitFor({ state: 'hidden' });
     }
 
+    if (size.width === 390) {
+      await page.locator('.topbar .login-button').click();
+      const accountDialog = page.locator('.account-modal');
+      await accountDialog.waitFor({ state: 'visible' });
+      await page.locator('#account-email').waitFor({ state: 'visible' });
+      await page.locator('#account-password').waitFor({ state: 'visible' });
+      await page.getByRole('button', { name: 'Забыли пароль?' }).click();
+      assert.equal(await page.locator('#account-password').count(), 0, 'Password reset request must not ask for the current password');
+      await page.locator('#account-email').fill('learner@example.com');
+      await page.getByRole('button', { name: 'Отправить ссылку' }).click();
+      await accountDialog.getByRole('alert').waitFor({ state: 'visible' });
+      assert.match(await accountDialog.getByRole('alert').innerText(), /Supabase/, 'An unconfigured account service should show a clear setup message');
+      await page.getByRole('button', { name: 'Создать аккаунт' }).click();
+      const newPassword = page.locator('#account-password');
+      await newPassword.waitFor({ state: 'visible' });
+      assert.equal(await newPassword.getAttribute('minlength'), '6', 'New account passwords must require at least six characters');
+      assert.equal(await newPassword.getAttribute('autocomplete'), 'new-password', 'Sign-up password fields should use new-password autocomplete');
+      await page.locator('.account-modal .modal-x').click();
+      await accountDialog.waitFor({ state: 'hidden' });
+    }
+
     if (size.width <= 768) {
       await page.locator('.language-select').selectOption('ar');
       await page.waitForFunction(() => document.documentElement.dir === 'rtl');
