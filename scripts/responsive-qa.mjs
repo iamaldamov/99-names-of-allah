@@ -202,7 +202,10 @@ try {
 
     if (size.width === 390) {
       await page.evaluate(() => window.scrollTo(0, 0));
-      await page.locator('.topbar .login-button').waitFor({ state: 'visible' });
+      await page.waitForFunction(() => {
+        const header = document.querySelector('.topbar');
+        return Boolean(header && !header.classList.contains('topbar-hidden') && !header.hasAttribute('inert'));
+      });
       await page.locator('.topbar .login-button').click();
       const accountDialog = page.locator('.account-modal');
       await accountDialog.waitFor({ state: 'visible' });
