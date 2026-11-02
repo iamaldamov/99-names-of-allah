@@ -1019,3 +1019,63 @@ input, select, textarea, .account-form input {
 @keyframes duck-bob { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(-7px) rotate(1deg); } }
 @media(max-width:760px) { .hero { padding-right:0; } .duck-mascot { position:relative; inset:auto; width:155px; margin:24px auto 0; } .duck-mascot-art { max-height:145px; } .duck-speech { font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .duck-mascot-art { animation:none; } }
+
+/* Fix the lesson card's oversized top gap and keep its actions inside mobile safe areas. */
+.modal-backdrop:has(> .lesson-modal:not(.review-session-modal)) {
+  align-items: center;
+  justify-items: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+}
+.lesson-modal:not(.review-session-modal) {
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 18px clamp(16px, 4vw, 24px) max(16px, env(safe-area-inset-bottom));
+  scroll-padding-block: 14px;
+}
+.lesson-modal:not(.review-session-modal) > .close-button {
+  flex: 0 0 auto;
+  margin: 0 0 10px auto;
+  min-height: 36px;
+  padding: 7px 4px;
+}
+.lesson-modal:not(.review-session-modal) > .lesson-topline { flex: 0 0 auto; margin: 0 0 4px; }
+.lesson-modal:not(.review-session-modal) > .swipe-hint { flex: 0 0 auto; margin: 4px auto 8px; }
+.lesson-modal:not(.review-session-modal) > .lesson-arabic { flex: 0 0 auto; margin: 10px 0 2px; line-height: 1.45; }
+.lesson-modal:not(.review-session-modal) > .lesson-quick-actions { flex: 0 0 auto; margin: 8px auto 12px; }
+.lesson-modal:not(.review-session-modal) > h2,
+.lesson-modal:not(.review-session-modal) > .lesson-translit { flex: 0 0 auto; }
+.lesson-modal:not(.review-session-modal) > .lesson-translit { margin-bottom: 12px; }
+.lesson-modal:not(.review-session-modal) > .lesson-meaning { flex: 0 0 auto; margin: 8px 0 12px; }
+.lesson-modal:not(.review-session-modal) > .already-learned { flex: 0 0 auto; margin: 8px 0 4px; }
+.lesson-modal:not(.review-session-modal) > .recall-compact,
+.lesson-modal:not(.review-session-modal) > .primary-button.full { flex: 0 0 auto; margin: 8px auto 0; }
+.lesson-modal:not(.review-session-modal) > .recall-compact { padding-bottom: max(2px, env(safe-area-inset-bottom)); }
+@media (max-width: 600px) {
+  .modal-backdrop:has(> .lesson-modal:not(.review-session-modal)) {
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+  }
+  .lesson-modal:not(.review-session-modal) {
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
+    padding: 14px 16px max(14px, env(safe-area-inset-bottom));
+  }
+  .lesson-modal:not(.review-session-modal) > .close-button { margin-bottom: 7px; }
+  .lesson-modal:not(.review-session-modal) > .lesson-arabic {
+    font-size: clamp(48px, 14vw, 58px);
+    margin-top: 6px;
+  }
+  .lesson-modal:not(.review-session-modal) > .lesson-meaning { padding: 14px 13px; margin-top: 6px; }
+}
+@media (max-height: 720px) {
+  .lesson-modal:not(.review-session-modal) {
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
+    padding-top: 10px;
+  }
+  .lesson-modal:not(.review-session-modal) > .lesson-arabic { font-size: 48px; margin-top: 2px; }
+  .lesson-modal:not(.review-session-modal) > .lesson-meaning { margin-block: 4px 8px; }
+}
