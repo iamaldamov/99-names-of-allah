@@ -61,7 +61,10 @@ try {
     assert.deepEqual(uiContracts.brokenAnchors, [], `Links without a valid target: ${JSON.stringify(uiContracts.brokenAnchors)}`);
     assert.deepEqual(uiContracts.unsafeExternalLinks, [], `External links opened in a new tab must use noopener or noreferrer: ${JSON.stringify(uiContracts.unsafeExternalLinks)}`);
     assert.deepEqual(uiContracts.unlabeledControls, [], `Form controls without an accessible label: ${JSON.stringify(uiContracts.unlabeledControls)}`);
-    const homeMascotAnimation = await page.locator('.hero .duck-mascot-emoji').evaluate(element => getComputedStyle(element).animationName);
+    const homeMascot = page.locator('.hero .duck-mascot-svg');
+    await homeMascot.waitFor({ state: 'visible' });
+    assert.equal(await homeMascot.evaluate(element => element.tagName.toLowerCase()), 'svg', 'The home mascot must be an inline SVG, not an emoji or external image');
+    const homeMascotAnimation = await homeMascot.evaluate(element => getComputedStyle(element).animationName);
     assert.equal(homeMascotAnimation, 'none', 'The home chick mascot must remain completely still');
     assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
     assert.equal(await page.locator('.daily-challenge').count(), 0, 'The legacy daily quiz must be removed');
@@ -80,9 +83,10 @@ try {
     await examButton.click();
     const dialog = page.locator('.path-exam-modal');
     await dialog.waitFor({ state: 'visible' });
-    const examMascot = page.locator('.path-exam-modal .duck-character-emoji');
+    const examMascot = page.locator('.path-exam-modal .duck-character-svg');
     await examMascot.waitFor({ state: 'visible' });
-    const examMascotMotion = await page.locator('.path-exam-modal .duck-character-emoji, .path-exam-modal .duck-bubble').evaluateAll(elements => elements.map(element => getComputedStyle(element).animationName));
+    assert.equal(await examMascot.evaluate(element => element.tagName.toLowerCase()), 'svg', 'The exam mascot must also use the shared inline SVG duckling');
+    const examMascotMotion = await page.locator('.path-exam-modal .duck-character-svg, .path-exam-modal .duck-bubble').evaluateAll(elements => elements.map(element => getComputedStyle(element).animationName));
     assert.ok(examMascotMotion.length >= 2 && examMascotMotion.every(name => name === 'none'), `The exam chick and speech bubble must stay still: ${examMascotMotion}`);
     const examTransliteration = page.locator('.path-exam-translit');
     await examTransliteration.waitFor({ state: 'visible' });
