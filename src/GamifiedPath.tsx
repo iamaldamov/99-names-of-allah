@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Award, BookOpen, Check, ChevronRight, LockKeyhole, RotateCcw, Sparkles, Trophy, X } from 'lucide-react';
 import './gamified-path.css';
+import { DucklingSvg } from './DucklingSvg';
 
-// The mascot is drawn with inline SVG and animated with CSS: no image assets or external requests.
+// The learning companion uses the same original static SVG duckling as the home screen.
 type DuckMood = 'idle' | 'correct' | 'wrong' | 'success' | 'encourage';
-function DuckMascot({ mood, language, message }: { mood: DuckMood; language: UiLanguage; message: string }) {
+function DuckCompanion({ mood, language, message }: { mood: DuckMood; language: UiLanguage; message: string }) {
   const label = language === 'ar' ? 'رفيق التعلّم' : language === 'en' ? 'Your learning buddy' : language === 'ky' ? 'Үйрөнүү досуң' : language === 'kk' ? 'Оқу досың' : 'Твой помощник в обучении';
   return (
     <div className={`duck-companion duck-${mood}`} role="status" aria-live="polite" aria-label={label}>
       <div className="duck-bubble">{message}</div>
-      <span className="duck-character duck-character-emoji" role="img" aria-label={label}>🐥</span>
+      <DucklingSvg className="duck-character-svg" label={label} />
     </div>
   );
 }
@@ -510,7 +511,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
                 <h2 id="path-exam-title">{t('Проверь, что запомнил')}</h2>
                 <p className="path-exam-intro">{t('10 вопросов по изученным именам. Для открытия следующего этапа нужно ответить правильно минимум на 8.')}</p>
                 <div className="path-exam-progress"><span style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }} /></div>
-                <DuckMascot
+                <DuckCompanion
                   mood={duckMood}
                   language={language}
                   message={language === 'en'
@@ -559,7 +560,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
               </>
             ) : (
               <div className="path-exam-result">
-                <DuckMascot
+                <DuckCompanion
                   mood={result >= PASS_SCORE ? 'success' : 'encourage'}
                   language={language}
                   message={language === 'en' ? (result >= PASS_SCORE ? 'You did it! I’m proud of your effort!' : 'You made progress. Review and try again!')

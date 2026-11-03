@@ -61,6 +61,14 @@ try {
     assert.deepEqual(uiContracts.brokenAnchors, [], `Links without a valid target: ${JSON.stringify(uiContracts.brokenAnchors)}`);
     assert.deepEqual(uiContracts.unsafeExternalLinks, [], `External links opened in a new tab must use noopener or noreferrer: ${JSON.stringify(uiContracts.unsafeExternalLinks)}`);
     assert.deepEqual(uiContracts.unlabeledControls, [], `Form controls without an accessible label: ${JSON.stringify(uiContracts.unlabeledControls)}`);
+    const homeMascot = page.locator('.hero .duck-mascot-svg');
+    await homeMascot.waitFor({ state: 'visible' });
+    assert.equal(await homeMascot.evaluate(element => element.tagName.toLowerCase()), 'svg', 'The home mascot must be an inline SVG, not an emoji or external image');
+    assert.equal(await homeMascot.getAttribute('role'), 'img', 'The home SVG mascot must expose image semantics');
+    assert.ok((await homeMascot.getAttribute('aria-label') || '').trim(), 'The home SVG mascot must have an accessible name');
+    assert.equal(await homeMascot.locator('image').count(), 0, 'The home mascot must not embed an external image');
+    const homeMascotAnimation = await homeMascot.evaluate(element => getComputedStyle(element).animationName);
+    assert.equal(homeMascotAnimation, 'none', 'The home chick mascot must remain completely still');
     assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
     assert.equal(await page.locator('.daily-challenge').count(), 0, 'The legacy daily quiz must be removed');
     assert.equal(await page.locator('.compact-details:has(.practice-section)').count(), 0, 'The duplicate mini quiz must be removed');
@@ -78,6 +86,14 @@ try {
     await examButton.click();
     const dialog = page.locator('.path-exam-modal');
     await dialog.waitFor({ state: 'visible' });
+    const examMascot = page.locator('.path-exam-modal .duck-character-svg');
+    await examMascot.waitFor({ state: 'visible' });
+    assert.equal(await examMascot.evaluate(element => element.tagName.toLowerCase()), 'svg', 'The exam mascot must also use the shared inline SVG duckling');
+    assert.equal(await examMascot.getAttribute('role'), 'img', 'The exam SVG mascot must expose image semantics');
+    assert.ok((await examMascot.getAttribute('aria-label') || '').trim(), 'The exam SVG mascot must have an accessible name');
+    assert.equal(await examMascot.locator('image').count(), 0, 'The exam mascot must not embed an external image');
+    const examMascotMotion = await page.locator('.path-exam-modal .duck-character-svg, .path-exam-modal .duck-bubble').evaluateAll(elements => elements.map(element => getComputedStyle(element).animationName));
+    assert.ok(examMascotMotion.length >= 2 && examMascotMotion.every(name => name === 'none'), `The exam chick and speech bubble must stay still: ${examMascotMotion}`);
     const examTransliteration = page.locator('.path-exam-translit');
     await examTransliteration.waitFor({ state: 'visible' });
     assert.ok((await examTransliteration.innerText()).trim().length > 0, 'Every exam question must show the Name transliteration');
@@ -116,13 +132,15 @@ try {
     assert.ok(darkControls.length >= 5, 'The exam should show its close control and four answer options');
     assert.ok(darkControls.every(style => style.background !== 'rgb(255, 255, 255)'), 'No exam control may remain white in dark mode');
     await page.locator('.path-exam-options button').first().click();
-    await page.locator('.path-exam-submit').click();
+    const changedMoodAnimation = await examMascot.evaluate(element => getComputedStyle(element).animationName);
+    assert.equal(changedMoodAnimation, 'none', 'The exam chick must stay still after an answer changes its mood');
     const darkFeedback = await page.locator('.path-exam-feedback').evaluate(element => ({
       background: getComputedStyle(element).backgroundColor,
       color: getComputedStyle(element).color,
     }));
     assert.notEqual(darkFeedback.background, 'rgb(255, 255, 255)', 'Answer feedback must follow dark mode');
     assert.notEqual(darkFeedback.color, 'rgb(0, 0, 0)', 'Answer feedback text must remain readable in dark mode');
+    await page.locator('.path-exam-submit').click();
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
     await page.locator('.theme-toggle').click();
@@ -134,10 +152,8 @@ try {
         await page.locator('.path-exam-options button').first().click();
         await page.locator('.path-exam-submit').click();
         if (question < 9) {
-          await page.locator('.path-exam-submit').click();
           await page.getByText(`ВОПРОС ${question + 2} ИЗ 10`, { exact: true }).waitFor({ state: 'visible' });
         } else {
-          await page.locator('.path-exam-submit').click();
           await page.getByText('РЕЗУЛЬТАТ ЭКЗАМЕНА', { exact: true }).waitFor({ state: 'visible' });
         }
       }
@@ -157,6 +173,13 @@ try {
       await page.locator('.name-row').first().click();
       const lessonDialog = page.locator('.lesson-modal:not(.review-session-modal)');
       await lessonDialog.waitFor({ state: 'visible' });
+      const lessonHeaderGap = await lessonDialog.evaluate(element => {
+        const close = element.querySelector('.close-button')?.getBoundingClientRect();
+        const topline = element.querySelector('.lesson-topline')?.getBoundingClientRect();
+        return close && topline ? topline.top - close.bottom : Number.POSITIVE_INFINITY;
+      });
+      assert.ok(lessonHeaderGap <= 24, `The lesson card must not leave a large blank gap below Close: ${lessonHeaderGap}px`);
+      assert.equal(await lessonDialog.locator('.recall-compact').count(), 0, 'Redundant check/arrow controls must not appear at the bottom of a Name card');
       assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Opening a Name card should lock background scrolling');
       await page.keyboard.press('Shift+Tab');
       assert.equal(await lessonDialog.evaluate(element => element.contains(document.activeElement)), true, 'Name card keyboard focus must remain inside the dialog');
@@ -185,6 +208,32 @@ try {
       assert.match(await lessonDialog.getAttribute('aria-label'), /Имя 3 из 99/, 'The first lesson must stop after exactly three names');
       await page.keyboard.press('Escape');
       await lessonDialog.waitFor({ state: 'hidden' });
+    }
+
+    if (size.width === 390) {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForFunction(() => {
+        const header = document.querySelector('.topbar');
+        return Boolean(header && !header.classList.contains('topbar-hidden') && !header.hasAttribute('inert'));
+      });
+      await page.locator('.topbar .login-button').click();
+      const accountDialog = page.locator('.account-modal');
+      await accountDialog.waitFor({ state: 'visible' });
+      await page.locator('#account-email').waitFor({ state: 'visible' });
+      await page.locator('#account-password').waitFor({ state: 'visible' });
+      await page.getByRole('button', { name: 'Забыли пароль?' }).click();
+      assert.equal(await page.locator('#account-password').count(), 0, 'Password reset request must not ask for the current password');
+      await page.locator('#account-email').fill('learner@example.com');
+      await page.getByRole('button', { name: 'Отправить ссылку' }).click();
+      await accountDialog.getByRole('alert').waitFor({ state: 'visible' });
+      assert.match(await accountDialog.getByRole('alert').innerText(), /Supabase/, 'An unconfigured account service should show a clear setup message');
+      await page.getByRole('button', { name: 'Создать аккаунт' }).click();
+      const newPassword = page.locator('#account-password');
+      await newPassword.waitFor({ state: 'visible' });
+      assert.equal(await newPassword.getAttribute('minlength'), '6', 'New account passwords must require at least six characters');
+      assert.equal(await newPassword.getAttribute('autocomplete'), 'new-password', 'Sign-up password fields should use new-password autocomplete');
+      await page.locator('.account-modal .modal-x').click();
+      await accountDialog.waitFor({ state: 'hidden' });
     }
 
     if (size.width <= 768) {

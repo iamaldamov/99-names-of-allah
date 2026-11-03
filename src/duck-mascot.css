@@ -1,14 +1,15 @@
-/* Static duckling: no bobbing, bouncing, blinking or wing movement. */
-.duck-mascot-art,
-.duck-mascot-wing,
-.duck-mascot-tail,
-.duck-mascot-eye,
+/* The home mascot is intentionally static in every theme and viewport. */
 .duck-speech {
   animation: none !important;
-}
-.duck-mascot-art {
   transform: none !important;
 }
-
-/* Familiar chick emoji mascot: still, warm and recognizable. */
-.duck-mascot-emoji{display:block;width:100%;text-align:center;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:clamp(92px,18vw,142px);line-height:1.15;filter:drop-shadow(0 7px 5px rgba(40,48,28,.12));animation:none!important;transform:none!important;}
+.duck-mascot-svg {
+  display: block;
+  width: clamp(104px, 18vw, 148px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+  filter: drop-shadow(0 7px 5px rgba(40, 48, 28, .12));
+  animation: none !important;
+  transform: none !important;
+}
