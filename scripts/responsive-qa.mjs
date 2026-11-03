@@ -64,6 +64,9 @@ try {
     const homeMascot = page.locator('.hero .duck-mascot-svg');
     await homeMascot.waitFor({ state: 'visible' });
     assert.equal(await homeMascot.evaluate(element => element.tagName.toLowerCase()), 'svg', 'The home mascot must be an inline SVG, not an emoji or external image');
+    assert.equal(await homeMascot.getAttribute('role'), 'img', 'The home SVG mascot must expose image semantics');
+    assert.ok((await homeMascot.getAttribute('aria-label') || '').trim(), 'The home SVG mascot must have an accessible name');
+    assert.equal(await homeMascot.locator('image').count(), 0, 'The home mascot must not embed an external image');
     const homeMascotAnimation = await homeMascot.evaluate(element => getComputedStyle(element).animationName);
     assert.equal(homeMascotAnimation, 'none', 'The home chick mascot must remain completely still');
     assert.equal(await page.locator('.path-stage-card').count(), 1, 'The learning path should show only the current stage');
@@ -86,6 +89,9 @@ try {
     const examMascot = page.locator('.path-exam-modal .duck-character-svg');
     await examMascot.waitFor({ state: 'visible' });
     assert.equal(await examMascot.evaluate(element => element.tagName.toLowerCase()), 'svg', 'The exam mascot must also use the shared inline SVG duckling');
+    assert.equal(await examMascot.getAttribute('role'), 'img', 'The exam SVG mascot must expose image semantics');
+    assert.ok((await examMascot.getAttribute('aria-label') || '').trim(), 'The exam SVG mascot must have an accessible name');
+    assert.equal(await examMascot.locator('image').count(), 0, 'The exam mascot must not embed an external image');
     const examMascotMotion = await page.locator('.path-exam-modal .duck-character-svg, .path-exam-modal .duck-bubble').evaluateAll(elements => elements.map(element => getComputedStyle(element).animationName));
     assert.ok(examMascotMotion.length >= 2 && examMascotMotion.every(name => name === 'none'), `The exam chick and speech bubble must stay still: ${examMascotMotion}`);
     const examTransliteration = page.locator('.path-exam-translit');
