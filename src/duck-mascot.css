@@ -3,13 +3,12 @@
   animation: none !important;
   transform: none !important;
 }
-.duck-mascot-emoji {
+.duck-mascot-svg {
   display: block;
-  width: 100%;
-  text-align: center;
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  font-size: clamp(92px, 18vw, 142px);
-  line-height: 1.15;
+  width: clamp(104px, 18vw, 148px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
   filter: drop-shadow(0 7px 5px rgba(40, 48, 28, .12));
   animation: none !important;
   transform: none !important;
