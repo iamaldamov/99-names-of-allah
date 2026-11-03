@@ -201,11 +201,11 @@ html[data-theme="dark"] body .path-exam-backdrop .path-exam-modal .path-exam-fee
 /* Static chick companion: deliberately no animation or movement. */
 .duck-companion{display:flex;align-items:center;justify-content:center;gap:15px;min-height:116px;margin:14px auto 18px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--accent,#3b8064) 16%,transparent);border-radius:18px;background:color-mix(in srgb,var(--accent,#3b8064) 5%,var(--paper,#fff));}
 .duck-bubble{position:relative;max-width:260px;padding:11px 14px;border-radius:15px 15px 15px 5px;background:var(--paper,#fff);color:var(--ink,#26372e);font-size:12px;line-height:1.55;box-shadow:0 5px 18px rgba(25,45,32,.07);animation:none!important;transform:none!important;}
-.duck-character-emoji{display:block;width:108px;height:auto;flex:0 0 108px;overflow:visible;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:86px;line-height:1.15;text-align:center;animation:none!important;transform:none!important;filter:drop-shadow(0 5px 4px rgba(35,55,40,.12));}
+.duck-character-svg{display:block;width:108px;height:auto;flex:0 0 108px;overflow:visible;animation:none!important;transform:none!important;filter:drop-shadow(0 5px 4px rgba(35,55,40,.12));}
 .duck-wrong .duck-bubble,.duck-encourage .duck-bubble{border:1px solid rgba(194,157,83,.3)}
 html[data-theme="dark"] .duck-companion{background:#202f25;border-color:#405747}
 html[data-theme="dark"] .duck-bubble{background:#293a30;color:#e8eee9}
-@media(max-width:480px){.duck-companion{gap:7px;min-height:98px;padding:7px 9px}.duck-character-emoji{width:88px;flex-basis:88px;font-size:72px}.duck-bubble{font-size:11px;padding:9px 10px}}
+@media(max-width:480px){.duck-companion{gap:7px;min-height:98px;padding:7px 9px}.duck-character-svg{width:88px;flex-basis:88px}.duck-bubble{font-size:11px;padding:9px 10px}}
  
 /* Size the static chick in the loading screen. */
 .site-preloader .duck-mascot {
