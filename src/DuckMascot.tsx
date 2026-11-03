@@ -1,4 +1,5 @@
 import './duck-mascot.css';
+import { DucklingSvg } from './DucklingSvg';
 
 type DuckLanguage = 'ru' | 'en' | 'ar' | 'ky' | 'kk';
 
@@ -22,7 +23,7 @@ export function DuckMascot({ language }: { language: DuckLanguage }) {
   return (
     <aside className="duck-mascot">
       <div className="duck-speech" lang={language} dir={language === 'ar' ? 'rtl' : 'auto'}>{greetings[language]}</div>
-      <span className="duck-mascot-emoji" role="img" aria-label={duckTitles[language]}>🐥</span>
+      <DucklingSvg className="duck-mascot-svg" label={duckTitles[language]} />
     </aside>
   );
 }
