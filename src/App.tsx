@@ -3,6 +3,7 @@ import type { FormEvent, PointerEvent } from 'react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand, Volume2, VolumeX } from 'lucide-react';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
+import { getPronunciationAudioUrl } from './data/pronunciationAudio';
 import { GamifiedPath } from './GamifiedPath';
 import { DuckMascot } from './DuckMascot';
 
@@ -151,6 +152,9 @@ Object.assign(languageText.en, {
   "дня подряд": "days in a row",
 
   "Язык": "Language",
+  "Запись произношения взята из открытого пакета; проверка преподавателем ещё не подтверждена.": "This pronunciation recording comes from an open-source package; review by a qualified Arabic teacher has not been confirmed.",
+  "Для этого имени отдельная аудиозапись пока недоступна.": "A separate audio recording for this name is not available yet.",
+  "Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.": "Could not load the recording. Check your connection and try again.",
 });
 Object.assign(languageText.ar, {
  'ПУТЬ ПОЗНАНИЯ':'رحلة المعرفة','Ежедневная цель':'الهدف اليومي','ТВОЯ ПРИВЫЧКА':'عادتك','Маленький шаг каждый день':'خطوة صغيرة كل يوم','Не гонись за количеством. Главное — возвращаться к знаниям.':'لا تتعجل في الكمية، فالأهم هو العودة إلى التعلّم.','дней подряд':'أيام متتالية','ОСТАЛОСЬ ИЗУЧИТЬ':'متبقٍ للتعلّم','ПОРА ПОВТОРИТЬ':'حان وقت المراجعة','ЦЕЛЬ НА СЕГОДНЯ':'هدف اليوم','БЛИЖАЙШАЯ ЦЕЛЬ':'الهدف القادم','ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ':'خمسة أسئلة كل يوم','Испытай свои знания':'اختبر معرفتك','Небольшая ежедневная проверка. Вопросы обновляются каждый день.':'اختبار يومي قصير. تتجدد الأسئلة كل يوم.','РЕКОРД':'أفضل نتيجة','Прочитай транскрипцию и выбери правильное значение имени':'اقرأ اللفظ واختر المعنى الصحيح للاسم.','Завершить испытание':'إنهاء التحدي','Следующий вопрос':'السؤال التالي','Испытание завершено':'اكتمل التحدي','Прекрасный результат. Продолжай укреплять знания.':'نتيجة رائعة. واصل ترسيخ علمك.','Хорошая работа. Вернись к именам, в которых сомневался.':'أحسنت. راجع الأسماء التي لم تكن متأكدًا منها.','Пройти ещё раз':'حاول مجددًا','Твой лучший результат сохраняется на этом устройстве':'تُحفظ أفضل نتيجة على هذا الجهاز','Избранное':'المفضلة','Ничего не найдено. Попробуй изменить запрос или фильтр.':'لم يتم العثور على نتائج. جرّب تغيير البحث أو التصفية.','Показать ещё имена':'عرض المزيد من الأسماء','Следующие имена закрыты':'الأسماء التالية مغلقة','Пройди итоговый экзамен, чтобы открыть следующий этап':'اجتز الاختبار النهائي لفتح المرحلة التالية.','Проверить знания':'اختبر معرفتك','Короткий тест по именам':'اختبار قصير حول الأسماء','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'مراجعة المعرفة','Проверь, что запомнил':'اختبر ما تذكّرته','Мини-тест':'اختبار قصير','КАК ПЕРЕВОДИТСЯ ИМЯ?':'ما معنى هذا الاسم؟','Показать результат':'عرض النتيجة','Тест завершён':'اكتمل الاختبار','Повторение и запоминание':'المراجعة والحفظ','Методика обучения':'منهجية التعلّم','Источники и достоверность':'المصادر والتوثيق','О создателе':'عن المنشئ',
@@ -158,15 +162,24 @@ Object.assign(languageText.ar, {
   "дня подряд": "أيام متتالية",
 
   "Язык": "اللغة",
+  "Запись произношения взята из открытого пакета; проверка преподавателем ещё не подтверждена.": "هذا التسجيل مأخوذ من حزمة مفتوحة المصدر؛ ولم يتم تأكيد مراجعته من معلّم عربي مؤهل.",
+  "Для этого имени отдельная аудиозапись пока недоступна.": "لا يتوفر تسجيل صوتي منفصل لهذا الاسم حتى الآن.",
+  "Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.": "تعذّر تحميل التسجيل. تحقق من اتصال الإنترنت وحاول مرة أخرى.",
 });
 
 Object.assign(languageText.ky, {
  'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'Аллахтын 99 көркөм ысымын шашпай, түшүнүү менен жана кайталап үйрөн. Окуу акысыз.',
- 'ВОПРОС {current} ИЗ 5':'5 суроонун {current}-суроосу','КАК ПЕРЕВОДИТСЯ ИМЯ?':'БУЛ ЫСЫМ КАНДАЙ КОТОРУЛАТ?','Тест завершён':'Тест аяктады','изученных имён':'үйрөнүлгөн ысым','цель выполнена':'максат аткарылды','Без занятий':'Сабак болгон жок','изучено':'үйрөнүлдү','имя ждёт повторения':'ысым кайталоону күтөт','имён ждут повторения':'ысым кайталоону күтөт','ещё':'дагы'
+ 'ВОПРОС {current} ИЗ 5':'5 суроонун {current}-суроосу','КАК ПЕРЕВОДИТСЯ ИМЯ?':'БУЛ ЫСЫМ КАНДАЙ КОТОРУЛАТ?','Тест завершён':'Тест аяктады','изученных имён':'үйрөнүлгөн ысым','цель выполнена':'максат аткарылды','Без занятий':'Сабак болгон жок','изучено':'үйрөнүлдү','имя ждёт повторения':'ысым кайталоону күтөт','имён ждут повторения':'ысым кайталоону күтөт','ещё':'дагы',
+  "Запись произношения взята из открытого пакета; проверка преподавателем ещё не подтверждена.": "Бул айтылыш жазмасы ачык пакеттен алынган; араб тили мугалими тарабынан текшерилгени тастыкталган эмес.",
+  "Для этого имени отдельная аудиозапись пока недоступна.": "Бул ысым үчүн өзүнчө аудио жазма азырынча жок.",
+  "Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.": "Аудио жазманы жүктөө мүмкүн болгон жок. Интернет байланышын текшерип, кайра аракет кыл.",
 });
 Object.assign(languageText.kk, {
  'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'Алланың 99 көркем есімін асықпай, түсініп және қайталау арқылы өз қарқыныңмен үйрен. Оқу тегін.',
- 'ВОПРОС {current} ИЗ 5':'5 сұрақтың {current}-сұрағы','Тест завершён':'Тест аяқталды','изученных имён':'үйренілген есім','цель выполнена':'мақсат орындалды','Без занятий':'Сабақ болған жоқ','изучено':'үйренілді','имя ждёт повторения':'есім қайталауды күтуде','имён ждут повторения':'есім қайталауды күтуде','ещё':'тағы'
+ 'ВОПРОС {current} ИЗ 5':'5 сұрақтың {current}-сұрағы','Тест завершён':'Тест аяқталды','изученных имён':'үйренілген есім','цель выполнена':'мақсат орындалды','Без занятий':'Сабақ болған жоқ','изучено':'үйренілді','имя ждёт повторения':'есім қайталауды күтуде','имён ждут повторения':'есім қайталауды күтуде','ещё':'тағы',
+  "Запись произношения взята из открытого пакета; проверка преподавателем ещё не подтверждена.": "Бұл айтылым жазбасы ашық пакеттен алынған; білікті араб тілі ұстазының тексергені расталмаған.",
+  "Для этого имени отдельная аудиозапись пока недоступна.": "Бұл есімге арналған жеке аудиожазба әзірге жоқ.",
+  "Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.": "Аудиожазбаны жүктеу мүмкін болмады. Интернет байланысын тексеріп, қайта көр.",
 });
 Object.assign(languageText.en, {
  'Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.':'Learn the 99 beautiful Names of Allah gradually, thoughtfully and through review, at your own pace. Learning is free.',
@@ -1254,27 +1267,16 @@ export default function App() {
   const [reviewAnswerShown, setReviewAnswerShown] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
   const [speakingNameId, setSpeakingNameId] = useState<number | null>(null);
-  const [arabicVoiceAvailable, setArabicVoiceAvailable] = useState<boolean | null>(null);
-  const [speechSupported, setSpeechSupported] = useState(true);
-  useEffect(() => {
-    const supported = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
-    setSpeechSupported(supported);
-    if (!supported) {
-      setArabicVoiceAvailable(false);
-      return;
-    }
-    const refreshArabicVoices = () => {
-      const hasArabicVoice = window.speechSynthesis.getVoices().some(voice => /^ar(?:-|$)/i.test(voice.lang));
-      setArabicVoiceAvailable(hasArabicVoice);
-    };
-    refreshArabicVoices();
-    window.speechSynthesis.addEventListener('voiceschanged', refreshArabicVoices);
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', refreshArabicVoices);
-  }, []);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(() => {
     setSpeakingNameId(null);
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
   }, [selected?.id]);
+  useEffect(() => () => { audioRef.current?.pause(); }, []);
   const [swipeHintVisible, setSwipeHintVisible] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
   const [swipeRange, setSwipeRange] = useState<{ min: number; max: number } | null>(null);
@@ -1367,54 +1369,51 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
   const stopArabicSpeech = () => {
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audioRef.current = null;
+    }
     setSpeakingNameId(null);
   };
-  const speakArabicName = (name: NameItem) => {
-    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
-      setSpeechSupported(false);
-      setNotice(tr('Браузер не поддерживает озвучивание речи.'));
+  const speakArabicName = async (name: NameItem) => {
+    const audioUrl = getPronunciationAudioUrl(name.id);
+    if (!audioUrl) {
+      setNotice(tr('Для этого имени отдельная аудиозапись пока недоступна.'));
       return;
     }
-    const synthesis = window.speechSynthesis;
-    const arabicVoice = synthesis.getVoices().find(voice => /^ar(?:-|$)/i.test(voice.lang));
-    if (!arabicVoice) {
-      setArabicVoiceAvailable(false);
-      setNotice(tr('На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.'));
-      return;
-    }
-    synthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(name.arabic);
-    utterance.voice = arabicVoice;
-    utterance.lang = arabicVoice.lang || 'ar';
-    utterance.rate = 0.78;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    utterance.onstart = () => setSpeakingNameId(name.id);
-    utterance.onend = () => setSpeakingNameId(current => current === name.id ? null : current);
-    utterance.onerror = () => {
-      setSpeakingNameId(null);
-      setNotice(tr('Не удалось запустить озвучивание. Попробуй ещё раз.'));
+    stopArabicSpeech();
+    const audio = new Audio(audioUrl);
+    audio.preload = 'none';
+    audioRef.current = audio;
+    audio.onended = () => {
+      if (audioRef.current === audio) audioRef.current = null;
+      setSpeakingNameId(current => current === name.id ? null : current);
     };
-    try {
-      synthesis.speak(utterance);
-      setSpeakingNameId(name.id);
-    } catch {
+    audio.onerror = () => {
+      if (audioRef.current === audio) audioRef.current = null;
       setSpeakingNameId(null);
-      setNotice(tr('Не удалось запустить озвучивание. Попробуй ещё раз.'));
+      setNotice(tr('Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.'));
+    };
+    setSpeakingNameId(name.id);
+    try {
+      await audio.play();
+    } catch {
+      if (audioRef.current === audio) audioRef.current = null;
+      setSpeakingNameId(null);
+      setNotice(tr('Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.'));
     }
   };
   const renderPronunciationControl = (name: NameItem) => {
     const isSpeaking = speakingNameId === name.id;
     const label = isSpeaking ? tr('Остановить озвучивание') : tr('Слушать произношение');
-    const note = !speechSupported
-      ? tr('Браузер не поддерживает озвучивание речи.')
-      : arabicVoiceAvailable === false
-        ? tr('На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.')
-        : tr('Голос устройства может отличаться от записи преподавателя. Для точной постановки звуков сверяйся с учителем.');
+    const note = getPronunciationAudioUrl(name.id)
+      ? tr('Запись произношения взята из открытого пакета; проверка преподавателем ещё не подтверждена.')
+      : tr('Для этого имени отдельная аудиозапись пока недоступна.');
     return (
       <div className="pronunciation-control">
-        <button type="button" className={`pronunciation-button${isSpeaking ? ' is-speaking' : ''}`} onClick={() => isSpeaking ? stopArabicSpeech() : speakArabicName(name)} aria-label={label} aria-pressed={isSpeaking}>
+        <button type="button" className={`pronunciation-button${isSpeaking ? ' is-speaking' : ''}`} onClick={() => isSpeaking ? stopArabicSpeech() : void speakArabicName(name)} aria-label={label} aria-pressed={isSpeaking}>
           {isSpeaking ? <VolumeX size={18}/> : <Volume2 size={18}/>}
           <span>{label}</span>
         </button>
