@@ -21,3 +21,25 @@ export function trackAnalytics(
   if (!initialized) return;
   amplitude.track(event, properties);
 }
+
+
+export type DiagnosticErrorType =
+  | 'javascript_error'
+  | 'unhandled_rejection'
+  | 'catalog_load_failed'
+  | 'session_check_failed'
+  | 'progress_load_failed'
+  | 'progress_sync_failed'
+  | 'progress_save_failed'
+  | 'auth_failed'
+  | 'signout_failed';
+
+export function reportAnalyticsError(
+  errorType: DiagnosticErrorType,
+  source: 'window' | 'catalog' | 'session' | 'progress' | 'auth' | 'signout',
+): void {
+  if (!initialized) return;
+  // Send only a fixed category and source. Never send messages, stack traces,
+  // URLs, user identifiers, form values, tokens, or other user content.
+  amplitude.track('diagnostic_error', { error_type: errorType, source });
+}

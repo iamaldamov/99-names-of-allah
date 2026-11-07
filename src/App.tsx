@@ -5,7 +5,7 @@ import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, S
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { getPronunciationAudioUrl } from './data/pronunciationAudio';
 import { GamifiedPath } from './GamifiedPath';
-import { initAnalytics, trackAnalytics } from './lib/analytics';
+import { initAnalytics, reportAnalyticsError, trackAnalytics } from './lib/analytics';
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
@@ -1333,7 +1333,19 @@ export default function App() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen-v2') !== '1'; } catch { return true; } });
   const [analyticsConsent, setAnalyticsConsent] = useState<'unknown' | 'granted' | 'denied'>(() => { try { const value = localStorage.getItem('99-names-analytics-consent-v1'); return value === 'granted' || value === 'denied' ? value : 'unknown'; } catch { return 'unknown'; } });
-  useEffect(() => { if (analyticsConsent !== 'granted') return; initAnalytics(); trackAnalytics('app_opened'); }, [analyticsConsent]);
+  useEffect(() => {
+    if (analyticsConsent !== 'granted') return;
+    initAnalytics();
+    trackAnalytics('app_opened');
+    const handleError = () => reportAnalyticsError('javascript_error', 'window');
+    const handleRejection = () => reportAnalyticsError('unhandled_rejection', 'window');
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, [analyticsConsent]);
   useEffect(() => { if (selected) trackAnalytics('lesson_opened'); }, [selected?.id]);
   const activeAppModal = reviewSessionId !== null ? 'review' : selected ? 'lesson' : accountOpen ? 'account' : welcomeOpen ? 'welcome' : showAllInfo ? 'info' : saveOpen ? 'save' : null;
   useEffect(() => {
@@ -1501,6 +1513,7 @@ export default function App() {
       .then(({ data, error: fetchError }: { data: NameItem[] | null; error: unknown }) => {
         if (!alive) return;
         if (fetchError) {
+          reportAnalyticsError('catalog_load_failed', 'catalog');
           setNotice(tr('Не удалось загрузить обновлённый каталог. Используется сохранённая версия.'));
           return;
         }
@@ -1510,11 +1523,13 @@ export default function App() {
         }
       }))
       .catch(() => {
+        reportAnalyticsError('catalog_load_failed', 'catalog');
         if (alive) setNotice(tr('Не удалось связаться с каталогом. Изучение доступно в автономном режиме.'));
       });
     void supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: User | null } | null } }) => {
       if (alive) setUser(data.session?.user ?? null);
     }).catch(() => {
+      reportAnalyticsError('session_check_failed', 'session');
       if (alive) setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
     });
     const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: User | null } | null) => {
@@ -1533,6 +1548,7 @@ export default function App() {
     void Promise.resolve(supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
       if (!alive) return;
       if (loadError) {
+        reportAnalyticsError('progress_load_failed', 'progress');
         setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
         return;
       }
@@ -1540,6 +1556,7 @@ export default function App() {
       setProgress(current => Array.from(new Set([...current, ...cloudIds])));
       setProgressLoadedFor(user.id);
     })).catch(() => {
+      reportAnalyticsError('progress_load_failed', 'progress');
       if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
@@ -1549,9 +1566,9 @@ export default function App() {
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
     void Promise.resolve(supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
       .then(({ error: saveError }: { error: unknown }) => {
-        if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
+        if (saveError) { reportAnalyticsError('progress_sync_failed', 'progress'); setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.')); }
       }))
-      .catch(() => setNotice(tr('Прогресс сохранён на этом устройстве, но синхронизация временно недоступна.')));
+      .catch(() => { reportAnalyticsError('progress_sync_failed', 'progress'); setNotice(tr('Прогресс сохранён на этом устройстве, но синхронизация временно недоступна.')); });
   }, [supabaseClient, user, progressLoadedFor, progress]);
 
   useEffect(() => {
@@ -1594,7 +1611,7 @@ export default function App() {
         if (authError) throw authError;
         setMessage(tr('Если адрес зарегистрирован, на почту придёт ссылка для смены пароля.'));
       }
-    } catch (e) { setError(e instanceof Error ? e.message : 'Не удалось выполнить запрос. Попробуй ещё раз.'); }
+    } catch (e) { reportAnalyticsError('auth_failed', 'auth'); setError(e instanceof Error ? e.message : 'Не удалось выполнить запрос. Попробуй ещё раз.'); }
     finally { setBusy(false); }
   };
 
@@ -1677,8 +1694,8 @@ export default function App() {
           next_review_at: new Date(Date.now() + 86400000).toISOString(), updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,name_id' });
         if (!saveError) setNotice(tr('Готово! Имя отмечено и сохранено в аккаунте.'));
-        else setNotice(tr('Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.'));
-      } catch { setNotice(tr('Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.')); }
+        else { reportAnalyticsError('progress_save_failed', 'progress'); setNotice(tr('Имя сохранено на этом устройстве. Синхронизация аккаунта пока недоступна: каталог имён в базе ещё не заполнен.')); }
+      } catch { reportAnalyticsError('progress_save_failed', 'progress'); setNotice(tr('Имя сохранено на этом устройстве. Облачное сохранение временно недоступно.')); }
     }
     setBusy(false);
   };
@@ -1690,6 +1707,7 @@ export default function App() {
       if (signOutError) throw signOutError;
       setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'));
     } catch {
+      reportAnalyticsError('signout_failed', 'signout');
       setError(tr('Не удалось выйти из аккаунта. Проверь подключение и попробуй ещё раз.'));
     }
   };
