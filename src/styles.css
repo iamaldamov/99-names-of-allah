@@ -1180,16 +1180,14 @@ input, select, textarea, .account-form input {
 
 /* Optional analytics consent: visible, explicit and non-blocking. */
 .analytics-consent {
-  position: fixed;
-  z-index: 1200;
-  inset-inline: max(14px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-right));
-  bottom: max(14px, env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  max-width: 760px;
-  margin-inline: auto;
+  width: min(760px, calc(100% - 28px));
+  margin: 12px auto 20px;
   padding: 16px 18px;
   border: 1px solid var(--border, rgba(25, 70, 52, .16));
   border-radius: 18px;
