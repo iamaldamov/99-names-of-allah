@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, S
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { getPronunciationAudioUrl } from './data/pronunciationAudio';
 import { GamifiedPath } from './GamifiedPath';
+import { initAnalytics, trackAnalytics } from './lib/analytics';
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
@@ -54,6 +55,15 @@ function loadReviewData(): Record<number, ReviewRecord> {
 
 const BOOK_URL = 'https://iamaldamov.github.io/ochishchenie-nafsa/';
 const SITE_URL = 'https://iamaldamov.github.io/99-names-of-allah/';
+
+const analyticsConsentText = {
+  ru: { title: 'Помочь улучшить обучение?', body: 'Можно разрешить анонимную аналитику: она покажет, какие функции помогают улучшать проект. Мы не собираем имя, почту, ответы или данные аккаунта.', allow: 'Разрешить', deny: 'Не сейчас' },
+  en: { title: 'Help improve the learning experience?', body: 'You can allow anonymous analytics to help improve the project. We do not collect your name, email, answers or account details.', allow: 'Allow', deny: 'Not now' },
+  ar: { title: 'هل تساعدنا في تحسين تجربة التعلّم؟', body: 'يمكنك السماح بإحصاءات مجهولة لتحسين المشروع. لا نجمع اسمك أو بريدك أو إجاباتك أو بيانات حسابك.', allow: 'سماح', deny: 'ليس الآن' },
+  ky: { title: 'Үйрөнүүнү жакшыртууга жардам бересиңби?', body: 'Долбоорду жакшыртуу үчүн анонимдүү статистикага уруксат бере аласың. Атың, почтаң, жоопторуң жана аккаунт маалыматың чогултулбайт.', allow: 'Уруксат берүү', deny: 'Азыр эмес' },
+  kk: { title: 'Оқу тәжірибесін жақсартуға көмектесесің бе?', body: 'Жобаны жақсарту үшін анонимді статистикаға рұқсат бере аласың. Атың, поштаң, жауаптарың және аккаунт деректерің жиналмайды.', allow: 'Рұқсат беру', deny: 'Қазір емес' }
+} as const;
+
 
 const languageText: Record<string, Record<string, string>> = {
  ky: {
@@ -1252,6 +1262,8 @@ export default function App() {
   }, []);
 
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
+  useEffect(() => { if (analyticsConsent !== 'granted') return; initAnalytics(); trackAnalytics('app_opened'); }, [analyticsConsent]);
+  useEffect(() => { if (selected) trackAnalytics('lesson_opened'); }, [selected?.id]);
   useEffect(() => {
     lastScrollY.current = window.scrollY;
     let ticking = false;
@@ -1322,6 +1334,7 @@ export default function App() {
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen-v2') !== '1'; } catch { return true; } });
+  const [analyticsConsent, setAnalyticsConsent] = useState<'unknown' | 'granted' | 'denied'>(() => { try { const value = localStorage.getItem('99-names-analytics-consent-v1'); return value === 'granted' || value === 'denied' ? value : 'unknown'; } catch { return 'unknown'; } });
   const activeAppModal = reviewSessionId !== null ? 'review' : selected ? 'lesson' : accountOpen ? 'account' : welcomeOpen ? 'welcome' : showAllInfo ? 'info' : saveOpen ? 'save' : null;
   useEffect(() => {
     if (!activeAppModal) return;
@@ -1412,6 +1425,7 @@ export default function App() {
       setNotice(tr('Не удалось загрузить аудиозапись. Проверь подключение и попробуй ещё раз.'));
     };
     setSpeakingNameId(name.id);
+    trackAnalytics('pronunciation_played');
     try {
       await audio.play();
     } catch {
@@ -1647,6 +1661,7 @@ export default function App() {
   const markLearned = async () => {
     if (!selected || busy) return;
     const nameId = selected.id;
+    if (!progress.includes(nameId)) trackAnalytics('lesson_completed');
     setBusy(true); setError('');
     if (!progress.includes(nameId)) praiseFor('learned');
     setProgress(old => old.includes(nameId) ? old : [...old, nameId]);
@@ -1695,7 +1710,7 @@ export default function App() {
   const nextMilestone = [1, 5, 10, 25, 50, 75, 99].find(value => value > progress.length) ?? 99;
   const milestoneProgress = Math.min(100, progress.length / nextMilestone * 100);
   const dueReviewIds = useMemo(() => Object.entries(reviewData).filter(([, item]) => new Date(item.dueAt).getTime() <= clockNow).map(([id]) => Number(id)).filter(id => progress.includes(id)).sort((a,b) => new Date(reviewData[a].dueAt).getTime() - new Date(reviewData[b].dueAt).getTime()), [reviewData, progress, clockNow]);
-  const startReview = (id: number) => { setReviewSessionId(id); setReviewAnswerShown(false); };
+  const startReview = (id: number) => { trackAnalytics('review_started'); setReviewSessionId(id); setReviewAnswerShown(false); };
   const recordRecall = (id: number, remembered: boolean) => {
     setReviewData(old => {
       const current = old[id] || { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null };
@@ -1706,6 +1721,7 @@ export default function App() {
   const finishReview = (remembered: boolean) => {
     if (reviewSessionId === null) return;
     const currentId = reviewSessionId;
+    trackAnalytics('review_answered', { remembered });
     recordRecall(currentId, remembered);
     if (!remembered) {
       setNotice(tr('Ничего страшного. Это имя вернётся через 10 минут.'));
@@ -1765,7 +1781,7 @@ export default function App() {
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? tr('Следующий шаг') : dueReviewIds.length ? tr('Время повторить') : tr('Ты прошёл весь список')}</small><b dir={language === 'ar' ? 'auto' : undefined}>{nextName ? `${language === 'ru' ? 'Продолжить' : language === 'en' ? 'Continue' : language === 'ar' ? 'متابعة' : language === 'ky' ? 'Улантуу' : 'Жалғастыру'}: ${nextName.translation}` : dueReviewIds.length ? tr('Закрепить изученное') : tr('Вернуться к каталогу')}</b></span><ArrowRight size={19}/></button>
       </section>
 
-      <GamifiedPath names={names} progress={progress} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onAnalyticsEvent={trackAnalytics} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
@@ -1878,6 +1894,14 @@ export default function App() {
 
       {saveOpen && <div className="modal-backdrop" onClick={() => setSaveOpen(false)}><section className="info-modal" role="dialog" aria-modal="true" aria-label={tr("Сохрани сайт, чтобы вернуться")} onClick={e => e.stopPropagation()}><button className="modal-x" aria-label={tr("Закрыть")} onClick={() => setSaveOpen(false)}><X size={19}/></button><div className="info-modal-icon"><Bookmark size={21}/></div><h2>{tr("Сохрани сайт, чтобы вернуться")}</h2><p><b>{tr("На iPhone:")}</b> {tr("нажми «Поделиться» в Safari, затем выбери «На экран Домой» или «Добавить закладку».")}</p><p><b>{tr("В других браузерах:")}</b> {tr("добавь страницу в закладки.")}</p><button className="primary-button full" onClick={() => setSaveOpen(false)}>{tr("Понятно")}</button></section></div>}
 
-    </main>
+    
+      {analyticsConsent === 'unknown' && <aside className="analytics-consent" role="region" aria-label={analyticsConsentText[language].title}>
+        <div className="analytics-consent__copy"><strong>{analyticsConsentText[language].title}</strong><p>{analyticsConsentText[language].body}</p></div>
+        <div className="analytics-consent__actions">
+          <button type="button" className="analytics-consent__allow" onClick={() => { try { localStorage.setItem('99-names-analytics-consent-v1', 'granted'); } catch { /* Consent applies for this session. */ } setAnalyticsConsent('granted'); }}>{analyticsConsentText[language].allow}</button>
+          <button type="button" className="analytics-consent__deny" onClick={() => { try { localStorage.setItem('99-names-analytics-consent-v1', 'denied'); } catch { /* Consent applies for this session. */ } setAnalyticsConsent('denied'); }}>{analyticsConsentText[language].deny}</button>
+        </div>
+      </aside>}
+</main>
   );
 }
