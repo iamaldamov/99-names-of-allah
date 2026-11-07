@@ -1513,6 +1513,7 @@ export default function App() {
       .then(({ data, error: fetchError }: { data: NameItem[] | null; error: unknown }) => {
         if (!alive) return;
         if (fetchError) {
+          reportAnalyticsError('catalog_load_failed', 'catalog');
           setNotice(tr('Не удалось загрузить обновлённый каталог. Используется сохранённая версия.'));
           return;
         }
@@ -1522,11 +1523,13 @@ export default function App() {
         }
       }))
       .catch(() => {
+        reportAnalyticsError('catalog_load_failed', 'catalog');
         if (alive) setNotice(tr('Не удалось связаться с каталогом. Изучение доступно в автономном режиме.'));
       });
     void supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: User | null } | null } }) => {
       if (alive) setUser(data.session?.user ?? null);
     }).catch(() => {
+      reportAnalyticsError('session_check_failed', 'session');
       if (alive) setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
     });
     const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: User | null } | null) => {
@@ -1545,6 +1548,7 @@ export default function App() {
     void Promise.resolve(supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
       if (!alive) return;
       if (loadError) {
+        reportAnalyticsError('progress_load_failed', 'progress');
         setNotice(tr('Не удалось загрузить прогресс из аккаунта. Локальные данные сохранены; попробуй обновить страницу.'));
         return;
       }
@@ -1552,6 +1556,7 @@ export default function App() {
       setProgress(current => Array.from(new Set([...current, ...cloudIds])));
       setProgressLoadedFor(user.id);
     })).catch(() => {
+      reportAnalyticsError('progress_load_failed', 'progress');
       if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
@@ -1702,6 +1707,7 @@ export default function App() {
       if (signOutError) throw signOutError;
       setMessage(tr('Ты вышел из аккаунта. Прогресс на этом устройстве сохранён.'));
     } catch {
+      reportAnalyticsError('signout_failed', 'signout');
       setError(tr('Не удалось выйти из аккаунта. Проверь подключение и попробуй ещё раз.'));
     }
   };
