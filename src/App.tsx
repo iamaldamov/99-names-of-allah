@@ -1262,8 +1262,6 @@ export default function App() {
   }, []);
 
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
-  useEffect(() => { if (analyticsConsent !== 'granted') return; initAnalytics(); trackAnalytics('app_opened'); }, [analyticsConsent]);
-  useEffect(() => { if (selected) trackAnalytics('lesson_opened'); }, [selected?.id]);
   useEffect(() => {
     lastScrollY.current = window.scrollY;
     let ticking = false;
@@ -1335,6 +1333,8 @@ export default function App() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen-v2') !== '1'; } catch { return true; } });
   const [analyticsConsent, setAnalyticsConsent] = useState<'unknown' | 'granted' | 'denied'>(() => { try { const value = localStorage.getItem('99-names-analytics-consent-v1'); return value === 'granted' || value === 'denied' ? value : 'unknown'; } catch { return 'unknown'; } });
+  useEffect(() => { if (analyticsConsent !== 'granted') return; initAnalytics(); trackAnalytics('app_opened'); }, [analyticsConsent]);
+  useEffect(() => { if (selected) trackAnalytics('lesson_opened'); }, [selected?.id]);
   const activeAppModal = reviewSessionId !== null ? 'review' : selected ? 'lesson' : accountOpen ? 'account' : welcomeOpen ? 'welcome' : showAllInfo ? 'info' : saveOpen ? 'save' : null;
   useEffect(() => {
     if (!activeAppModal) return;
