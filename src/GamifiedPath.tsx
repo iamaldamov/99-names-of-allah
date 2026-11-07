@@ -274,11 +274,12 @@ function shuffled<T,>(items: T[]): T[] {
   return result;
 }
 
-export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, getTransliteration, language }: {
+export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, onAnalyticsEvent, getTransliteration, language }: {
   names: LearningName[];
   progress: number[];
   onOpenName: (name: LearningName) => void;
   onUnlockedNameLimit: (limit: number) => void;
+  onAnalyticsEvent: (event: string, properties?: Record<string, string | number | boolean>) => void;
   getTransliteration: (nameId: number) => string;
   language: UiLanguage;
 }) {
@@ -326,6 +327,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
       const distractors = shuffled(stage.names.filter(name => name.id !== correct.id)).slice(0, 3);
       return { nameId: correct.id, options: shuffled([correct, ...distractors]) };
     });
+    onAnalyticsEvent('exam_started', { stage: stageId });
     setExamStage(stageId);
     setQuestions(examQuestions);
     setQuestionIndex(0);
@@ -337,6 +339,7 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
 
   const selectAnswer = (optionId: number) => {
     if (!currentQuestion || checked) return;
+    onAnalyticsEvent('exam_answered', { stage: examStage ?? 0, correct: optionId === currentQuestion.nameId });
     setAnswer(optionId);
     setChecked(true);
   };
@@ -348,6 +351,9 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
     if (questionIndex === questions.length - 1) {
       setResult(nextScore);
       if (examStage !== null) {
+        const passed = nextScore >= PASS_SCORE;
+        onAnalyticsEvent('exam_completed', { stage: examStage, score: nextScore, passed });
+        if (passed && !pathState.passedStages.includes(examStage)) onAnalyticsEvent('stage_unlocked', { stage: examStage + 1 });
         setPathState(old => ({
           passedStages: nextScore >= PASS_SCORE && !old.passedStages.includes(examStage)
             ? [...old.passedStages, examStage]
