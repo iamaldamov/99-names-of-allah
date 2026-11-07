@@ -5,7 +5,6 @@ import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, S
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { getPronunciationAudioUrl } from './data/pronunciationAudio';
 import { GamifiedPath } from './GamifiedPath';
-import { DuckMascot } from './DuckMascot';
 
 type NameItem = (typeof completeNames)[number];
 const previewNames: NameItem[] = completeNames;
@@ -131,6 +130,40 @@ const languageText: Record<string, Record<string, string>> = {
  'Связанный источник:':'المصدر المرتبط:'
  }
 };
+
+
+Object.assign(languageText.ky, {
+ 'ПЕРЕД НАЧАЛОМ':'ОКУУНУ БАШТООДОН МУРДА','Изучение 99 имён Аллаха':'Аллахтын 99 ысымын үйрөнүү',
+ 'Этот проект поможет тебе постепенно знакомиться с прекрасными именами Аллаха.':'Бул долбоор Аллахтын көркөм ысымдарын акырындык менен үйрөнүүгө жардам берет.',
+ 'Господи, прибавь мне знания.':'Оо, Раббим, илимимди арттыр.',
+ 'Коран, 20:114':'Куран, 20:114',
+ 'Прочитай это дуа и попроси Всевышнего даровать тебе полезные знания.':'Бул дубаны окуп, Аллахтан пайдалуу илим сура.',
+ 'Начать изучение':'Үйрөнүүнү баштоо'
+});
+Object.assign(languageText.kk, {
+ 'ПЕРЕД НАЧАЛОМ':'ОҚУДЫ БАСТАМАС БҰРЫН','Изучение 99 имён Аллаха':'Алланың 99 есімін үйрену',
+ 'Этот проект поможет тебе постепенно знакомиться с прекрасными именами Аллаха.':'Бұл жоба Алланың көркем есімдерін біртіндеп үйренуге көмектеседі.',
+ 'Господи, прибавь мне знания.':'Раббым, білімімді арттыр.',
+ 'Коран, 20:114':'Құран, 20:114',
+ 'Прочитай это дуа и попроси Всевышнего даровать тебе полезные знания.':'Осы дұғаны оқып, Алладан пайдалы білім сұра.',
+ 'Начать изучение':'Үйренуді бастау'
+});
+Object.assign(languageText.en, {
+ 'ПЕРЕД НАЧАЛОМ':'BEFORE YOU BEGIN','Изучение 99 имён Аллаха':'Learning the 99 Names of Allah',
+ 'Этот проект поможет тебе постепенно знакомиться с прекрасными именами Аллаха.':'This project will help you gradually learn the beautiful Names of Allah.',
+ 'Господи, прибавь мне знания.':'My Lord, increase me in knowledge.',
+ 'Коран, 20:114':'Qur’an, 20:114',
+ 'Прочитай это дуа и попроси Всевышнего даровать тебе полезные знания.':'Read this du’a and ask Allah to grant you beneficial knowledge.',
+ 'Начать изучение':'Start learning'
+});
+Object.assign(languageText.ar, {
+ 'ПЕРЕД НАЧАЛОМ':'قَبْلَ أَنْ تَبْدَأ','Изучение 99 имён Аллаха':'تعلّم أسماء الله الحسنى',
+ 'Этот проект поможет тебе постепенно знакомиться с прекрасными именами Аллаха.':'يساعدك هذا المشروع على التعرّف تدريجيًا على أسماء الله الحسنى.',
+ 'Господи, прибавь мне знания.':'رَبِّ زِدْنِي عِلْمًا',
+ 'Коран, 20:114':'القرآن، ٢٠:١١٤',
+ 'Прочитай это дуа и попроси Всевышнего даровать тебе полезные знания.':'اقرأ هذا الدعاء واسأل الله أن يرزقك علمًا نافعًا.',
+ 'Начать изучение':'ابدأ التعلّم'
+});
 
 Object.assign(languageText.ky, {
  'ПУТЬ ПОЗНАНИЯ':'ТААНЫП-БИЛҮҮ ЖОЛУ','Ежедневная цель':'Күнүмдүк максат','ТВОЯ ПРИВЫЧКА':'СЕНИН АДАТЫҢ','Маленький шаг каждый день':'Күн сайын кичинекей кадам','Не гонись за количеством. Главное — возвращаться к знаниям.':'Санга умтулба. Эң негизгиси — билимге кайра кайтуу.','дней подряд':'күн катары менен','ОСТАЛОСЬ ИЗУЧИТЬ':'ҮЙРӨНҮҮ КАЛДЫ','ПОРА ПОВТОРИТЬ':'КАЙТАЛОО УБАГЫ','ЦЕЛЬ НА СЕГОДНЯ':'БҮГҮНКҮ МАКСАТ','БЛИЖАЙШАЯ ЦЕЛЬ':'ЖАКЫНКЫ МАКСАТ','ПЯТЬ ВОПРОСОВ КАЖДЫЙ ДЕНЬ':'КҮН САЙЫН БЕШ СУРОО','Испытай свои знания':'Билимиңди сына','Небольшая ежедневная проверка. Вопросы обновляются каждый день.':'Күнүмдүк чакан текшерүү. Суроолор күн сайын жаңыланат.','РЕКОРД':'РЕКОРД','Прочитай транскрипцию и выбери правильное значение имени':'Транскрипцияны окуп, ысымдын туура маанисин танда.','Завершить испытание':'Сынакты аяктоо','Следующий вопрос':'Кийинки суроо','Испытание завершено':'Сынак аяктады','Прекрасный результат. Продолжай укреплять знания.':'Мыкты жыйынтык. Билимиңди бекемдей бер.','Хорошая работа. Вернись к именам, в которых сомневался.':'Жакшы аракет. Күмөн санаган ысымдарыңа кайра кайт.','Пройти ещё раз':'Кайра өтүү','Твой лучший результат сохраняется на этом устройстве':'Эң жакшы жыйынтыгың ушул түзмөктө сакталат','Избранное':'Тандалгандар','Ничего не найдено. Попробуй изменить запрос или фильтр.':'Эч нерсе табылган жок. Издөөнү же чыпканы өзгөртүп көр.','Показать ещё имена':'Дагы ысымдарды көрсөтүү','Следующие имена закрыты':'Кийинки ысымдар жабык','Пройди итоговый экзамен, чтобы открыть следующий этап':'Кийинки этапты ачуу үчүн жыйынтыктоочу сынактан өт.','Проверить знания':'Билимиңди текшер','Короткий тест по именам':'Ысымдар боюнча кыска тест','ЗАКРЕПЛЕНИЕ ЗНАНИЙ':'БИЛИМДИ БЕКЕМДӨӨ','Проверь, что запомнил':'Эмнени эстеп калганыңды текшер','Мини-тест':'Кыска тест','КАК ПЕРЕВОДИТСЯ ИМЯ?':'БУЛ ЫСЫМ КАНДАЙ КОТОРУЛАТ?','Показать результат':'Жыйынтыкты көрсөтүү','Тест завершён':'Тест аяктады','Повторение и запоминание':'Кайталоо жана жаттоо','Методика обучения':'Үйрөнүү ыкмасы','Источники и достоверность':'Булактар жана ишенимдүүлүк','О создателе':'Долбоордун автору',
@@ -1714,7 +1747,7 @@ export default function App() {
     <main className="app-shell" aria-busy={initialLoading}>
       {initialLoading && <div className={`site-preloader${preloaderLeaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
         <div className="site-preloader__content">
-          <DuckMascot language={language} />
+          <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
           <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
           <div className="site-preloader__spinner" aria-hidden="true"><span /></div>
           <p className="site-preloader__message" key={loadingMessageIndex}>{loadingMessages[language][loadingMessageIndex]}</p>
@@ -1732,7 +1765,6 @@ export default function App() {
         <h1 className="text-enter">{tr('Познакомься с именами')}</h1>
         <p className="hero-copy text-enter">{tr('Изучай 99 прекрасных имён Аллаха постепенно, осмысленно и с повторением — в собственном темпе. Обучение бесплатное.')}</p>
         <button className="primary-button" data-feedback onClick={() => displayedNames[0] && setSelected(displayedNames[0])}>{tr('Начать обучение')} <ArrowRight size={17}/></button>
-        <DuckMascot language={language} />
         
       </section>
 
@@ -1808,15 +1840,17 @@ export default function App() {
       <footer><span>{tr("99 имён Аллаха · Учись с намерением и постоянством")}</span><div className="footer-actions"><button onClick={shareSite}><Share2 size={14}/> {tr("Поделиться")}</button><button onClick={() => setSaveOpen(true)}><Bookmark size={14}/> {tr("Сохранить")}</button></div></footer>
 
       {welcomeOpen && <div className="modal-backdrop welcome-backdrop" onClick={closeWelcome}><section className="info-modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title" onClick={e => e.stopPropagation()}>
-        <button className="modal-x" aria-label={tr("Закрыть")} onClick={closeWelcome}><X size={19}/></button>
-        <div className="welcome-bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-        <span className="muted-label welcome-eyebrow">{tr("ДОБРО ПОЖАЛОВАТЬ")}</span>
-        <h2 id="welcome-title">{tr("Ассаляму алейкум!")}</h2>
-        <p className="welcome-greeting">{tr("Я Рамазан. Создал этот бесплатный сайт, чтобы ты мог изучать 99 прекрасных имён Аллаха.")}</p>
-        <p className="welcome-intention">{tr("Изучай постепенно, вдумывайся в смысл и старайся применять знания в жизни. Пусть это будет ради довольства Аллаха.")}</p>
+        <div className="welcome-bismillah" lang="ar" dir="rtl">رَبِّ زِدْنِي عِلْمًا</div>
+        <span className="muted-label welcome-eyebrow">{tr("ПЕРЕД НАЧАЛОМ")}</span>
+        <h2 id="welcome-title">{tr("Изучение 99 имён Аллаха")}</h2>
+        <p className="welcome-greeting">{tr("Этот проект поможет тебе постепенно знакомиться с прекрасными именами Аллаха.")}</p>
+        <div className="welcome-intention">
+          <p className="welcome-dua-translation">{tr("Господи, прибавь мне знания.")}</p>
+          <span className="welcome-quran-reference">{tr("Коран, 20:114")}</span>
+        </div>
+        <p className="welcome-invitation">{tr("Прочитай это дуа и попроси Всевышнего даровать тебе полезные знания.")}</p>
         <div className="welcome-actions">
-          <button className="welcome-continue" onClick={closeWelcome}>{tr("Перейти к изучению")} <ArrowRight size={16}/></button>
-          <a className="donation-button welcome-donation" href="https://web.tribute.tg/d/T75" target="_blank" rel="noreferrer">{tr("Поддержать проект")} <span>♥</span></a>
+          <button className="welcome-continue" onClick={closeWelcome}>{tr("Начать изучение")} <ArrowRight size={16}/></button>
         </div>
       </section></div>}
 
