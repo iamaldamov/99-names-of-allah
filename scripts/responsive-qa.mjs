@@ -25,7 +25,7 @@ try {
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
     await page.addInitScript(() => {
-      localStorage.setItem('99-names-welcome-seen', '1');
+      localStorage.setItem('99-names-welcome-seen-v2', '1');
       localStorage.setItem('asma-ul-husna-progress', JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9]));
       localStorage.setItem('99-names-learning-path-v1', JSON.stringify({ passedStages: [], bestScores: {} }));
     });
