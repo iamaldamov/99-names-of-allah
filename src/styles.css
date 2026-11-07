@@ -1124,3 +1124,22 @@ input, select, textarea, .account-form input {
 @media(prefers-reduced-motion:reduce) {
   .welcome-modal .welcome-continue { transition: none; }
 }
+
+
+/* Keep the meaning panel and completion control visible in the scrollable lesson card. */
+.lesson-modal { min-height: 0; }
+.lesson-modal > * { flex-shrink: 0; }
+.lesson-meaning { flex: 0 0 auto; min-width: 0; }
+.lesson-meaning .lesson-description { overflow-wrap: anywhere; }
+.lesson-modal > .primary-button.full,
+.lesson-modal > .already-learned { flex-shrink: 0; }
+@media (max-width: 600px) {
+  .lesson-modal {
+    height: min(92dvh, 760px);
+    max-height: min(92dvh, 760px);
+    padding-bottom: max(22px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lesson-meaning { margin-bottom: 16px; }
+}
