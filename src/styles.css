@@ -1010,31 +1010,6 @@ input, select, textarea, .account-form input {
 }
 
 
-/* Friendly duck companion: a small guide, never a competing hero image. */
-.hero { padding-right: min(27vw, 300px); }
-.duck-mascot { position:absolute; top:48px; right:clamp(10px,4vw,56px); width:clamp(170px,22vw,250px); display:grid; justify-items:center; gap:0; pointer-events:none; }
-.duck-mascot-art { display:block; width:100%; max-height:205px; overflow:visible; filter:drop-shadow(0 8px 10px rgba(65,90,65,.08)); animation:duck-bob 3.8s ease-in-out infinite; transform-origin:50% 90%; }
-.duck-speech { position:relative; z-index:1; max-width:100%; padding:9px 13px; border:1px solid #e5ecdf; border-radius:17px 17px 17px 5px; background:var(--paper,#fff); color:var(--ink,#26342e); box-shadow:0 5px 18px rgba(38,52,46,.06); font-size:11px; line-height:1.45; text-align:center; }
-:root[data-theme="dark"] .duck-speech { border-color:#405747; background:#202f25; color:#e8eee9; }
-@keyframes duck-bob { 0%,100% { transform:translateY(0) rotate(-1deg); } 50% { transform:translateY(-7px) rotate(1deg); } }
-@media(max-width:760px) { .hero { padding-right:0; } .duck-mascot { position:relative; inset:auto; width:155px; margin:24px auto 0; } .duck-mascot-art { max-height:145px; } .duck-speech { font-size:10px; } }
-@media(prefers-reduced-motion:reduce) { .duck-mascot-art { animation:none; } }
-
-
-/* Subtle character details: blink, wing flutter and a gentle tail sway. */
-.duck-mascot-wing{transform-box:fill-box;transform-origin:80% 55%;animation:duck-wing-wave 4.8s ease-in-out infinite}
-.duck-mascot-tail{transform-box:fill-box;transform-origin:15% 55%;animation:duck-tail-sway 3.8s ease-in-out infinite}
-.duck-mascot-eye{transform-box:fill-box;transform-origin:center;animation:duck-blink 5.2s ease-in-out infinite}
-.duck-mascot-eye:nth-of-type(2){animation-delay:.08s}
-.duck-speech{animation:duck-speech-in .55s cubic-bezier(.2,.75,.25,1) both}
-@keyframes duck-wing-wave{0%,78%,100%{transform:rotate(0)}84%{transform:rotate(-9deg)}90%{transform:rotate(5deg)}96%{transform:rotate(0)}}
-@keyframes duck-tail-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}
-@keyframes duck-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}}
-@keyframes duck-speech-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){
-  .duck-mascot-art,.duck-mascot-wing,.duck-mascot-tail,.duck-mascot-eye,.duck-speech{animation:none!important}
-}
-
 /* Final high-contrast override for total points in night mode. */
 :root[data-theme="dark"] body .learning-path .path-xp{background:#304333!important;border:1px solid #61775e!important;}
 :root[data-theme="dark"] body .learning-path .path-xp,:root[data-theme="dark"] body .learning-path .path-xp *{color:#fff4d6!important;-webkit-text-fill-color:#fff4d6!important;opacity:1!important;}
@@ -1051,3 +1026,101 @@ input, select, textarea, .account-form input {
 [data-theme="dark"] .pronunciation-button.is-speaking{background:#294a37;border-color:#56745e}
 [data-theme="dark"] .pronunciation-note{color:#a5b4a8}
 @media(max-width:480px){.pronunciation-button{min-height:46px;padding:12px 22px}.pronunciation-note{font-size:10px}}
+
+
+/* First-visit welcome: calm emerald backdrop, subtle Islamic geometry, short dua. */
+.welcome-backdrop {
+  padding: 18px;
+  background:
+    radial-gradient(ellipse at 15% 18%, rgba(219, 190, 123, .22), transparent 38%),
+    radial-gradient(ellipse at 88% 82%, rgba(118, 157, 126, .25), transparent 42%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0 1px, transparent 1px 22px),
+    #102f27 !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.welcome-modal {
+  position: relative;
+  width: min(100%, 430px);
+  padding: clamp(25px, 6vw, 38px) clamp(22px, 6vw, 34px) 27px;
+  overflow: hidden;
+  border: 1px solid rgba(198, 169, 112, .35) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(232, 220, 190, .55), transparent 48%),
+    linear-gradient(155deg, #fbf8ef 0%, #f2f0e5 100%) !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, .32), inset 0 1px rgba(255,255,255,.9);
+  color: #233b30;
+  text-align: center;
+}
+.welcome-modal::before,
+.welcome-modal::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border: 1px solid rgba(157, 132, 82, .14);
+  border-radius: 28px;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.welcome-modal::before { top: -112px; left: -92px; }
+.welcome-modal::after { right: -105px; bottom: -118px; }
+.welcome-modal .welcome-bismillah {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 88px;
+  margin: 0 auto 15px;
+  color: #315e49;
+  font: 36px/1.8 'Amiri','Noto Naskh Arabic',serif;
+}
+.welcome-modal .welcome-eyebrow { color: #8c7447; letter-spacing: .16em; font-size: 10px; }
+.welcome-modal h2 { margin: 9px 0 12px; color: #203b2e; font-size: clamp(21px, 5vw, 25px); line-height: 1.25; }
+.welcome-modal .welcome-greeting { max-width: 330px; margin: 0 auto 17px; color: #5d6c61; font-size: 13px; line-height: 1.65; }
+.welcome-modal .welcome-intention {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto 14px;
+  padding: 15px 16px 12px;
+  border: 1px solid rgba(116, 143, 112, .27);
+  border-radius: 18px;
+  background: rgba(224, 233, 218, .62);
+  color: #315642 !important;
+}
+.welcome-dua-translation { margin: 0 0 5px; font-size: 14px; font-weight: 700; line-height: 1.5; }
+.welcome-quran-reference { color: #718274; font-size: 10px; letter-spacing: .04em; }
+.welcome-modal .welcome-invitation { max-width: 330px; margin: 0 auto 18px; color: #69776b; font-size: 11px; line-height: 1.6; }
+.welcome-modal .welcome-actions { margin-top: 0; }
+.welcome-modal .welcome-continue {
+  width: 100%;
+  min-height: 49px;
+  justify-content: center;
+  border: 1px solid #315b45;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #315f48, #234a38);
+  color: #fffaf0;
+  box-shadow: 0 8px 18px rgba(43, 83, 60, .2);
+  font-size: 13px;
+}
+.welcome-modal .welcome-continue:hover { background: #1e4433; transform: translateY(-1px); }
+:root[data-theme="dark"] .welcome-modal {
+  border-color: rgba(198, 169, 112, .3) !important;
+  background: linear-gradient(155deg, #23382c, #1b2d23) !important;
+  color: #e8eee9;
+}
+:root[data-theme="dark"] .welcome-modal h2 { color: #f0f0df; }
+:root[data-theme="dark"] .welcome-modal .welcome-greeting,
+:root[data-theme="dark"] .welcome-modal .welcome-invitation { color: #c0cec1; }
+:root[data-theme="dark"] .welcome-modal .welcome-bismillah { color: #d2dfc5; }
+:root[data-theme="dark"] .welcome-modal .welcome-intention { background: rgba(56, 83, 63, .58); border-color: rgba(166, 195, 165, .24); color: #e0ebdc !important; }
+:root[data-theme="dark"] .welcome-quran-reference { color: #b5c5b6; }
+@media(max-width:480px) {
+  .welcome-backdrop { padding: 12px; }
+  .welcome-modal { padding: 25px 19px 20px; }
+  .welcome-modal .welcome-bismillah { min-height: 72px; font-size: 33px; margin-bottom: 10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .welcome-modal .welcome-continue { transition: none; }
+}
