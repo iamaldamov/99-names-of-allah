@@ -9,7 +9,6 @@ export function initAnalytics(): void {
   amplitude.init(API_KEY, {
     autocapture: false,
     defaultTracking: false,
-    disableCookies: true,
     trackingOptions: { ipAddress: false },
   });
   initialized = true;
