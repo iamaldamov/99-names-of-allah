@@ -1143,3 +1143,36 @@ input, select, textarea, .account-form input {
   }
   .lesson-meaning { margin-bottom: 16px; }
 }
+
+
+/* The global rounded-card rule sets overflow:hidden !important.
+   Override it for the lesson dialog so the full meaning remains reachable on short screens. */
+.lesson-modal {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+.lesson-modal > * {
+  flex-shrink: 0 !important;
+}
+.lesson-modal .lesson-meaning {
+  flex: 0 0 auto !important;
+  min-height: max-content;
+}
+.lesson-modal .lesson-description {
+  display: block;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .lesson-modal {
+    height: 92dvh;
+    max-height: 92dvh;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
