@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent } from 'react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
-import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, LockKeyhole, LogOut, Mail, Share2, Sparkles, X, UserRound, Bookmark, Heart, Hand, Volume2, VolumeX } from 'lucide-react';
 import { names as completeNames, studyPrinciples, coreReferences } from './data/names';
 import { GamifiedPath } from './GamifiedPath';
 import { DuckMascot } from './DuckMascot';
@@ -1043,6 +1043,40 @@ Object.assign(languageText.ar, {
   "Не удалось выйти из аккаунта. Проверь подключение и попробуй ещё раз.": "تعذّر تسجيل الخروج. تحقق من اتصالك ثم حاول مرة أخرى."
 });
 
+
+Object.assign(languageText.en, {
+  'Слушать произношение': 'Listen to pronunciation',
+  'Остановить озвучивание': 'Stop audio',
+  'Голос устройства может отличаться от записи преподавателя. Для точной постановки звуков сверяйся с учителем.': 'This is device-generated speech, not a teacher recording. For precise articulation, check with a qualified teacher.',
+  'На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.': 'No Arabic voice was found. On iPhone, open Settings → Accessibility → Spoken Content → Voices and add an Arabic voice.',
+  'Браузер не поддерживает озвучивание речи.': 'This browser does not support speech playback.',
+  'Не удалось запустить озвучивание. Попробуй ещё раз.': 'Could not start audio. Please try again.'
+});
+Object.assign(languageText.ky, {
+  'Слушать произношение': 'Айтылышын угуу',
+  'Остановить озвучивание': 'Үндү токтотуу',
+  'Голос устройства может отличаться от записи преподавателя. Для точной постановки звуков сверяйся с учителем.': 'Бул — түзмөктүн синтездеген үнү, мугалимдин жазмасы эмес. Тыбыштарды туура айтууну мугалим менен текшер.',
+  'На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.': 'Арабча үн табылган жок. iPhone жөндөөлөрүнөн арабча үндү кош.',
+  'Браузер не поддерживает озвучивание речи.': 'Бул браузер үн менен окууну колдобойт.',
+  'Не удалось запустить озвучивание. Попробуй ещё раз.': 'Үндү иштетүү мүмкүн болгон жок. Кайра аракет кыл.'
+});
+Object.assign(languageText.kk, {
+  'Слушать произношение': 'Айтылуын тыңдау',
+  'Остановить озвучивание': 'Дыбыстауды тоқтату',
+  'Голос устройства может отличаться от записи преподавателя. Для точной постановки звуков сверяйся с учителем.': 'Бұл — құрылғы синтездеген дауыс, ұстаздың жазбасы емес. Дыбыстарды дұрыс айтуды білікті ұстазбен тексер.',
+  'На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.': 'Арабша дауыс табылмады. iPhone баптауларынан арабша дауысты қос.',
+  'Браузер не поддерживает озвучивание речи.': 'Бұл браузер дауыстап оқуды қолдамайды.',
+  'Не удалось запустить озвучивание. Попробуй ещё раз.': 'Дыбыстауды іске қосу мүмкін болмады. Қайталап көр.'
+});
+Object.assign(languageText.ar, {
+  'Слушать произношение': 'استمع إلى النطق',
+  'Остановить озвучивание': 'إيقاف الصوت',
+  'Голос устройства может отличаться от записи преподавателя. Для точной постановки звуков сверяйся с учителем.': 'هذا صوت آلي من الجهاز وليس تسجيلًا لمعلّم. راجع معلّمًا مؤهلًا لضبط مخارج الحروف.',
+  'На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.': 'لم يتم العثور على صوت عربي. أضف صوتًا عربيًا من إعدادات الجهاز.',
+  'Браузер не поддерживает озвучивание речи.': 'هذا المتصفح لا يدعم النطق الصوتي.',
+  'Не удалось запустить озвучивание. Попробуй ещё раз.': 'تعذّر تشغيل الصوت. حاول مرة أخرى.'
+});
+
 const russianTransliterations: Record<number, string> = {
   1:'Ар-Рахмаан', 2:'Ар-Рахиим', 3:'Аль-Малик', 4:'Аль-Куддус', 5:'Ас-Саляам',
   6:'Аль-Муъмин', 7:'Аль-Мухаймин', 8:'Аль-Азииз', 9:'Аль-Джаббаар', 10:'Аль-Мутакаббир',
@@ -1219,6 +1253,28 @@ export default function App() {
   const [reviewSessionId, setReviewSessionId] = useState<number | null>(null);
   const [reviewAnswerShown, setReviewAnswerShown] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
+  const [speakingNameId, setSpeakingNameId] = useState<number | null>(null);
+  const [arabicVoiceAvailable, setArabicVoiceAvailable] = useState<boolean | null>(null);
+  const [speechSupported, setSpeechSupported] = useState(true);
+  useEffect(() => {
+    const supported = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+    setSpeechSupported(supported);
+    if (!supported) {
+      setArabicVoiceAvailable(false);
+      return;
+    }
+    const refreshArabicVoices = () => {
+      const hasArabicVoice = window.speechSynthesis.getVoices().some(voice => /^ar(?:-|$)/i.test(voice.lang));
+      setArabicVoiceAvailable(hasArabicVoice);
+    };
+    refreshArabicVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', refreshArabicVoices);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', refreshArabicVoices);
+  }, []);
+  useEffect(() => {
+    setSpeakingNameId(null);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }, [selected?.id]);
   const [swipeHintVisible, setSwipeHintVisible] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<1 | -1>(1);
   const [swipeRange, setSwipeRange] = useState<{ min: number; max: number } | null>(null);
@@ -1310,6 +1366,62 @@ export default function App() {
   useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
   useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
   useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
+  const stopArabicSpeech = () => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setSpeakingNameId(null);
+  };
+  const speakArabicName = (name: NameItem) => {
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+      setSpeechSupported(false);
+      setNotice(tr('Браузер не поддерживает озвучивание речи.'));
+      return;
+    }
+    const synthesis = window.speechSynthesis;
+    const arabicVoice = synthesis.getVoices().find(voice => /^ar(?:-|$)/i.test(voice.lang));
+    if (!arabicVoice) {
+      setArabicVoiceAvailable(false);
+      setNotice(tr('На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.'));
+      return;
+    }
+    synthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(name.arabic);
+    utterance.voice = arabicVoice;
+    utterance.lang = arabicVoice.lang || 'ar';
+    utterance.rate = 0.78;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    utterance.onstart = () => setSpeakingNameId(name.id);
+    utterance.onend = () => setSpeakingNameId(current => current === name.id ? null : current);
+    utterance.onerror = () => {
+      setSpeakingNameId(null);
+      setNotice(tr('Не удалось запустить озвучивание. Попробуй ещё раз.'));
+    };
+    try {
+      synthesis.speak(utterance);
+      setSpeakingNameId(name.id);
+    } catch {
+      setSpeakingNameId(null);
+      setNotice(tr('Не удалось запустить озвучивание. Попробуй ещё раз.'));
+    }
+  };
+  const renderPronunciationControl = (name: NameItem) => {
+    const isSpeaking = speakingNameId === name.id;
+    const label = isSpeaking ? tr('Остановить озвучивание') : tr('Слушать произношение');
+    const note = !speechSupported
+      ? tr('Браузер не поддерживает озвучивание речи.')
+      : arabicVoiceAvailable === false
+        ? tr('На устройстве не найден арабский голос. На iPhone открой Настройки → Универсальный доступ → Устный контент → Голоса и добавь арабский голос.')
+        : tr('Голос устройства может отличаться от записи преподавателя. Для точной постановки звуков сверяйся с учителем.');
+    return (
+      <div className="pronunciation-control">
+        <button type="button" className={`pronunciation-button${isSpeaking ? ' is-speaking' : ''}`} onClick={() => isSpeaking ? stopArabicSpeech() : speakArabicName(name)} aria-label={label} aria-pressed={isSpeaking}>
+          {isSpeaking ? <VolumeX size={18}/> : <Volume2 size={18}/>}
+          <span>{label}</span>
+        </button>
+        <p className="pronunciation-note" aria-live="polite">{note}</p>
+      </div>
+    );
+  };
   const toggleFavorite = (id:number) => setFavorites(old => old.includes(id) ? old.filter(x=>x!==id) : [...old,id]);
   const shareName = async (name: NameItem) => {
     const text = `${name.translation} — ${shownTransliteration(name)}\nИзучай 99 прекрасных имён Аллаха бесплатно: ${SITE_URL}`;
@@ -1713,7 +1825,7 @@ export default function App() {
         <button className="close-button" onClick={() => setSelected(null)}>{tr("Закрыть")}</button>
         <div className="lesson-topline"><span className="muted-label">{tr("ИМЯ {id} ИЗ 99",{id:String(selected.id).padStart(2,"0")})}</span><span className="lesson-progress-line">{tr("{count} / 99 изучено",{count:progress.length})}</span></div>
         {swipeHintVisible && <div className="swipe-hint" aria-live="polite"><Hand size={22} strokeWidth={1.8}/><span>{tr('Смахни влево — следующее имя')}</span><span className="swipe-hint-arrow">←</span></div>}
-        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div><div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?tr('Убрать из избранного'):tr('В избранное')} title={favorites.includes(selected.id)?tr('Убрать из избранного'):tr('В избранное')}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label={tr('Поделиться карточкой')} title={tr('Поделиться карточкой')}><Share2 size={18}/></button></div>
+        <div className="lesson-arabic" lang="ar" dir="rtl">{selected.arabic}</div>{renderPronunciationControl(selected)}<div className="lesson-quick-actions compact-icon-actions"><button className={favorites.includes(selected.id)?'is-favorite':''} data-feedback onClick={()=>toggleFavorite(selected.id)} aria-label={favorites.includes(selected.id)?tr('Убрать из избранного'):tr('В избранное')} title={favorites.includes(selected.id)?tr('Убрать из избранного'):tr('В избранное')}><Heart size={18} fill={favorites.includes(selected.id)?'currentColor':'none'}/></button><button onClick={()=>shareName(selected)} aria-label={tr('Поделиться карточкой')} title={tr('Поделиться карточкой')}><Share2 size={18}/></button></div>
         <h2 className="text-enter" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}>{selected.translation}</h2>
         <p className="lesson-translit text-enter">{shownTransliteration(selected)}</p>
         <div className="lesson-meaning"><span className="muted-label">{tr('ЗНАЧЕНИЕ ИМЕНИ')}</span><p className="lesson-description text-enter" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}>{selected.explanation}</p></div>
@@ -1727,6 +1839,7 @@ export default function App() {
         <span className="muted-label">{tr('ИНТЕРВАЛЬНОЕ ПОВТОРЕНИЕ')}</span>
         <div className="review-session-step">{tr('Имя {id} · {count} в очереди', {id: item.id, count: dueReviewIds.length})}</div>
         <div className="lesson-arabic review-session-arabic" lang="ar" dir="rtl">{item.arabic}</div>
+        {renderPronunciationControl(item)}
         <p className="lesson-translit">{shownTransliteration(item)}</p>
         <h2>{tr('Вспомни значение этого имени')}</h2>
         {!reviewAnswerShown ? <button className="primary-button full" data-feedback onClick={() => setReviewAnswerShown(true)}>{tr('Показать значение')}</button> : <><div className="review-session-answer" dir={language === 'ar' ? 'ltr' : undefined} lang={language === 'ar' ? 'ru' : language}><b>{item.translation}</b><p>{item.explanation}</p></div><p className="review-session-question">{tr('Удалось вспомнить значение до подсказки?')}</p><div className="review-session-actions"><button className="review-session-remembered" data-feedback onClick={() => finishReview(true)}>{tr('Вспомнил')}</button><button className="review-session-forgot" data-feedback onClick={() => finishReview(false)} >{tr('Нужно повторить')}</button></div></>}
