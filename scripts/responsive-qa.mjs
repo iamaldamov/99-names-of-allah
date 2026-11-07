@@ -100,6 +100,11 @@ try {
     await dialog.waitFor({ state: 'hidden' });
     assert.notEqual(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Closing the exam should restore background scrolling');
 
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.waitForFunction(() => {
+      const header = document.querySelector('.topbar');
+      return header && !header.hasAttribute('inert');
+    });
     await page.locator('.theme-toggle').click();
     await examButton.click();
     await dialog.waitFor({ state: 'visible' });
@@ -125,6 +130,11 @@ try {
     assert.notEqual(darkFeedback.color, 'rgb(0, 0, 0)', 'Answer feedback text must remain readable in dark mode');
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.waitForFunction(() => {
+      const header = document.querySelector('.topbar');
+      return header && !header.hasAttribute('inert');
+    });
     await page.locator('.theme-toggle').click();
 
     if (size.width === 390) {
