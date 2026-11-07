@@ -121,13 +121,13 @@ try {
     assert.ok(darkControls.length >= 5, 'The exam should show its close control and four answer options');
     assert.ok(darkControls.every(style => style.background !== 'rgb(255, 255, 255)'), 'No exam control may remain white in dark mode');
     await page.locator('.path-exam-options button').first().click();
-    await page.locator('.path-exam-submit').click();
     const darkFeedback = await page.locator('.path-exam-feedback').evaluate(element => ({
       background: getComputedStyle(element).backgroundColor,
       color: getComputedStyle(element).color,
     }));
     assert.notEqual(darkFeedback.background, 'rgb(255, 255, 255)', 'Answer feedback must follow dark mode');
     assert.notEqual(darkFeedback.color, 'rgb(0, 0, 0)', 'Answer feedback text must remain readable in dark mode');
+    await page.locator('.path-exam-submit').click();
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
@@ -167,6 +167,9 @@ try {
       await page.locator('.name-row').first().click();
       const lessonDialog = page.locator('.lesson-modal:not(.review-session-modal)');
       await lessonDialog.waitFor({ state: 'visible' });
+      const pronunciationButton = lessonDialog.locator('.pronunciation-button');
+      await pronunciationButton.waitFor({ state: 'visible' });
+      assert.equal(await pronunciationButton.getAttribute('aria-label'), 'Слушать произношение', 'The lesson must expose the real audio pronunciation control');
       assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden', 'Opening a Name card should lock background scrolling');
       await page.keyboard.press('Shift+Tab');
       assert.equal(await lessonDialog.evaluate(element => element.contains(document.activeElement)), true, 'Name card keyboard focus must remain inside the dialog');
