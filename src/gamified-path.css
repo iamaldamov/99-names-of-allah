@@ -215,21 +215,7 @@ html[data-theme="dark"] .path-xp small,
   color: #d7dfd3 !important;
 }
 
-/* A still, clearly recognizable duckling in the lesson exam. */
-.duck-head { fill: #ffe47b; stroke: #d4b33f; stroke-width: 1.5; }
-.duck-character,.duck-shadow,.duck-wing,.duck-star,.duck-bubble {
-  animation: none !important;
-  transform: none !important;
-}
-.duck-wing { fill: #efcd50; }
-.duck-beak { fill: #ef9840; stroke: #d77e32; stroke-width: 1.2; }
-.duck-foot { fill: none; stroke: #df8d3c; stroke-width: 3.2; stroke-linecap: round; }
-.duck-star { display: none; }
-
 /* Explicit dark-mode contrast for total points. */
 :root[data-theme="dark"] body .learning-path .path-xp{background:#304333!important;border:1px solid #61775e!important;}
 :root[data-theme="dark"] body .learning-path .path-xp,:root[data-theme="dark"] body .learning-path .path-xp *{color:#fff4d6!important;-webkit-text-fill-color:#fff4d6!important;opacity:1!important;visibility:visible!important;}
 :root[data-theme="dark"] body .learning-path .path-xp small{color:#dce8d9!important;-webkit-text-fill-color:#dce8d9!important;}
-.duck-character-emoji{display:block;width:108px;height:auto;flex:0 0 108px;overflow:visible;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:86px;line-height:1.15;text-align:center;animation:none!important;transform:none!important;filter:drop-shadow(0 5px 4px rgba(35,55,40,.12));}
-@media(max-width:480px){.duck-character-emoji{width:88px;flex-basis:88px;font-size:72px;}}
-.duck-companion .duck-bubble{animation:none!important;transform:none!important;}
