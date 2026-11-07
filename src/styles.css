@@ -1039,3 +1039,15 @@ input, select, textarea, .account-form input {
 :root[data-theme="dark"] body .learning-path .path-xp{background:#304333!important;border:1px solid #61775e!important;}
 :root[data-theme="dark"] body .learning-path .path-xp,:root[data-theme="dark"] body .learning-path .path-xp *{color:#fff4d6!important;-webkit-text-fill-color:#fff4d6!important;opacity:1!important;}
 :root[data-theme="dark"] body .learning-path .path-xp small{color:#dce8d9!important;-webkit-text-fill-color:#dce8d9!important;}
+
+
+.pronunciation-control{display:grid;justify-items:center;gap:8px;margin:12px auto 17px;max-width:340px}
+.pronunciation-button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 20px;border:1px solid #dce7dc;border-radius:999px;background:#edf4ed;color:#315b46;font:600 13px 'DM Sans',sans-serif;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
+.pronunciation-button:hover{background:#e3eee3;transform:translateY(-1px)}
+.pronunciation-button:focus-visible{outline:3px solid #9dbca4;outline-offset:3px}
+.pronunciation-button.is-speaking{background:#dceadd;border-color:#b8cfba}
+.pronunciation-note{max-width:320px;margin:0;color:#87938a;font-size:10px;line-height:1.55;text-align:center}
+[data-theme="dark"] .pronunciation-button{background:#20392e;border-color:#385344;color:#e5f0e6}
+[data-theme="dark"] .pronunciation-button.is-speaking{background:#294a37;border-color:#56745e}
+[data-theme="dark"] .pronunciation-note{color:#a5b4a8}
+@media(max-width:480px){.pronunciation-button{min-height:46px;padding:12px 22px}.pronunciation-note{font-size:10px}}
