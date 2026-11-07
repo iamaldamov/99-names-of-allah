@@ -1758,6 +1758,14 @@ export default function App() {
           <button className="login-button" onClick={() => { setAccountMode('login'); setAccountOpen(true); setError(''); setMessage(''); }}><LockKeyhole size={15}/> {tr('Войти')}</button>}
       </header>
 
+      {analyticsConsent === 'unknown' && <aside className="analytics-consent" role="region" aria-label={analyticsConsentText[language].title}>
+        <div className="analytics-consent__copy"><strong>{analyticsConsentText[language].title}</strong><p>{analyticsConsentText[language].body}</p></div>
+        <div className="analytics-consent__actions">
+          <button type="button" className="analytics-consent__allow" onClick={() => { try { localStorage.setItem('99-names-analytics-consent-v1', 'granted'); } catch { /* Consent applies for this session. */ } setAnalyticsConsent('granted'); }}>{analyticsConsentText[language].allow}</button>
+          <button type="button" className="analytics-consent__deny" onClick={() => { try { localStorage.setItem('99-names-analytics-consent-v1', 'denied'); } catch { /* Consent applies for this session. */ } setAnalyticsConsent('denied'); }}>{analyticsConsentText[language].deny}</button>
+        </div>
+      </aside>}
+
       <section className="hero reveal" id="home">
         <div className="eyebrow"><Sparkles size={14}/> {tr('ПУТЬ ПОЗНАНИЯ')}</div>
         <h1 className="text-enter">{tr('Познакомься с именами')}</h1>
@@ -1895,13 +1903,7 @@ export default function App() {
       {saveOpen && <div className="modal-backdrop" onClick={() => setSaveOpen(false)}><section className="info-modal" role="dialog" aria-modal="true" aria-label={tr("Сохрани сайт, чтобы вернуться")} onClick={e => e.stopPropagation()}><button className="modal-x" aria-label={tr("Закрыть")} onClick={() => setSaveOpen(false)}><X size={19}/></button><div className="info-modal-icon"><Bookmark size={21}/></div><h2>{tr("Сохрани сайт, чтобы вернуться")}</h2><p><b>{tr("На iPhone:")}</b> {tr("нажми «Поделиться» в Safari, затем выбери «На экран Домой» или «Добавить закладку».")}</p><p><b>{tr("В других браузерах:")}</b> {tr("добавь страницу в закладки.")}</p><button className="primary-button full" onClick={() => setSaveOpen(false)}>{tr("Понятно")}</button></section></div>}
 
     
-      {analyticsConsent === 'unknown' && <aside className="analytics-consent" role="region" aria-label={analyticsConsentText[language].title}>
-        <div className="analytics-consent__copy"><strong>{analyticsConsentText[language].title}</strong><p>{analyticsConsentText[language].body}</p></div>
-        <div className="analytics-consent__actions">
-          <button type="button" className="analytics-consent__allow" onClick={() => { try { localStorage.setItem('99-names-analytics-consent-v1', 'granted'); } catch { /* Consent applies for this session. */ } setAnalyticsConsent('granted'); }}>{analyticsConsentText[language].allow}</button>
-          <button type="button" className="analytics-consent__deny" onClick={() => { try { localStorage.setItem('99-names-analytics-consent-v1', 'denied'); } catch { /* Consent applies for this session. */ } setAnalyticsConsent('denied'); }}>{analyticsConsentText[language].deny}</button>
-        </div>
-      </aside>}
+
 </main>
   );
 }
