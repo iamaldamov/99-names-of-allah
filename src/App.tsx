@@ -1212,19 +1212,10 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 
-const loadingMessages: Record<'ru' | 'en' | 'ar' | 'ky' | 'kk', string[]> = {
-  ru: ['Обучение полностью бесплатное.', 'Каждый день — маленький шаг к знаниям.', 'Проект создан для всех желающих учиться.', 'Вы можете поддержать развитие проекта.'],
-  en: ['Learning is completely free.', 'Every day is a small step towards knowledge.', 'This project is open to everyone.', 'You can support the project’s development.'],
-  ar: ['التعلّم مجاني بالكامل.', 'كل يوم خطوة صغيرة نحو المعرفة.', 'هذا المشروع متاح للجميع.', 'يمكنك دعم تطوير المشروع.'],
-  ky: ['Окуу толугу менен акысыз.', 'Күн сайын билимге карай кичинекей кадам.', 'Долбоор үйрөнүүнү каалагандардын баарына ачык.', 'Долбоордун өнүгүшүнө колдоо көрсөтө аласыз.'],
-  kk: ['Оқу толығымен тегін.', 'Күн сайын білімге қарай кішкентай қадам.', 'Жоба үйренгісі келетін баршаға ашық.', 'Жобаның дамуына қолдау көрсете аласыз.'],
-};
-
 export default function App() {
   const [language, setLanguage] = useState<'ru'|'en'|'ar'|'ky'|'kk'>(() => { try { return (localStorage.getItem('99-names-language') as 'ru'|'en'|'ar'|'ky'|'kk') || 'ru'; } catch { return 'ru'; } });
   const [initialLoading, setInitialLoading] = useState(true);
   const [preloaderLeaving, setPreloaderLeaving] = useState(false);
-  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const tr = (value: string, values: Record<string, string | number> = {}) => {
@@ -1240,17 +1231,16 @@ export default function App() {
     const pageReady = document.readyState === 'complete'
       ? Promise.resolve()
       : new Promise<void>(resolve => window.addEventListener('load', () => resolve(), { once: true }));
-    const fontsReady = document.fonts?.ready ?? Promise.resolve();
-    const fallback = new Promise<void>(resolve => window.setTimeout(resolve, 2200));
+    const fallback = new Promise<void>(resolve => window.setTimeout(resolve, 1800));
 
-    void Promise.race([Promise.all([pageReady, fontsReady]), fallback]).then(() => {
-      const remaining = Math.max(0, 750 - (performance.now() - startedAt));
+    void Promise.race([pageReady, fallback]).then(() => {
+      const remaining = Math.max(0, 350 - (performance.now() - startedAt));
       startTimer = window.setTimeout(() => {
         if (!active) return;
         setPreloaderLeaving(true);
         finishTimer = window.setTimeout(() => {
           if (active) setInitialLoading(false);
-        }, 280);
+        }, 180);
       }, remaining);
     });
 
@@ -1261,14 +1251,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!initialLoading) return;
-    const messages = loadingMessages[language];
-    const interval = window.setInterval(() => {
-      setLoadingMessageIndex(index => (index + 1) % messages.length);
-    }, 2600);
-    return () => window.clearInterval(interval);
-  }, [initialLoading, language]);
   useEffect(() => { try { localStorage.setItem('99-names-language', language); } catch { /* ignore */ } document.documentElement.lang = language; document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'; }, [language]);
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -1747,10 +1729,10 @@ export default function App() {
     <main className="app-shell" aria-busy={initialLoading}>
       {initialLoading && <div className={`site-preloader${preloaderLeaving ? ' is-leaving' : ''}`} role="status" aria-live="polite">
         <div className="site-preloader__content">
-          <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span><i /><b /></div>
+          <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span></div>
           <p className="site-preloader__brand">{tr('99 имён Аллаха')}</p>
           <div className="site-preloader__spinner" aria-hidden="true"><span /></div>
-          <p className="site-preloader__message" key={loadingMessageIndex}>{loadingMessages[language][loadingMessageIndex]}</p>
+          <p className="site-preloader__message">{language === 'en' ? 'Preparing your learning space…' : language === 'ar' ? 'نُعِدّ لك مساحة التعلّم…' : language === 'ky' ? 'Окуу чөйрөсүн даярдап жатабыз…' : language === 'kk' ? 'Оқу ортасын дайындап жатырмыз…' : 'Подготавливаем обучение…'}</p>
           <p className="site-preloader__note">{language === 'en' ? 'A free learning project' : language === 'ar' ? 'مشروع تعليمي مجاني' : language === 'ky' ? 'Акысыз билим берүү долбоору' : language === 'kk' ? 'Тегін білім беру жобасы' : 'Бесплатный образовательный проект'}</p>
         </div>
       </div>}
