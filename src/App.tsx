@@ -1321,7 +1321,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'all' | 'learned' | 'review' | 'favorites'>('all');
   const [visibleNamesCount, setVisibleNamesCount] = useState(12);
   const [catalogOpen, setCatalogOpen] = useState(false);
-  const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen') !== '1'; } catch { return true; } });
+  const [welcomeOpen, setWelcomeOpen] = useState(() => { try { return localStorage.getItem('99-names-welcome-seen-v2') !== '1'; } catch { return true; } });
   const activeAppModal = reviewSessionId !== null ? 'review' : selected ? 'lesson' : accountOpen ? 'account' : welcomeOpen ? 'welcome' : showAllInfo ? 'info' : saveOpen ? 'save' : null;
   useEffect(() => {
     if (!activeAppModal) return;
@@ -1349,7 +1349,7 @@ export default function App() {
         else if (activeAppModal === 'account') setAccountOpen(false);
         else if (activeAppModal === 'welcome') {
           setWelcomeOpen(false);
-          try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* ignore */ }
+          try { localStorage.setItem('99-names-welcome-seen-v2', '1'); } catch { /* ignore */ }
         } else if (activeAppModal === 'info') setShowAllInfo(false);
         else if (activeAppModal === 'save') setSaveOpen(false);
         return;
@@ -1464,7 +1464,7 @@ export default function App() {
     setLearnedToday([]);
   }, [dayKey]);
 
-  const closeWelcome = () => { setWelcomeOpen(false); try { localStorage.setItem('99-names-welcome-seen', '1'); } catch { /* Welcome can be closed even when storage is unavailable. */ } };
+  const closeWelcome = () => { setWelcomeOpen(false); try { localStorage.setItem('99-names-welcome-seen-v2', '1'); } catch { /* Welcome can be closed even when storage is unavailable. */ } };
 
   // Load the optional cloud/account client after the first paint so it does not delay the learning interface.
   useEffect(() => {
