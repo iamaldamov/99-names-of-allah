@@ -1820,6 +1820,17 @@ export default function App() {
   }), [accessibleNames, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
 
+  if (!authReady || storageOwnerId !== activeStorageOwner) {
+    return (
+      <main className="app-shell" aria-busy="true">
+        <div className="site-preloader" role="status" aria-live="polite">
+          <div className="site-preloader__content">
+            <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span></div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell" aria-busy={initialLoading}>
