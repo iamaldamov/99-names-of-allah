@@ -1537,7 +1537,10 @@ export default function App() {
       void import('./lib/supabase').then(({ supabase: client }) => {
         if (alive) setSupabaseClient(client);
       }).catch(() => {
-        if (alive) setNotice(tr('Не удалось подключить аккаунт. Локальное изучение доступно.'));
+        if (alive) {
+          setNotice(tr('Не удалось подключить аккаунт. Локальное изучение доступно.'));
+          setAuthReady(true);
+        }
       });
     }, 700);
     return () => { alive = false; window.clearTimeout(timer); };
