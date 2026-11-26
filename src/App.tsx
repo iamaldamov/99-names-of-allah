@@ -17,24 +17,55 @@ function localDayKey(date = new Date()): string {
   const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
-function loadStudyDays(): Record<string, number> {
-  try { const value: unknown = JSON.parse(localStorage.getItem('99-names-study-days') || '{}');
+function accountStorageKey(key: string, ownerId = 'guest'): string {
+  return ownerId === 'guest' ? key : key + ':user:' + ownerId;
+}
+
+function loadStudyDays(ownerId = 'guest'): Record<string, number> {
+  try { const value: unknown = JSON.parse(localStorage.getItem(accountStorageKey('99-names-study-days', ownerId)) || '{}');
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
     return Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, count]) => /^\d{4}-\d{2}-\d{2}$/.test(key) && typeof count === 'number' && Number.isInteger(count) && count > 0).sort(([a], [b]) => a.localeCompare(b)).slice(-90).map(([key, count]) => [key, Number(count)]));
   } catch { return {}; }
 }
-function loadProgress(): number[] {
+function loadProgress(ownerId = 'guest'): number[] {
   try {
-    const value: unknown = JSON.parse(localStorage.getItem('asma-ul-husna-progress') || '[]');
+    const value: unknown = JSON.parse(localStorage.getItem(accountStorageKey('asma-ul-husna-progress', ownerId)) || '[]');
     return Array.isArray(value)
       ? Array.from(new Set(value.filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= 99)))
       : [];
   } catch { return []; }
 }
 
-function loadReviewData(): Record<number, ReviewRecord> {
+function loadNumberList(key: string, ownerId = 'guest'): number[] {
   try {
-    const value: unknown = JSON.parse(localStorage.getItem('asma-ul-husna-review-v1') || '{}');
+    const value: unknown = JSON.parse(localStorage.getItem(accountStorageKey(key, ownerId)) || '[]');
+    return Array.isArray(value)
+      ? Array.from(new Set(value.filter((item): item is number => Number.isInteger(item) && item >= 1 && item <= 99)))
+      : [];
+  } catch { return []; }
+}
+
+function loadDailyGoal(ownerId = 'guest'): number {
+  try {
+    const value = Number(localStorage.getItem(accountStorageKey('99-names-daily-goal', ownerId)));
+    return [1, 3, 5].includes(value) ? value : 1;
+  } catch { return 1; }
+}
+
+function loadLearnedToday(ownerId = 'guest'): number[] {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(accountStorageKey('99-names-learned-today', ownerId)) || '{}');
+    if (!value || typeof value !== 'object') return [];
+    const saved = value as { date?: unknown; ids?: unknown };
+    return (saved.date === new Date().toDateString() || saved.date === localDayKey()) && Array.isArray(saved.ids)
+      ? Array.from(new Set(saved.ids.filter((id): id is number => Number.isInteger(id) && id >= 1 && id <= 99)))
+      : [];
+  } catch { return []; }
+}
+
+function loadReviewData(ownerId = 'guest'): Record<number, ReviewRecord> {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(accountStorageKey('asma-ul-husna-review-v1', ownerId)) || '{}');
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
     return Object.fromEntries(Object.entries(value).flatMap(([key, raw]) => {
       const id = Number(key);
@@ -1285,9 +1316,12 @@ export default function App() {
   const [names, setNames] = useState<NameItem[]>(previewNames);
   const [supabaseClient, setSupabaseClient] = useState<SupabaseClient | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [progress, setProgress] = useState<number[]>(loadProgress);
+  const [authReady, setAuthReady] = useState(false);
+  const activeStorageOwner = user?.id ?? 'guest';
+  const [storageOwnerId, setStorageOwnerId] = useState<string | null>(null);
+  const [progress, setProgress] = useState<number[]>([]);
   const [progressLoadedFor, setProgressLoadedFor] = useState<string | null>(null);
-  const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>(loadReviewData);
+  const [reviewData, setReviewData] = useState<Record<number, ReviewRecord>>({});
   const [reviewSessionId, setReviewSessionId] = useState<number | null>(null);
   const [reviewAnswerShown, setReviewAnswerShown] = useState(false);
   const [selected, setSelected] = useState<NameItem | null>(null);
@@ -1319,11 +1353,11 @@ export default function App() {
   const [showAllInfo, setShowAllInfo] = useState(false);
   const [search, setSearch] = useState('');
   const [theme, setTheme] = useState<'light'|'dark'>(() => { try { return localStorage.getItem('99-names-theme') === 'dark' ? 'dark' : 'light'; } catch { return 'light'; } });
-  const [favorites, setFavorites] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-favorites') || '[]'); return Array.isArray(v) ? v.filter((x): x is number => Number.isInteger(x) && x>=1 && x<=99) : []; } catch { return []; } });
-  const [dailyGoal, setDailyGoal] = useState<number>(() => { try { const n=Number(localStorage.getItem('99-names-daily-goal')); return [1,3,5].includes(n) ? n : 1; } catch { return 1; } });
-  const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}'); const passed = Array.isArray(saved.passedStages) ? saved.passedStages.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 11) : []; return Math.min(99, (new Set(passed).size + 1) * 9); } catch { return 9; } });
-  const [learnedToday, setLearnedToday] = useState<number[]>(() => { try { const v=JSON.parse(localStorage.getItem('99-names-learned-today') || '{}'); return (v.date === new Date().toDateString() || v.date === localDayKey()) && Array.isArray(v.ids) ? v.ids.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 99) : []; } catch { return []; } });
-  const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [dailyGoal, setDailyGoal] = useState<number>(1);
+  const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(9);
+  const [learnedToday, setLearnedToday] = useState<number[]>([]);
+  const [studyDays, setStudyDays] = useState<Record<string, number>>({});
   const [clockNow, setClockNow] = useState(() => Date.now());
   const observedDayRef = useRef(localDayKey());
   const dayKey = localDayKey(new Date(clockNow));
@@ -1392,10 +1426,22 @@ export default function App() {
     };
   }, [activeAppModal, selected?.id, reviewSessionId]);
   useEffect(() => { document.documentElement.dataset.theme = theme; try { localStorage.setItem('99-names-theme', theme); } catch {} }, [theme]);
-  useEffect(() => { try { localStorage.setItem('99-names-favorites', JSON.stringify(favorites)); } catch {} }, [favorites]);
-  useEffect(() => { try { localStorage.setItem('99-names-daily-goal', String(dailyGoal)); } catch {} }, [dailyGoal]);
-  useEffect(() => { try { localStorage.setItem('99-names-learned-today', JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {} }, [learnedToday]);
-  useEffect(() => { try { localStorage.setItem('99-names-study-days', JSON.stringify(studyDays)); } catch {} }, [studyDays]);
+  useEffect(() => {
+    if (storageOwnerId !== activeStorageOwner) return;
+    try { localStorage.setItem(accountStorageKey('99-names-favorites', activeStorageOwner), JSON.stringify(favorites)); } catch {}
+  }, [favorites, storageOwnerId, activeStorageOwner]);
+  useEffect(() => {
+    if (storageOwnerId !== activeStorageOwner) return;
+    try { localStorage.setItem(accountStorageKey('99-names-daily-goal', activeStorageOwner), String(dailyGoal)); } catch {}
+  }, [dailyGoal, storageOwnerId, activeStorageOwner]);
+  useEffect(() => {
+    if (storageOwnerId !== activeStorageOwner) return;
+    try { localStorage.setItem(accountStorageKey('99-names-learned-today', activeStorageOwner), JSON.stringify({date:localDayKey(),ids:learnedToday})); } catch {}
+  }, [learnedToday, storageOwnerId, activeStorageOwner]);
+  useEffect(() => {
+    if (storageOwnerId !== activeStorageOwner) return;
+    try { localStorage.setItem(accountStorageKey('99-names-study-days', activeStorageOwner), JSON.stringify(studyDays)); } catch {}
+  }, [studyDays, storageOwnerId, activeStorageOwner]);
   const stopArabicSpeech = () => {
     const audio = audioRef.current;
     if (audio) {
@@ -1482,13 +1528,19 @@ export default function App() {
 
   // Load the optional cloud/account client after the first paint so it does not delay the learning interface.
   useEffect(() => {
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) return;
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setAuthReady(true);
+      return;
+    }
     let alive = true;
     const timer = window.setTimeout(() => {
       void import('./lib/supabase').then(({ supabase: client }) => {
         if (alive) setSupabaseClient(client);
       }).catch(() => {
-        if (alive) setNotice(tr('Не удалось подключить аккаунт. Локальное изучение доступно.'));
+        if (alive) {
+          setNotice(tr('Не удалось подключить аккаунт. Локальное изучение доступно.'));
+          setAuthReady(true);
+        }
       });
     }, 700);
     return () => { alive = false; window.clearTimeout(timer); };
@@ -1513,21 +1565,52 @@ export default function App() {
         if (alive) setNotice(tr('Не удалось связаться с каталогом. Изучение доступно в автономном режиме.'));
       });
     void supabaseClient.auth.getSession().then(({ data }: { data: { session: { user: User | null } | null } }) => {
-      if (alive) setUser(data.session?.user ?? null);
+      if (alive) {
+        setUser(data.session?.user ?? null);
+        setAuthReady(true);
+      }
     }).catch(() => {
-      if (alive) setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
+      if (alive) {
+        setNotice(tr('Не удалось проверить аккаунт. Локальный прогресс сохранён.'));
+        setAuthReady(true);
+      }
     });
     const { data: listener } = supabaseClient.auth.onAuthStateChange((_event: string, session: { user: User | null } | null) => {
-      if (alive) setUser(session?.user ?? null);
+      if (alive) {
+        setUser(session?.user ?? null);
+        setAuthReady(true);
+      }
     });
     return () => { alive = false; listener.subscription.unsubscribe(); };
   }, [supabaseClient]);
 
-  useEffect(() => { try { localStorage.setItem('asma-ul-husna-progress', JSON.stringify(progress)); } catch { /* Storage unavailable */ } }, [progress]);
-  useEffect(() => { try { localStorage.setItem('asma-ul-husna-review-v1', JSON.stringify(reviewData)); } catch { /* Storage unavailable */ } }, [reviewData]);
-  useEffect(() => { setReviewData(old => { const missing = progress.filter(id => !old[id]); if (!missing.length) return old; const next = { ...old }; missing.forEach(id => { next[id] = { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null }; }); return next; }); }, [progress]);
   useEffect(() => {
-    if (!supabaseClient || !user) { setProgressLoadedFor(null); return; }
+    if (!authReady) return;
+    setStorageOwnerId(null);
+    setProgress(loadProgress(activeStorageOwner));
+    setReviewData(loadReviewData(activeStorageOwner));
+    setFavorites(loadNumberList('99-names-favorites', activeStorageOwner));
+    setDailyGoal(loadDailyGoal(activeStorageOwner));
+    setLearnedToday(loadLearnedToday(activeStorageOwner));
+    setStudyDays(loadStudyDays(activeStorageOwner));
+    setUnlockedNameLimit(9);
+    setProgressLoadedFor(null);
+    setStorageOwnerId(activeStorageOwner);
+  }, [activeStorageOwner, authReady]);
+  useEffect(() => {
+    if (!authReady || storageOwnerId !== activeStorageOwner) return;
+    try { localStorage.setItem(accountStorageKey('asma-ul-husna-progress', activeStorageOwner), JSON.stringify(progress)); } catch { /* Storage unavailable */ }
+  }, [progress, storageOwnerId, activeStorageOwner]);
+  useEffect(() => {
+    if (storageOwnerId !== activeStorageOwner) return;
+    try { localStorage.setItem(accountStorageKey('asma-ul-husna-review-v1', activeStorageOwner), JSON.stringify(reviewData)); } catch { /* Storage unavailable */ }
+  }, [reviewData, storageOwnerId, activeStorageOwner]);
+  useEffect(() => {
+    if (storageOwnerId !== activeStorageOwner) return;
+    setReviewData(old => { const missing = progress.filter(id => !old[id]); if (!missing.length) return old; const next = { ...old }; missing.forEach(id => { next[id] = { box: 0, dueAt: new Date().toISOString(), seen: 0, correct: 0, lastReviewedAt: null }; }); return next; });
+  }, [progress, storageOwnerId, activeStorageOwner]);
+  useEffect(() => {
+    if (!authReady || !supabaseClient || !user || storageOwnerId !== user.id) { if (!user) setProgressLoadedFor(null); return; }
     let alive = true;
     setProgressLoadedFor(null);
     void Promise.resolve(supabaseClient.from('user_progress').select('name_id,status').eq('user_id', user.id).then(({ data, error: loadError }: { data: Array<{ name_id: number; status: string }> | null; error: unknown }) => {
@@ -1543,16 +1626,16 @@ export default function App() {
       if (alive) setNotice(tr('Не удалось связаться с хранилищем прогресса. Локальные данные не удалены.'));
     });
     return () => { alive = false; };
-  }, [user, supabaseClient]);
+  }, [user, supabaseClient, storageOwnerId, authReady]);
   useEffect(() => {
-    if (!supabaseClient || !user || progressLoadedFor !== user.id || !progress.length) return;
+    if (!authReady || !supabaseClient || !user || storageOwnerId !== user.id || progressLoadedFor !== user.id || !progress.length) return;
     const rows = progress.map(name_id => ({ user_id: user.id, name_id, status: 'learned', confidence: 3, times_seen: 1, times_correct: 0, last_reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
     void Promise.resolve(supabaseClient.from('user_progress').upsert(rows, { onConflict: 'user_id,name_id', ignoreDuplicates: true })
       .then(({ error: saveError }: { error: unknown }) => {
         if (saveError) setNotice(tr('Прогресс есть на этом устройстве, но не удалось синхронизировать его с аккаунтом.'));
       }))
       .catch(() => setNotice(tr('Прогресс сохранён на этом устройстве, но синхронизация временно недоступна.')));
-  }, [supabaseClient, user, progressLoadedFor, progress]);
+  }, [supabaseClient, user, storageOwnerId, progressLoadedFor, progress, authReady]);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
@@ -1740,6 +1823,17 @@ export default function App() {
   }), [accessibleNames, search, activeTab, progress, favorites, dueReviewIds]);
   const visibleNames = displayedNames.slice(0, visibleNamesCount);
 
+  if (!authReady || storageOwnerId !== activeStorageOwner) {
+    return (
+      <main className="app-shell" aria-busy="true">
+        <div className="site-preloader" role="status" aria-live="polite">
+          <div className="site-preloader__content">
+            <div className="site-preloader__symbol" aria-hidden="true"><span>أ</span></div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell" aria-busy={initialLoading}>
@@ -1789,7 +1883,7 @@ export default function App() {
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? tr('Следующий шаг') : dueReviewIds.length ? tr('Время повторить') : tr('Ты прошёл весь список')}</small><b dir={language === 'ar' ? 'auto' : undefined}>{nextName ? `${language === 'ru' ? 'Продолжить' : language === 'en' ? 'Continue' : language === 'ar' ? 'متابعة' : language === 'ky' ? 'Улантуу' : 'Жалғастыру'}: ${nextName.translation}` : dueReviewIds.length ? tr('Закрепить изученное') : tr('Вернуться к каталогу')}</b></span><ArrowRight size={19}/></button>
       </section>
 
-      <GamifiedPath names={names} progress={progress} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onAnalyticsEvent={trackAnalytics} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} storageOwnerId={storageOwnerId ?? 'pending'} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onAnalyticsEvent={trackAnalytics} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
