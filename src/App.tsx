@@ -1354,7 +1354,7 @@ export default function App() {
   const [theme, setTheme] = useState<'light'|'dark'>(() => { try { return localStorage.getItem('99-names-theme') === 'dark' ? 'dark' : 'light'; } catch { return 'light'; } });
   const [favorites, setFavorites] = useState<number[]>(() => loadNumberList('99-names-favorites'));
   const [dailyGoal, setDailyGoal] = useState<number>(() => loadDailyGoal());
-  const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(() => { try { const saved = JSON.parse(localStorage.getItem('99-names-learning-path-v1') || '{}'); const passed = Array.isArray(saved.passedStages) ? saved.passedStages.filter((id: unknown) => Number.isInteger(id) && Number(id) >= 1 && Number(id) <= 11) : []; return Math.min(99, (new Set(passed).size + 1) * 9); } catch { return 9; } });
+  const [unlockedNameLimit, setUnlockedNameLimit] = useState<number>(9);
   const [learnedToday, setLearnedToday] = useState<number[]>(() => loadLearnedToday());
   const [studyDays, setStudyDays] = useState<Record<string, number>>(loadStudyDays);
   const [clockNow, setClockNow] = useState(() => Date.now());
@@ -1576,6 +1576,7 @@ export default function App() {
     setDailyGoal(loadDailyGoal(activeStorageOwner));
     setLearnedToday(loadLearnedToday(activeStorageOwner));
     setStudyDays(loadStudyDays(activeStorageOwner));
+    setUnlockedNameLimit(9);
     setProgressLoadedFor(null);
     setStorageOwnerId(activeStorageOwner);
   }, [activeStorageOwner]);
@@ -1854,7 +1855,7 @@ export default function App() {
         <button className="journey-continue" data-feedback onClick={() => { if (nextName) setSelected(nextName); else if (dueReviewIds.length) { const due = names.find(item => item.id === dueReviewIds[0]); if (due) setSelected(due); } else setCatalogOpen(true); }}><span><small>{nextName ? tr('Следующий шаг') : dueReviewIds.length ? tr('Время повторить') : tr('Ты прошёл весь список')}</small><b dir={language === 'ar' ? 'auto' : undefined}>{nextName ? `${language === 'ru' ? 'Продолжить' : language === 'en' ? 'Continue' : language === 'ar' ? 'متابعة' : language === 'ky' ? 'Улантуу' : 'Жалғастыру'}: ${nextName.translation}` : dueReviewIds.length ? tr('Закрепить изученное') : tr('Вернуться к каталогу')}</b></span><ArrowRight size={19}/></button>
       </section>
 
-      <GamifiedPath names={names} progress={progress} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onAnalyticsEvent={trackAnalytics} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
+      <GamifiedPath names={names} progress={progress} storageOwnerId={activeStorageOwner} language={language} getTransliteration={(nameId) => { const name = names.find(item => item.id === nameId); return name ? shownTransliteration(name) : ''; }} onUnlockedNameLimit={setUnlockedNameLimit} onAnalyticsEvent={trackAnalytics} onOpenName={(name) => { const lessonStart = Math.floor((name.id - 1) / 3) * 3 + 1; setSwipeRange({ min: lessonStart, max: Math.min(lessonStart + 2, 99) }); setError(''); setSelected(names.find(item => item.id === name.id) ?? null); }} />
 
       <section className="learning-section reveal" id="learning">
         <div className="section-heading"><div><span className="muted-label">{tr('ПЕРВЫЕ ШАГИ')}</span><h2>{tr('Изучай имена по порядку')}</h2></div><span className="section-total">{names.length} имён <ChevronRight size={15}/></span></div>{language !== 'ru' && <p className="content-language-note">{tr('Переводы значений и объяснения имён пока доступны на русском языке.')}</p>}
