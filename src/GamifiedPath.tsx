@@ -311,7 +311,10 @@ export function GamifiedPath({ names, progress, storageOwnerId, onOpenName, onUn
   }, [pathState, pathStateOwnerId, storageOwnerId]);
 
   const unlockedCount = Math.min(11, pathState.passedStages.length + 1);
-  useEffect(() => { onUnlockedNameLimit(unlockedCount * STAGE_SIZE); }, [unlockedCount, onUnlockedNameLimit]);
+  useEffect(() => {
+    if (pathStateOwnerId !== storageOwnerId) return;
+    onUnlockedNameLimit(unlockedCount * STAGE_SIZE);
+  }, [unlockedCount, onUnlockedNameLimit, pathStateOwnerId, storageOwnerId]);
 
   const stages = useMemo(() => Array.from({ length: 11 }, (_, index) => {
     const id = index + 1;
