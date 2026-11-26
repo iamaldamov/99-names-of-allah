@@ -244,9 +244,13 @@ const STAGE_SIZE = 9;
 const LESSON_SIZE = 3;
 const PASS_SCORE = 8;
 
-function readPathState(): PathState {
+function pathStorageKey(ownerId: string): string {
+  return ownerId === 'guest' ? STORAGE_KEY : STORAGE_KEY + ':user:' + ownerId;
+}
+
+function readPathState(ownerId: string): PathState {
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') as Partial<PathState>;
+    const raw = JSON.parse(localStorage.getItem(pathStorageKey(ownerId)) || '{}') as Partial<PathState>;
     return {
       passedStages: (() => {
         const saved = Array.isArray(raw.passedStages)
@@ -274,8 +278,9 @@ function shuffled<T,>(items: T[]): T[] {
   return result;
 }
 
-export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit, onAnalyticsEvent, getTransliteration, language }: {
+export function GamifiedPath({ names, progress, storageOwnerId, onOpenName, onUnlockedNameLimit, onAnalyticsEvent, getTransliteration, language }: {
   names: LearningName[];
+  storageOwnerId: string;
   progress: number[];
   onOpenName: (name: LearningName) => void;
   onUnlockedNameLimit: (limit: number) => void;
@@ -284,7 +289,8 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   language: UiLanguage;
 }) {
   const t = (key: string, values: Record<string, string | number> = {}) => translate(language, key, values);
-  const [pathState, setPathState] = useState<PathState>(readPathState);
+  const [pathState, setPathState] = useState<PathState>(() => readPathState(storageOwnerId));
+  const [pathStateOwnerId, setPathStateOwnerId] = useState(storageOwnerId);
   const [examStage, setExamStage] = useState<number | null>(null);
   const [questions, setQuestions] = useState<LessonQuestion[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -295,8 +301,14 @@ export function GamifiedPath({ names, progress, onOpenName, onUnlockedNameLimit,
   const examDialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pathState)); } catch { /* Local progress remains usable for this session. */ }
-  }, [pathState]);
+    setPathState(readPathState(storageOwnerId));
+    setPathStateOwnerId(storageOwnerId);
+  }, [storageOwnerId]);
+
+  useEffect(() => {
+    if (pathStateOwnerId !== storageOwnerId) return;
+    try { localStorage.setItem(pathStorageKey(storageOwnerId), JSON.stringify(pathState)); } catch { /* Local progress remains usable for this session. */ }
+  }, [pathState, pathStateOwnerId, storageOwnerId]);
 
   const unlockedCount = Math.min(11, pathState.passedStages.length + 1);
   useEffect(() => { onUnlockedNameLimit(unlockedCount * STAGE_SIZE); }, [unlockedCount, onUnlockedNameLimit]);
